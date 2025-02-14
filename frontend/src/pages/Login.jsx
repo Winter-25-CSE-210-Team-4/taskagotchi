@@ -16,6 +16,9 @@ const LoginPage = () => {
   //iitializes variable + function to track login status
   const [login_status, set_login_status] = useState(false);
 
+  // tracking login attempts
+  const [num_attempts, set_num_attempts] = useState(0);
+
   //mock user database (to be replaed with backend queries)
   const mock_data = [
     { email: "test@gmail.com", password: "password123" },
@@ -55,7 +58,12 @@ const LoginPage = () => {
       user.email == form_data.email && user.password == form_data.password);
 
     if (!curr_user) {
+      set_num_attempts(num_attempts + 1);
       set_errs({ general: "Invalid email or password" });
+
+      if (num_attempts >= 3) {
+        set_errs({ general: "Try Reset Password or Sign up." });
+      }
       return;
     }
     
@@ -104,8 +112,13 @@ const LoginPage = () => {
                       {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
                     </div>
 
-                    
-                    {errors.general && <p className="text-red-500 text-center mb-2">{errors.general}</p>}
+
+                    {/* Display error message for failed login attempts */}
+                    {errors.general && (
+                      <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-blue-500" : "text-red-500"}`}>
+                        {errors.general}
+                      </p>
+                    )}
 
                     <div className="w-full mt-4 justify-center items-center px-5">
                       <button
