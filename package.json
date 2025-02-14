@@ -1,6 +1,21 @@
 {
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build"
+  },
   "dependencies": {
+    "dotenv": "^16.4.7",
+    "mongoose": "^8.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^22.13.4",
+    "concurrently": "^9.1.2"
   }
 }
