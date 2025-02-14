@@ -1,4 +1,5 @@
 import './App.css';
+import GoalForm from './pages/GoalForm';
 
 function App() {
   const handleClick = () => {
@@ -11,6 +12,8 @@ function App() {
       <button className='btn m-2' onClick={handleClick}>
         Button
       </button>
+      <GoalForm onSubmit={(goal) => console.log(goal)} />
+      <GoalForm onSubmit={(goal) => console.log(goal)} edit={true} />
     </>
   );
 }
