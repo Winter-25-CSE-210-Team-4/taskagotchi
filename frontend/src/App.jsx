@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import "./App.css";
 import LoginPage from "./pages/Login"; // Import your LoginPage
+import ResetPasswordPage from "./pages/ResetPassword";
+import RecoveryCodePage from "./pages/RecoveryCode";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -22,6 +24,8 @@ function App() {
         
         {/* Login Page Route */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/recovery" element={<RecoveryCodePage />} />
+        <Route path="/reset" element={<ResetPasswordPage />} />
       </Routes>
     </Router>
   );

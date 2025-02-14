@@ -2,7 +2,14 @@ import { useState } from "react";
 import React from "react";
 import Header from "../components/ui/Header";
 
-const LoginPage = () => {
+/*
+ * This page allows the user to reset their password.
+ * This page should do the following:
+ *   1) When the user submits their new password, the password connected to their email is updated.
+ *   2) Redirects them to the login page.
+ * Currently this page does nothing.
+ */
+const ResetPasswordPage = () => {
 
   //Defining email and password as elemenets to be updated dynamically
   const [form_data, set_form_data] = useState({
@@ -71,20 +78,7 @@ const LoginPage = () => {
     console.log("Form Submitted:", form_data);
   };
 
-/*
- * Event handler for "Forgot password"
- * It should do the following:
- *   1) If the given email is a registered email, proceed. Otherwise give alert.
- *   2) Create a random recovery code
- *   3) Send an email with the recovery code
- *   4) Redirect to the RecoveryCode page
- * Currently, it only generates the code and redirects.
- */
-function handleForgot (e) {
-  const recoveryCode = Math.floor(Math.random() * 9000 + 1000);
-  console.log(`Should send email with code ${recoveryCode} to ${form_data.email}` );
-  window.location.href = "/recovery"
-}
+function resetPassword (e) {console.log("Reset!")}
 
   return (
     <div className="flex flex-col h-screen w-full min-w-[1024px]">
@@ -95,22 +89,10 @@ function handleForgot (e) {
       <div className="flex flex-1 justify-center items-center bg-white">
         {/* Login box */}
         <div className="flex flex-col bg-mint/10 py-8 px-6 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-semibold text-center my-6">Log in</h2>
+          <h2 className="text-2xl font-semibold text-center my-6">Reset Password</h2>
 
           {/* Login form */}
           <form onSubmit={handle_submit}>
-                    <div>
-                      <label className="block mb-2 text-left">Email</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={form_data.email}
-                        onChange={handle_input}
-                        className="w-full p-2 mb-2 border border-black rounded bg-white"
-                        placeholder="Enter your email"
-                      />
-                      {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
-                    </div>
 
                     <div>
                       <label className="block mb-2 text-left">Password</label>
@@ -120,45 +102,24 @@ function handleForgot (e) {
                         value={form_data.password}
                         onChange={handle_input}
                         className="w-full p-2 mb-2 border  border-black rounded bg-white"
-                        placeholder="Enter your password"
+                        placeholder="Enter your new password"
                       />
                       {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
                     </div>
-
-
-                    {/* Display error message for failed login attempts */}
-                    {errors.general && (
-                      <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-blue-500" : "text-red-500"}`}>
-                        {errors.general}
-                      </p>
-                    )}
 
                     <div className="w-full mt-4 justify-center items-center px-5">
                       <button
                         type="submit"
                         className="w-full bg-darkmint text-center text-white border border-darkmint py-2 rounded hover:bg-mint"
                       >
-                        Login
+                        Reset
                       </button>
                     </div>
                   </form>
-
-                  {/* Sign up & Reset Password buttons */}
-                  <div className="w-full mt-4 justify-center items-center px-5">
-                    <div className="bg-darkmint text-center text-white border border-darkmint py-2 rounded hover:bg-mint">
-                      Sign up
-                    </div>
-                  </div>
-
-                  <div className="w-full mt-4 justify-center items-center px-5">
-                    <div className="bg-white text-center text-darkmint border border-darkmint py-2 rounded hover:bg-lightmint">
-                      <button onClick={handleForgot}>Reset password</button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           );
 };
 
-export default LoginPage;
+export default ResetPasswordPage;
