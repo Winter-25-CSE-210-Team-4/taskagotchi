@@ -62,7 +62,7 @@ const LoginPage = () => {
       set_errs({ general: "Invalid email or password" });
 
       if (num_attempts >= 3) {
-        set_errs({ general: "Try Reset Password or Sign up." });
+        set_errs({ general: "Invalid email or password. Try Reset Password or Sign up." });
       }
       return;
     }
@@ -115,7 +115,7 @@ const LoginPage = () => {
 
                     {/* Display error message for failed login attempts */}
                     {errors.general && (
-                      <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-blue-500" : "text-red-500"}`}>
+                      <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-red-500" : "text-red-500"}`}>
                         {errors.general}
                       </p>
                     )}
