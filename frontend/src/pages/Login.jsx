@@ -1,8 +1,12 @@
 import { useState } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom"
 import Header from "../components/ui/Header";
 
 const LoginPage = () => {
+
+  //handles redirection to different pages
+  const navigate = useNavigate();
 
   //Defining email and password as elemenets to be updated dynamically
   const [form_data, set_form_data] = useState({
@@ -50,7 +54,7 @@ const LoginPage = () => {
     }
 
     if (Object.keys(curr_errs).length > 0) {
-      set_errs(curr_errs);
+      set_errs(curr_errs); 
       return;
     }
 
@@ -69,6 +73,9 @@ const LoginPage = () => {
     
     //Sanity check
     console.log("Form Submitted:", form_data);
+    
+    
+    navigate("/home");
   };
 
 
