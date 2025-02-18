@@ -12,7 +12,7 @@ const GoalForm = ({ onSubmit, edit }) => {
     endDate: Date.now(),
   };
   const [goal, setGoal] = useState(emptyGoal);
-  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(emptyGoal.endDate);
 
   const setGoalName = (name) => {
     name = name.trim();
@@ -23,9 +23,10 @@ const GoalForm = ({ onSubmit, edit }) => {
     description = description.trim();
     setGoal({ ...goal, description });
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(goal);
+    onSubmit({ ...goal, endDate: endDate });
     setGoal(emptyGoal);
   };
 
@@ -66,8 +67,8 @@ const GoalForm = ({ onSubmit, edit }) => {
         </div>
         <div>
           <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
           />
         </div>
 
