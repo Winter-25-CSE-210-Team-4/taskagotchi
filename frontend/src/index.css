@@ -3,12 +3,5 @@
 @tailwind components;
 @tailwind utilities;
 
-@theme {
-  --color-mint: #4ECDC4;
-  --color-darkmint: #1A535C;
-  --color-lightmint: #B9FAED;
-  --color-lemon: #FFE66D;
-
-}
 
 
