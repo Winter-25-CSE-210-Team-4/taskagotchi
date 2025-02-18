@@ -86,10 +86,10 @@ const LoginPage = () => {
       <Header />
 
       {/* Main content area */}
-      <div className="flex flex-1 justify-center items-center bg-white">
+      <div className="flex flex-1 justify-center items-center bg-white font-inter">
         {/* Login box */}
-        <div className="flex flex-col bg-mint/10 py-8 px-6 rounded-lg shadow-md w-1/2 max-w-md">
-          <h2 className="text-2xl font-semibold text-left my-6">Log in</h2>
+        <div className="flex flex-col bg-primary/10 py-8 px-6 rounded-lg shadow-md w-1/2 max-w-lg">
+          <h2 className="text-2xl text-left mt-6 mb-14">Log in</h2>
 
           {/* Login form */}
           <form onSubmit={handle_submit}>
@@ -100,20 +100,20 @@ const LoginPage = () => {
                         name="email"
                         value={form_data.email}
                         onChange={handle_input}
-                        className="w-1/2 p-2 mb-2 border border-black rounded bg-white"
+                        className="w-full p-1 mb-2 border border-black rounded-lg bg-white"
                         placeholder="Enter your email"
                       />
                       {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
                     </div>
 
-                    <div className="flex flex-col flex-1 justify-center items-left">
+                    <div className="flex flex-col flex-1 justify-center items-left mb-10">
                       <label className="block mb-2 text-left">Password</label>
                       <input
                         type="password"
                         name="password"
                         value={form_data.password}
                         onChange={handle_input}
-                        className="w-1/2 p-2 mb-2 border border-black rounded bg-white"
+                        className="w-full p-1 mb-2 border border-black rounded-lg bg-white"
                         placeholder="Enter your password"
                       />
                       {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
@@ -130,7 +130,7 @@ const LoginPage = () => {
                     <div className="flex w-full mt-4 justify-center items-center px-5">
                       <button
                         type="submit"
-                        className="w-1/3 bg-darkmint text-center text-white border border-darkmint py-2 rounded hover:bg-mint hover:border-mint"
+                        className="w-1/3 bg-accent text-center text-white border border-accent py-2 rounded-lg hover:bg-primary hover:border-primary"
                       >
                         Login
                       </button>
@@ -139,13 +139,13 @@ const LoginPage = () => {
 
                   {/* Sign up & Reset Password buttons */}
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                  <div className="w-1/3 bg-white text-center text-darkmint border border-darkmint py-2 rounded hover:bg-lightmint">
+                  <div className="w-1/3 bg-white text-center text-accent border border-accent border-2 py-2 rounded-lg hover:bg-secondary">
                       Sign up
                     </div>
                   </div>
 
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                    <div className="w-1/3 bg-white text-center text-darkmint py-2 rounded hover:text-mint">
+                    <div className="w-1/3 text-center text-accent py-2 rounded hover:text-mint">
                       Reset password
                     </div>
                   </div>
