@@ -1,24 +1,42 @@
-// src/server.ts
 import express from 'express';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes';
+import { errorHandler } from './middleware/errorHandler';
+import mongoose from 'mongoose';
+import config from './config/config';
 
-// 创建 Express 应用
 const app = express();
 
-// 简单路由
+// Middleware
+app.use(cors());  // Add CORS middleware
+app.use(express.json());
+
+// Routes
 app.get('/', (req, res) => {
-    console.log('Root route hit!'); // 添加日志
+    console.log('Root route hit!');
     res.json({ message: 'Hello from Express!' });
 });
 
 app.get('/test', (req, res) => {
-    console.log('Test route hit!'); // 添加日志
+    console.log('Test route hit!');
     res.json({ message: 'Test endpoint working!' });
 });
 
-// 启动服务器
-const PORT = 5050;
-app.listen(PORT, () => {
-    console.log('=================================');
-    console.log(`🚀 Server is running at http://localhost:${PORT}`);
-    console.log('=================================');
-});
+app.use('/api/auth', authRoutes);
+
+app.use(errorHandler);
+
+// MongoDB connection and server start
+mongoose.connect(config.mongoUri)
+    .then(() => {
+        console.log('📦 Connected to MongoDB successfully');
+        const PORT = config.port || 5050;
+        app.listen(PORT, () => {
+            console.log('=================================');
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log('=================================');
+        });
+    })
+    .catch(err => {
+        console.error('MongoDB connection error:', err);
+    });
