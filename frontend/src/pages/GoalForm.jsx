@@ -2,15 +2,7 @@ import React, { useState } from 'react';
 import CheckIcon from '../assets/check.svg';
 import ChevronLeftIcon from '../assets/chevron-left.svg';
 import DatePicker from 'react-datepicker';
-
 import 'react-datepicker/dist/react-datepicker.css';
-
-const Example = () => {
-  const [startDate, setStartDate] = useState(new Date());
-  return (
-    <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} />
-  );
-};
 
 const GoalForm = ({ onSubmit, edit }) => {
   const emptyGoal = {
@@ -20,6 +12,7 @@ const GoalForm = ({ onSubmit, edit }) => {
     endDate: Date.now(),
   };
   const [goal, setGoal] = useState(emptyGoal);
+  const [startDate, setStartDate] = useState(new Date());
 
   const setGoalName = (name) => {
     name = name.trim();
@@ -69,6 +62,12 @@ const GoalForm = ({ onSubmit, edit }) => {
             className='textarea textarea-bordered w-full'
             value={goal.description ?? ''}
             onChange={(e) => setGoalDescription(e.target.value)}
+          />
+        </div>
+        <div>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
           />
         </div>
 
