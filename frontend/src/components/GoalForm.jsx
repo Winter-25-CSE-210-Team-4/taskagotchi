@@ -11,7 +11,13 @@ const GoalForm = ({ onSubmit, edit }) => {
     completed: false,
     endDate: Date.now(),
   };
+  const incompleteState = {
+    submitted: false,
+    name: true,
+    description: true,
+  };
   const [goal, setGoal] = useState(emptyGoal);
+  const [incomplete, setIncomplete] = useState(incompleteState);
   const [endDate, setEndDate] = useState(emptyGoal.endDate);
 
   const setGoalName = (name) => {
@@ -26,8 +32,16 @@ const GoalForm = ({ onSubmit, edit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ ...goal, endDate: endDate });
-    setGoal(emptyGoal);
+    if (goal.name === '' || goal.description === '') {
+      setIncomplete({
+        submitted: true,
+        name: goal.name === '',
+        description: goal.description === '',
+      });
+    } else {
+      onSubmit({ ...goal, endDate: endDate });
+      setGoal(emptyGoal);
+    }
   };
 
   return (
@@ -54,6 +68,9 @@ const GoalForm = ({ onSubmit, edit }) => {
             value={goal.name ?? ''}
             onChange={(e) => setGoalName(e.target.value)}
           />
+          {incomplete.submitted && incomplete.name && (
+            <p className='text-red-600'>Missing Name!</p>
+          )}
         </div>
         <div className='flex flex-col gap-2'>
           <p>Description</p>
@@ -64,8 +81,12 @@ const GoalForm = ({ onSubmit, edit }) => {
             value={goal.description ?? ''}
             onChange={(e) => setGoalDescription(e.target.value)}
           />
+          {incomplete.submitted && incomplete.description && (
+            <p className='text-red-600'>Missing Description!</p>
+          )}
         </div>
         <div>
+          <p>Select End Date (optional)</p>
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}
