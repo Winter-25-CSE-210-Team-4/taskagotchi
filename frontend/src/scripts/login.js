@@ -1,5 +1,6 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 
 const useLogin = () => {
@@ -7,7 +8,7 @@ const useLogin = () => {
     //handles redirection to different pages
     const navigate = useNavigate();
 
-    //Defining email and password as elemenets to be updated dynamically
+    //Defining email and password as elements to be updated dynamically
     const [form_data, set_form_data] = useState({
     email: "",
     password: "",
@@ -22,11 +23,11 @@ const useLogin = () => {
     // tracking login attempts
     const [num_attempts, set_num_attempts] = useState(0);
 
-    //mock user database (to be replaed with backend queries)
-    const mock_data = [
-    { email: "test@gmail.com", password: "password123" },
-    { email: "abc@icloud.com", password: "xyzpassword" },
-    ];
+    // //mock user database (to be replaed with backend queries)
+    // const mock_data = [
+    // { email: "test@gmail.com", password: "password123" },
+    // { email: "abc@icloud.com", password: "xyzpassword" },
+    // ];
 
 
     //Event handler to handle user input as it comes in
@@ -40,7 +41,7 @@ const useLogin = () => {
 
     /*Event handler to handle submissions
         - Will set errrors if required information is not provided*/
-    const handle_submit = (e) => {
+    const handle_submit = async (e) => {
     e.preventDefault();
     let curr_errs = {};
 
@@ -57,24 +58,48 @@ const useLogin = () => {
         return;
     }
 
-    const curr_user = mock_data.find((user) => 
-        user.email == form_data.email && user.password == form_data.password);
+    // const curr_user = mock_data.find((user) => 
+    //     user.email == form_data.email && user.password == form_data.password);
+    try {
 
-    if (!curr_user) {
+        // query the database and save the data recieved 
+        // will error if data not there
+        const response = await axios.post("http://localhost:5000/api/auth/login", form_data);
+
+        const { token, user } = response.data;
+
+        
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        set_login_status(true);
+        set_errs({});
+
+        navigate("/home");
+    } catch (error){
         set_num_attempts(num_attempts + 1);
         set_errs({ general: "Invalid email or password" });
 
         if (num_attempts >= 3) {
-        set_errs({ general: "Invalid email or password. Try Reset Password or Sign up." });
+            set_errs({ general: "Invalid email or password. Try Reset Password or Sign up." });
         }
-        return;
     }
+
+    // if (!curr_user) {
+    //     set_num_attempts(num_attempts + 1);
+    //     set_errs({ general: "Invalid email or password" });
+
+    //     if (num_attempts >= 3) {
+    //     set_errs({ general: "Invalid email or password. Try Reset Password or Sign up." });
+    //     }
+    //     return;
+    // }
     
     //Sanity check
     console.log("Form Submitted:", form_data);
     
     
-    navigate("/home");
+    // navigate("/home");
     };
 
     return {
