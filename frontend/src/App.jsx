@@ -4,6 +4,7 @@ import "./App.css";
 import LoginPage from "./pages/Login"; // Import your LoginPage
 import ResetPasswordPage from "./pages/ResetPassword";
 import RecoveryCodePage from "./pages/RecoveryCode";
+import HomePage from "./pages/Home";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -26,6 +27,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/recovery" element={<RecoveryCodePage />} />
         <Route path="/reset" element={<ResetPasswordPage />} />
+
+        {/* Home Page Route */}
+        <Route path="/home" element={<HomePage />} />
       </Routes>
     </Router>
   );

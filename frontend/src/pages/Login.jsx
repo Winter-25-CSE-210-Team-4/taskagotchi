@@ -1,8 +1,12 @@
 import { useState } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom"
 import Header from "../components/ui/Header";
 
 const LoginPage = () => {
+
+  //handles redirection to different pages
+  const navigate = useNavigate();
 
   //Defining email and password as elemenets to be updated dynamically
   const [form_data, set_form_data] = useState({
@@ -50,7 +54,7 @@ const LoginPage = () => {
     }
 
     if (Object.keys(curr_errs).length > 0) {
-      set_errs(curr_errs);
+      set_errs(curr_errs); 
       return;
     }
 
@@ -62,13 +66,16 @@ const LoginPage = () => {
       set_errs({ general: "Invalid email or password" });
 
       if (num_attempts >= 3) {
-        set_errs({ general: "Try Reset Password or Sign up." });
+        set_errs({ general: "Invalid email or password. Try Reset Password or Sign up." });
       }
       return;
     }
     
     //Sanity check
     console.log("Form Submitted:", form_data);
+    
+    
+    navigate("/home");
   };
 
 /*
@@ -94,32 +101,32 @@ function handleForgot (e) {
       {/* Main content area */}
       <div className="flex flex-1 justify-center items-center bg-white">
         {/* Login box */}
-        <div className="flex flex-col bg-mint/10 py-8 px-6 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-semibold text-center my-6">Log in</h2>
+        <div className="flex flex-col bg-mint/10 py-8 px-6 rounded-lg shadow-md w-1/2 max-w-md">
+          <h2 className="text-2xl font-semibold text-left my-6">Log in</h2>
 
           {/* Login form */}
           <form onSubmit={handle_submit}>
-                    <div>
+                    <div className="flex flex-col flex-1 justify-center items-left">
                       <label className="block mb-2 text-left">Email</label>
                       <input
                         type="email"
                         name="email"
                         value={form_data.email}
                         onChange={handle_input}
-                        className="w-full p-2 mb-2 border border-black rounded bg-white"
+                        className="w-1/2 p-2 mb-2 border border-black rounded bg-white"
                         placeholder="Enter your email"
                       />
                       {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
                     </div>
 
-                    <div>
+                    <div className="flex flex-col flex-1 justify-center items-left">
                       <label className="block mb-2 text-left">Password</label>
                       <input
                         type="password"
                         name="password"
                         value={form_data.password}
                         onChange={handle_input}
-                        className="w-full p-2 mb-2 border  border-black rounded bg-white"
+                        className="w-1/2 p-2 mb-2 border border-black rounded bg-white"
                         placeholder="Enter your password"
                       />
                       {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
@@ -128,15 +135,15 @@ function handleForgot (e) {
 
                     {/* Display error message for failed login attempts */}
                     {errors.general && (
-                      <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-blue-500" : "text-red-500"}`}>
+                      <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-red-500" : "text-red-500"}`}>
                         {errors.general}
                       </p>
                     )}
 
-                    <div className="w-full mt-4 justify-center items-center px-5">
+                    <div className="flex w-full mt-4 justify-center items-center px-5">
                       <button
                         type="submit"
-                        className="w-full bg-darkmint text-center text-white border border-darkmint py-2 rounded hover:bg-mint"
+                        className="w-1/3 bg-darkmint text-center text-white border border-darkmint py-2 rounded hover:bg-mint hover:border-mint"
                       >
                         Login
                       </button>
@@ -144,14 +151,14 @@ function handleForgot (e) {
                   </form>
 
                   {/* Sign up & Reset Password buttons */}
-                  <div className="w-full mt-4 justify-center items-center px-5">
-                    <div className="bg-darkmint text-center text-white border border-darkmint py-2 rounded hover:bg-mint">
+                  <div className="flex w-full mt-4 justify-center items-center px-5">
+                  <div className="w-1/3 bg-white text-center text-darkmint border border-darkmint py-2 rounded hover:bg-lightmint">
                       Sign up
                     </div>
                   </div>
 
-                  <div className="w-full mt-4 justify-center items-center px-5">
-                    <div className="bg-white text-center text-darkmint border border-darkmint py-2 rounded hover:bg-lightmint">
+                  <div className="flex w-full mt-4 justify-center items-center px-5">
+                    <div className="w-1/3 bg-white text-center text-darkmint py-2 rounded hover:text-mint">
                       <button onClick={handleForgot}>Reset password</button>
                     </div>
                   </div>
