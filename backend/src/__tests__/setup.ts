@@ -1,24 +1,48 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { beforeAll, afterAll, afterEach } from '@jest/globals';
+import { beforeAll, afterAll, afterEach, beforeEach} from '@jest/globals';
 
-let mongoServer: MongoMemoryServer;
+let mongod: MongoMemoryServer;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
-});
-
-afterEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    const collection = collections[key];
-    await collection.deleteMany({});
-  }
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
+    // Close any existing connections first
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    
+    try {
+      mongod = await MongoMemoryServer.create();
+      const uri = mongod.getUri();
+      await mongoose.connect(uri);
+    } catch (error) {
+      console.error('MongoDB Memory Server setup failed:', error);
+      throw error;
+    }
+  });
+  
+  afterEach(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      try {
+        const collections = mongoose.connection.collections;
+        for (const key in collections) {
+          await collections[key].deleteMany({});
+        }
+      } catch (error) {
+        console.error('Collection cleanup failed:', error);
+        throw error;
+      }
+    }
+  });
+  
+  afterAll(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      try {
+        await mongoose.connection.close();
+      } catch (error) {
+        console.error('Connection close failed:', error);
+      }
+    }
+    if (mongod) {
+      await mongod.stop();
+    }
+  });
