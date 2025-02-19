@@ -68,9 +68,9 @@ const LoginPage = () => {
 
                   {/* Sign up & Reset Password buttons */}
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                  <div className="w-1/3 bg-white text-center text-accent border border-accent border-2 py-2 rounded-lg hover:bg-secondary">
-                      Sign up
-                    </div>
+                  <a href='/signup' className="w-1/3 bg-white text-center text-accent border border-accent border-2 py-2 rounded-lg hover:bg-secondary">
+                      Go to Sign up
+                  </a>
                   </div>
 
                   <div className="flex w-full mt-4 justify-center items-center px-5">
