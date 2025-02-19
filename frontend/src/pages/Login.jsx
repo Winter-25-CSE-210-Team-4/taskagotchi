@@ -59,7 +59,7 @@ const LoginPage = () => {
                     <div className="flex w-full mt-4 justify-center items-center px-5">
                       <button
                         type="submit"
-                        className="w-1/3 bg-accent text-center text-white border border-accent py-2 rounded-lg hover:bg-primary hover:border-primary"
+                        className="w-1/2 bg-accent text-center text-white border border-accent py-2 rounded-lg hover:bg-primary hover:border-primary"
                       >
                         Login
                       </button>
@@ -68,15 +68,16 @@ const LoginPage = () => {
 
                   {/* Sign up & Reset Password buttons */}
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                  <a href='/signup' className="w-1/3 bg-white text-center text-accent border border-accent border-2 py-2 rounded-lg hover:bg-secondary">
-                      Go to Sign up
+                  <a href="/signup" className="btn btn-outline w-1/2 bg-white text-center text-accent border-2 py-2 rounded-lg hover:bg-secondary">
+                      Create Account
                   </a>
                   </div>
 
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                    <div className="w-1/3 text-center text-accent py-2 rounded hover:text-mint">
-                      Reset password
-                    </div>
+                     {/*TODO: change this to proper link */}
+                      <a href="/home" className="btn btn-link btn-accent w-1/2 text-center">
+                          Reset Password
+                      </a>
                   </div>
                 </div>
               </div>

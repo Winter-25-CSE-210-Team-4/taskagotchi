@@ -98,7 +98,6 @@ const useLogin = () => {
     //Sanity check
     console.log("Form Submitted:", form_data);
     
-    
     // navigate("/home");
     };
 
@@ -107,7 +106,7 @@ const useLogin = () => {
         errors,
         num_attempts,
         handle_input,
-        handle_submit,
+        handle_submit
       };
 };
 
