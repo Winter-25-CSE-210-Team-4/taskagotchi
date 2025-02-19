@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ExampleComponent from './ExampleComponent';
 import PropTypes from 'prop-types';
 
-const mockedSubmit = vi.fn();
+//TODO: Example spy test
+// const mockedSubmit = vi.fn();
 
 //TODO: Add mock service call
 

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 const ExampleComponent = ({ onSubmit }) => {
   const initFormInput = 'empty';
@@ -23,4 +24,7 @@ const ExampleComponent = ({ onSubmit }) => {
   );
 };
 
+ExampleComponent.propTypes = {
+  onSubmit: PropTypes.func,
+};
 export default ExampleComponent;
