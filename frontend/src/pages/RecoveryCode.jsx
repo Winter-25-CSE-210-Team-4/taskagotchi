@@ -1,16 +1,10 @@
 import { useContext, useState } from "react";
 import React from "react";
 import Header from "../components/ui/Header";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 /*
- * This page handles recovering a forgotten password by entering a random code emailed to the user
- * This page should do the following:
- *   1) If the user submits the correct code, redirect to the ResetPassword page.
- *   2) If the user submits the wrong code, show an error.
- * Currently, this page only redirects to the ResetPassword page. 
- * 
- * This page also requires context info from the login page to get the email and recovery code
+ * This page is part of the reset password flow. It requires the user to enter a recovery code.
  */
 function RecoveryCodePage() {
 
@@ -28,9 +22,8 @@ function RecoveryCodePage() {
 			setError(true);
 			return;
 		}
-		navigate('/reset')
+		navigate('/reset', {state: {email: email}})
 	}
-
 
 	return (
 		<div className="flex flex-col h-screen w-full min-w-[1024px] bg-white">
