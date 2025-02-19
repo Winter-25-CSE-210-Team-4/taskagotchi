@@ -6,15 +6,6 @@ import { beforeAll, afterAll, describe, it, expect } from '@jest/globals';
 
 let mongoServer: MongoMemoryServer;
 
-// beforeAll(async () => {
-//   mongoServer = await MongoMemoryServer.create();
-//   await mongoose.connect(mongoServer.getUri());
-// });
-
-// afterAll(async () => {
-//   await mongoose.disconnect();
-//   await mongoServer.stop();
-// });
 describe('Auth Endpoints', () => {
     it('should register a new user', async () => {
       const res = await request(app)
