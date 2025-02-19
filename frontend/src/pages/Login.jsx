@@ -1,6 +1,11 @@
+import { useState } from "react";
+import React from "react";
+import { useNavigate, Navigate } from "react-router-dom"
 import Header from "../components/ui/Header";
 import useLogin from "../scripts/login.js";
 
+//handles redirection to different pages
+const navigate = useNavigate();
 
 const LoginPage = () => {
 
@@ -69,7 +74,13 @@ const LoginPage = () => {
     
     //Sanity check
     console.log("Form Submitted:", form_data);
+    
+    navigate("/home");
   };
+
+const emailIsRegistered = (email) => {
+  return mock_data.find((user) => user.email == email) // temporary until backend
+}
 
 /*
  * Event handler for "Forgot password"
@@ -80,10 +91,14 @@ const LoginPage = () => {
  *   4) Redirect to the RecoveryCode page
  * Currently, it only generates the code and redirects.
  */
-function handleForgot (e) {
+const handleForgot = (e) => {
+  if (!emailIsRegistered(form_data.email)) {
+    set_errs({ general: "The entered email is not registered. Sign up to continue." });
+    return;
+  }
   const recoveryCode = Math.floor(Math.random() * 9000 + 1000);
   console.log(`Should send email with code ${recoveryCode} to ${form_data.email}` );
-  window.location.href = "/recovery"
+  navigate("/recovery", {state: {email: form_data.email, recoveryCode: recoveryCode}});
 }
 
   return (
