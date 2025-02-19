@@ -1,6 +1,6 @@
 import { useState } from "react";
 import React from "react";
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Navigate } from "react-router-dom"
 import Header from "../components/ui/Header";
 
 const LoginPage = () => {
@@ -78,19 +78,26 @@ const LoginPage = () => {
     navigate("/home");
   };
 
+
+const emailIsRegistered = (email) => {
+  return mock_data.find((user) => user.email == email) // temporary until backend
+}
+
 /*
- * Event handler for "Forgot password"
- * It should do the following:
- *   1) If the given email is a registered email, proceed. Otherwise give alert.
- *   2) Create a random recovery code
- *   3) Send an email with the recovery code
- *   4) Redirect to the RecoveryCode page
- * Currently, it only generates the code and redirects.
+ * Event handler for "Reset password" which creates a recovery code and redirects to
+ * the RecoveryCode page. 
+ * 
+ * FUTURE WORK: Send the recovery code to the email address. As a temporary standin,
+ * the recovery code is printed to the console.
  */
-function handleForgot (e) {
+const handleForgot = (e) => {
+  if (!emailIsRegistered(form_data.email)) {
+    set_errs({ general: "The entered email is not registered. Sign up to continue." });
+    return;
+  }
   const recoveryCode = Math.floor(Math.random() * 9000 + 1000);
   console.log(`Should send email with code ${recoveryCode} to ${form_data.email}` );
-  window.location.href = "/recovery"
+  navigate("/recovery", {state: {email: form_data.email, recoveryCode: recoveryCode}});
 }
 
   return (
