@@ -9,7 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.js'],
     coverage: {
-      provider: 'istanbul',
+      provider: 'v8',
       include: ['src/**/*.{js,jsx}'], // specify files to include
       exclude: ['src/generated/**/*.ts'], // specify files to exclude
       reporter: ['text', 'json', 'html'],
