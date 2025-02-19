@@ -35,7 +35,7 @@ const SignupPage = () => {
                         </div>
 
                         <div className="flex flex-col flex-1 justify-center items-left">
-                            <label className="block mb-2 text-left">User Name</label>
+                            <label className="block mb-2 text-left">Username</label>
                             <input
                                 type="text"
                                 name="name"
@@ -73,7 +73,7 @@ const SignupPage = () => {
                         </div>
                         {/* Display error message for failed login attempts */}
                         {errors.general && (
-                        <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-red-500" : "text-red-500"}`}>
+                        <p className={"text-red-500 text-xs"}>
                             {errors.general}
                         </p>
                         )}

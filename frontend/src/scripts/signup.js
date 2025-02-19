@@ -27,15 +27,13 @@ const useSignup = () => {
         }
     };
 
-    // TODO: decide if user_id should be created in the front end or the backend and how it should be created
      /*Event handler to handle submissions
       - Will set errrors if required information is not provided*/
-    const handle_submit = (e) => {
+    const handle_submit = async (e) => {
         e.preventDefault();
         let curr_errs = {};
 
-        // TODO: add an error checking for duplicated emails in existing data
-        //checks if email and password are present
+        //checks if email and password, and username are present
         if (!form_data.email) {
         curr_errs.email = "Email is required";
         }
@@ -61,6 +59,35 @@ const useSignup = () => {
             set_errs(curr_errs);
             return;
         }
+        
+        // querying database to check if account with email already exists
+        // TODO: Fix backend issues Discuss CORS issues, fronted not able to access backend
+        try {
+            const response = await fetch("http://localhost:5000/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(form_data),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to register");
+            }
+
+            //sanity check
+            console.log("✅ User registered successfully:", data);
+
+
+            // TODO: Store user token and redirect to homepage
+
+        } catch (error) {
+            console.error("Registration error:", error.message);
+            set_errs({ general: error.message });
+        }
+
   
         //Sanity check
         console.log("Form Submitted:", form_data);
