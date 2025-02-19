@@ -6,7 +6,7 @@ import useSignup from "../scripts/signup";
 
 const SignupPage = () => {
 
-    const {form_data, errors, handle_input, handle_submit}  = useSignup();
+    const {form_data, errors, confirm_password, handle_input, handle_submit}  = useSignup();
 
     return (
         <div className="flex flex-col h-screen w-full min-w-[1024px]">
@@ -47,7 +47,7 @@ const SignupPage = () => {
                             {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
                         </div>
 
-                        <div className="flex flex-col flex-1 justify-center items-left mb-10">
+                        <div className="flex flex-col flex-1 justify-center items-left">
                             <label className="block mb-2 text-left">Password</label>
                             <input
                                 type="password"
@@ -59,7 +59,18 @@ const SignupPage = () => {
                             />
                             {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
                         </div>
-
+                        <div className="flex flex-col flex-1 justify-center items-left mb-10">
+                        <label className="block mb-2 text-left">Confirm Password</label>
+                            <input
+                                type="password"
+                                name="confirm_password"
+                                value={confirm_password}
+                                onChange={handle_input}
+                                className="w-full p-1 mb-2 border border-black rounded-lg bg-white"
+                                placeholder="Confirm you password"
+                            />
+                            {errors.confirm_password && <p className="text-red-500 text-xs">{errors.confirm_password}</p>}
+                        </div>
                         {/* Display error message for failed login attempts */}
                         {errors.general && (
                         <p className={`text-center mb-2 ${num_attempts >= 3 ? "text-red-500" : "text-red-500"}`}>

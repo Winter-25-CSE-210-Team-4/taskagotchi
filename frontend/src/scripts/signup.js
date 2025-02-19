@@ -10,14 +10,21 @@ const useSignup = () => {
       //Initializes errors variable as empty, defines function to set errors
     const [errors, set_errs] = useState({});
 
+    // Initialize confirm password varaibles as empty, define function to set it
+    const  [confirm_password, set_confirm_password] = useState("");
     
     //Event handler to handle user input as it comes in
     const handle_input = (e) => {
-        set_form_data({
-        ...form_data,
-        [e.target.name]: e.target.value,
-        });
-        set_errs({ ...errors, [e.target.name]: "", general: "" });
+
+        if (e.target.name == "confirm_password") {
+            set_confirm_password(e.target.value);
+        } else {
+            set_form_data({
+                ...form_data,
+                [e.target.name]: e.target.value,
+                });
+                set_errs({ ...errors, [e.target.name]: "", general: "" });
+        }
     };
 
     // TODO: decide if user_id should be created in the front end or the backend and how it should be created
@@ -34,18 +41,27 @@ const useSignup = () => {
         }
 
         if (!form_data.password) {
-        curr_errs.password = "Password is required";
+            curr_errs.password = "Password is required";
         }
 
         if (!form_data.name) {
             curr_errs.name = "Name is required";
         }
 
+        if (!confirm_password) {
+            curr_errs.confirm_password = "Confirm Password is required";
+        } 
+        
+        // checks if passwords match - only if confirm password is provided
+        else if (form_data.password !== confirm_password) {
+            curr_errs.confirm_password = "Passwords do not match";
+        }
+
         if (Object.keys(curr_errs).length > 0) {
             set_errs(curr_errs);
             return;
         }
-        
+  
         //Sanity check
         console.log("Form Submitted:", form_data);
     };
@@ -53,6 +69,7 @@ const useSignup = () => {
     return {
         form_data,
         errors,
+        confirm_password,
         handle_input,
         handle_submit,
       };
