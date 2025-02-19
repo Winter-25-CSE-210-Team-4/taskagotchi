@@ -5,7 +5,7 @@ import { errorHandler } from './middleware/errorHandler';
 import mongoose from 'mongoose';
 import config from './config/config';
 
-const app = express();
+export const app = express();
 
 // Middleware
 app.use(cors());  // Add CORS middleware
@@ -27,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use(errorHandler);
 
 // MongoDB connection and server start
+if (process.env.NODE_ENV !== 'test') {
 mongoose.connect(config.mongoUri)
     .then(() => {
         console.log('📦 Connected to MongoDB successfully');
@@ -40,3 +41,4 @@ mongoose.connect(config.mongoUri)
     .catch(err => {
         console.error('MongoDB connection error:', err);
     });
+}
