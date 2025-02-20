@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
+import goalRoutes from './routes/goalRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import mongoose from 'mongoose';
 import config from './config/config';
+
 
 const app = express();
 
@@ -23,10 +25,11 @@ app.get('/test', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-
+app.use('/api/goals', goalRoutes);
 app.use(errorHandler);
 
 // MongoDB connection and server start
+
 if (process.env.NODE_ENV !== 'test') {
     mongoose.connect(config.mongoUri)
         .then(() => {
