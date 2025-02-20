@@ -1,78 +1,14 @@
-import { useState } from "react";
 import React from "react";
 import Header from "../components/ui/Header";
+import useLogin from "../scripts/login.js";
+
 
 const LoginPage = () => {
 
-  //Defining email and password as elemenets to be updated dynamically
-  const [form_data, set_form_data] = useState({
-    email: "",
-    password: "",
-  });
+  // get javascript functions
+  const { form_data, errors, num_attempts, handle_input, handle_submit } = useLogin();
 
-  //Initializes errors variable as empty, defines function to set errors
-  const [errors, set_errs] = useState({});
-
-  //iitializes variable + function to track login status
-  const [login_status, set_login_status] = useState(false);
-
-  // tracking login attempts
-  const [num_attempts, set_num_attempts] = useState(0);
-
-  //mock user database (to be replaed with backend queries)
-  const mock_data = [
-    { email: "test@gmail.com", password: "password123" },
-    { email: "abc@icloud.com", password: "xyzpassword" },
-  ];
-
-
-  //Event handler to handle user input as it comes in
-  const handle_input = (e) => {
-    set_form_data({
-      ...form_data,
-      [e.target.name]: e.target.value,
-    });
-    set_errs({ ...errors, [e.target.name]: "", general: "" });
-  };
-
-  /*Event handler to handle submissions
-      - Will set errrors if required information is not provided*/
-  const handle_submit = (e) => {
-    e.preventDefault();
-    let curr_errs = {};
-
-    //checks if email and password are present
-    if (!form_data.email) {
-      curr_errs.email = "Email is required";
-    }
-    if (!form_data.password) {
-      curr_errs.password = "Password is required";
-    }
-
-    if (Object.keys(curr_errs).length > 0) {
-      set_errs(curr_errs);
-      return;
-    }
-
-    const curr_user = mock_data.find((user) => 
-      user.email == form_data.email && user.password == form_data.password);
-
-    if (!curr_user) {
-      set_num_attempts(num_attempts + 1);
-      set_errs({ general: "Invalid email or password" });
-
-      if (num_attempts >= 3) {
-        set_errs({ general: "Invalid email or password. Try Reset Password or Sign up." });
-      }
-      return;
-    }
-    
-    //Sanity check
-    console.log("Form Submitted:", form_data);
-  };
-
-
-
+ 
   return (
     <div className="flex flex-col h-screen w-full min-w-[1024px]">
       {/* Header stays at the top */}
@@ -123,7 +59,7 @@ const LoginPage = () => {
                     <div className="flex w-full mt-4 justify-center items-center px-5">
                       <button
                         type="submit"
-                        className="w-1/3 bg-accent text-center text-white border border-accent py-2 rounded-lg hover:bg-primary hover:border-primary"
+                        className="w-1/2 bg-accent text-center text-white border border-accent py-2 rounded-lg hover:bg-primary hover:border-primary"
                       >
                         Login
                       </button>
@@ -132,15 +68,16 @@ const LoginPage = () => {
 
                   {/* Sign up & Reset Password buttons */}
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                  <a href='/signup' className="w-1/3 bg-white text-center text-accent border border-accent border-2 py-2 rounded-lg hover:bg-secondary">
-                      Go to Sign up
+                  <a href="/signup" className="btn btn-outline w-1/2 bg-white text-center text-accent border-2 py-2 rounded-lg hover:bg-secondary">
+                      Create Account
                   </a>
                   </div>
 
                   <div className="flex w-full mt-4 justify-center items-center px-5">
-                    <div className="w-1/3 text-center text-accent py-2 rounded hover:text-mint">
-                      Reset password
-                    </div>
+                     {/*TODO: change this to proper link */}
+                      <a href="/home" className="btn btn-link btn-accent w-1/2 text-center">
+                          Reset Password
+                      </a>
                   </div>
                 </div>
               </div>
