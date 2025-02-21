@@ -1,5 +1,5 @@
 import './App.css';
-import GoalForm from './components/GoalForm';
+import GoalForm from './components/GoalForm/GoalForm';
 
 function App() {
   const handleClick = () => {
