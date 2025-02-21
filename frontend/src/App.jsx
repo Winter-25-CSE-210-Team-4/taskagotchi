@@ -1,12 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
 import "./App.css";
 import LoginPage from "./pages/Login"; // Import your LoginPage
 import SignupPage from "./pages/Signup";
 import Header from "./components/ui/Header";
 
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
     <Router>

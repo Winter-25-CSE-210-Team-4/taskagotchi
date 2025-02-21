@@ -1,4 +1,3 @@
-import React from "react";
 import Header from "../components/ui/Header";
 import useLogin from "../scripts/login.js";
 

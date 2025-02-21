@@ -1,5 +1,3 @@
-import { useState } from "react";
-import React from "react";
 import Header from "../components/ui/Header";
 import useSignup from "../scripts/signup";
 

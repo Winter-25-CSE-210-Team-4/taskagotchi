@@ -18,7 +18,7 @@ const useLogin = () => {
     const [errors, set_errs] = useState({});
 
     //iitializes variable + function to track login status
-    const [login_status, set_login_status] = useState(false);
+    // const [login_status, set_login_status] = useState(false);
 
     // tracking login attempts
     const [num_attempts, set_num_attempts] = useState(0);
@@ -72,11 +72,11 @@ const useLogin = () => {
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
 
-        set_login_status(true);
+        // set_login_status(true);
         set_errs({});
 
         navigate("/home");
-    } catch (error){
+    } catch {
         set_num_attempts(num_attempts + 1);
         set_errs({ general: "Invalid email or password" });
 
