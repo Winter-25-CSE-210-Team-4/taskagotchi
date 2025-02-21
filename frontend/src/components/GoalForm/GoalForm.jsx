@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CheckIcon from '../../assets/check.svg';
 import ChevronLeftIcon from '../../assets/chevron-left.svg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import PropTypes from 'prop-types';
 
 const GoalForm = ({ onSubmit, edit }) => {
   const emptyGoal = {
@@ -118,6 +119,11 @@ const GoalForm = ({ onSubmit, edit }) => {
       </div>
     </form>
   );
+};
+
+GoalForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  edit: PropTypes.bool,
 };
 
 export default GoalForm;
