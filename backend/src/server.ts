@@ -29,20 +29,20 @@ app.use('/api/goals', goalRoutes);
 app.use(errorHandler);
 
 // MongoDB connection and server start
-
-mongoose.connect(config.mongoUri)
-    .then(() => {
-        console.log('📦 Connected to MongoDB successfully');
-        const PORT = config.port || 5050;
-        app.listen(PORT, () => {
-            console.log('=================================');
-            console.log(`🚀 Server running on port ${PORT}`);
-            console.log('=================================');
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect(config.mongoUri)
+        .then(() => {
+            console.log('📦 Connected to MongoDB successfully');
+            const PORT = config.port || 5050;
+            app.listen(PORT, () => {
+                console.log('=================================');
+                console.log(`🚀 Server running on port ${PORT}`);
+                console.log('=================================');
+            });
+        })
+        .catch(err => {
+            console.error('MongoDB connection error:', err);
         });
-    })
-    .catch(err => {
-        console.error('MongoDB connection error:', err);
-    });
-
+}
 
 export {app};
