@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import CheckIcon from '../assets/check.svg';
-import ChevronLeftIcon from '../assets/chevron-left.svg';
+import CheckIcon from '../../assets/check.svg';
+import ChevronLeftIcon from '../../assets/chevron-left.svg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -21,12 +21,10 @@ const GoalForm = ({ onSubmit, edit }) => {
   const [endDate, setEndDate] = useState(emptyGoal.endDate);
 
   const setGoalName = (name) => {
-    name = name.trim();
     setGoal({ ...goal, name });
   };
 
   const setGoalDescription = (description) => {
-    description = description.trim();
     setGoal({ ...goal, description });
   };
 
@@ -39,7 +37,14 @@ const GoalForm = ({ onSubmit, edit }) => {
         description: goal.description === '',
       });
     } else {
-      onSubmit({ ...goal, endDate: endDate });
+      const trimmedName = goal.name.trim();
+      const trimmedDescription = goal.description.trim();
+      onSubmit({
+        ...goal,
+        name: trimmedName,
+        description: trimmedDescription,
+        endDate: endDate,
+      });
       setGoal(emptyGoal);
     }
   };
@@ -67,6 +72,7 @@ const GoalForm = ({ onSubmit, edit }) => {
             className='input input-bordered w-full'
             value={goal.name ?? ''}
             onChange={(e) => setGoalName(e.target.value)}
+            data-testid='form-input-name-element'
           />
           {incomplete.submitted && incomplete.name && (
             <p className='text-red-600'>Missing Name!</p>
@@ -80,6 +86,7 @@ const GoalForm = ({ onSubmit, edit }) => {
             className='textarea textarea-bordered w-full'
             value={goal.description ?? ''}
             onChange={(e) => setGoalDescription(e.target.value)}
+            data-testid='form-input-description-element'
           />
           {incomplete.submitted && incomplete.description && (
             <p className='text-red-600'>Missing Description!</p>
