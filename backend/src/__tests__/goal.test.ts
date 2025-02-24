@@ -99,8 +99,9 @@ describe('Goal Endpoints', () => {
 
     it('should delete a goal', async () => {
         const res = await request(app)
-            .delete(`/api/goals/${goalId}`);
-
+            .delete(`/api/goals/${goalId}`)
+            .send();
+    
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
         expect(res.body.message).toBe('Goal successfully deleted');
