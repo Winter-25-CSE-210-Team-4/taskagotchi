@@ -4,10 +4,9 @@ import { useNavigate, Navigate } from "react-router-dom"
 import Header from "../components/ui/Header";
 import useLogin from "../scripts/login.js";
 
-//handles redirection to different pages
-const navigate = useNavigate();
-
 const LoginPage = () => {
+  //handles redirection to different pages
+  const navigate = useNavigate();
 
   //Defining email and password as elemenets to be updated dynamically
   const [form_data, set_form_data] = useState({
