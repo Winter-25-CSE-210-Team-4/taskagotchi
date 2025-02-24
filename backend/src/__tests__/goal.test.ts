@@ -7,7 +7,6 @@ import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/glo
 let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
-
     if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect();
     }
@@ -21,10 +20,10 @@ afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
 });
+
 describe('Goal Endpoints', () => {
     let goalId: string;
-    //change this to before each, create a goal in database and save the id
-    //just to ensure each test has a fresh goal to work with 
+
     beforeEach(async () => {
         try {
             const createRes = await request(app)
@@ -49,14 +48,15 @@ describe('Goal Endpoints', () => {
             .send({
                 title: 'Another Goal',
                 description: 'Another Description',
-                deadline: '2024-03-01T00:00:00.000Z'
+                deadline: '2024-03-01T00:00:00.000Z',
+                isCompleted: false
             });
 
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
         expect(res.body.data).toHaveProperty('title', 'Another Goal');
+        expect(res.body.data).toHaveProperty('isCompleted', false);
     });
-
 
     it('should get all goals', async () => {
         const res = await request(app)
@@ -67,7 +67,6 @@ describe('Goal Endpoints', () => {
         expect(Array.isArray(res.body.data)).toBe(true);
     });
 
- 
     it('should get a specific goal by id', async () => {
         console.log('Testing get goal with ID:', goalId);
         
@@ -81,21 +80,19 @@ describe('Goal Endpoints', () => {
         expect(res.body.data).toHaveProperty('_id', goalId);
     });
 
-
-    it('should update a goal', async () => {
+    it('should update a goal completion status', async () => {
         const res = await request(app)
             .put(`/api/goals/${goalId}`)
             .send({
                 title: 'Updated Goal',
-                status: 'completed'
+                isCompleted: true
             });
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
         expect(res.body.data).toHaveProperty('title', 'Updated Goal');
-        expect(res.body.data).toHaveProperty('status', 'completed');
+        expect(res.body.data).toHaveProperty('isCompleted', true);
     });
-
 
     it('should delete a goal', async () => {
         const res = await request(app)

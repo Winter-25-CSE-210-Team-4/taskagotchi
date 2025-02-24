@@ -13,10 +13,14 @@ const goalSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    status: {
-        type: String,
-        enum: ['active', 'completed', 'cancelled'],
-        default: 'active'
+    // status: {
+    //     type: String,
+    //     enum: ['active', 'completed', 'cancelled'],
+    //     default: 'active'
+    // },
+    isCompleted: { 
+        type: Boolean, 
+        default: false 
     },
     createdAt: {
         type: Date,
