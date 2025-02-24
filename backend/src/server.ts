@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes';
-import goalRoutes from './routes/goalRoutes';
+import petRoutes from './routes/petRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import mongoose from 'mongoose';
 import config from './config/config';
@@ -25,7 +25,8 @@ app.get('/test', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/goals', goalRoutes);
+app.use('/api/pets', petRoutes);
+
 app.use(errorHandler);
 
 // MongoDB connection and server start
@@ -45,4 +46,4 @@ if (process.env.NODE_ENV !== 'test') {
         });
 }
 
-export {app};
+export { app };
