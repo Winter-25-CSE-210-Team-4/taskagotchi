@@ -1,5 +1,4 @@
-import { useContext, useState } from "react";
-import React from "react";
+import { useState } from "react";
 import Header from "../components/ui/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -32,7 +31,7 @@ function RecoveryCodePage() {
 				<div className='w-[32rem] flex flex-col py-8 px-6 rounded-lg shadow-md w-full max-w-md'>
 					<p
 						className='py-2'>
-						A recovery code has been sent to {email}. Really, it's just in the console.
+						A recovery code has been sent to {email}. Really, it&apos;s just in the console.
 					</p>
 					<div
 						className='flex flex-row gap-2'>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import React from "react";
 import Header from "../components/ui/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -21,8 +20,8 @@ const ResetPasswordPage = () => {
   // temporary until backend is connected
   function updatePassword() {
     const user = mock_data.find((user) => user.email == email)
-    user[password] = newPass;
-    console.log(`${email} has new password ${user[password]}`)
+    user.password = newPass;
+    console.log(`${email} has new password ${user.password}`)
   }
 
 	function handleSubmit(e) {

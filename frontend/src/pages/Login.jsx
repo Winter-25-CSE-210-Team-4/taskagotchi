@@ -1,8 +1,7 @@
 import { useState } from "react";
-import React from "react";
-import { useNavigate, Navigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Header from "../components/ui/Header";
-import useLogin from "../scripts/login.js";
+//import useLogin from "../scripts/login.js";
 
 const LoginPage = () => {
   //handles redirection to different pages
@@ -18,7 +17,7 @@ const LoginPage = () => {
   const [errors, set_errs] = useState({});
 
   //iitializes variable + function to track login status
-  const [login_status, set_login_status] = useState(false);
+  //const [login_status, set_login_status] = useState(false);
 
   // tracking login attempts
   const [num_attempts, set_num_attempts] = useState(0);
@@ -90,7 +89,7 @@ const emailIsRegistered = (email) => {
  *   4) Redirect to the RecoveryCode page
  * Currently, it only generates the code and redirects.
  */
-const handleForgot = (e) => {
+const handleForgot = () => {
   if (!emailIsRegistered(form_data.email)) {
     set_errs({ general: "The entered email is not registered. Sign up to continue." });
     return;
