@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Signup from "/Users/siyarajpal/Desktop/Winter 25/CSE 210/taskagotchi/frontend/src/pages/Signup.jsx";
 import { describe, it, vi, expect, beforeEach, afterEach } from "vitest";
-import { wait } from "@testing-library/user-event/dist/cjs/utils/index.js";
 
 beforeEach(() => {
     vi.spyOn(global, "fetch").mockResolvedValue({
