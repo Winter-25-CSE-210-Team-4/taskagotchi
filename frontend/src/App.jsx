@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/Login"; // Import your LoginPage
 import SignupPage from "./pages/Signup";
+import ResetPasswordPage from "./pages/ResetPassword";
+import RecoveryCodePage from "./pages/RecoveryCode";
 import Header from "./components/ui/Header";
 
 function App() {
@@ -36,8 +38,9 @@ function App() {
 
         {/* Login Page Route */}
         <Route path="/login" element={<LoginPage />} />
-        {/* Sign up Page Route */}
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/recovery" element={<RecoveryCodePage />} />
+        <Route path="/reset" element={<ResetPasswordPage />} />
       </Routes>
     </Router>
   );
