@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import Signup from "/Users/siyarajpal/Desktop/Winter 25/CSE 210/taskagotchi/frontend/src/pages/Signup.jsx";
+import Signup from "../pages/Signup.jsx";
 import { describe, it, vi, expect, beforeEach, afterEach } from "vitest";
 
 beforeEach(() => {
