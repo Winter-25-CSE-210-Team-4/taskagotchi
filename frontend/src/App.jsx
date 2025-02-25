@@ -3,6 +3,7 @@ import "./App.css";
 import LoginPage from "./pages/Login"; // Import your LoginPage
 import SignupPage from "./pages/Signup";
 import Header from "./components/ui/Header";
+import HomePage from "./pages/Home";
 
 function App() {
 
@@ -38,6 +39,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         {/* Sign up Page Route */}
         <Route path="/signup" element={<SignupPage />} />
+        {/* Home Page Route */}
+        <Route path="/home" element={<HomePage />} />
       </Routes>
     </Router>
   );
