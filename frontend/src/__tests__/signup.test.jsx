@@ -10,7 +10,7 @@ beforeEach(() => {
   });
   
   afterEach(() => {
-    vi.restoreAllMocks(); // Resets mock between tests
+    vi.restoreAllMocks();
   });
 
 describe("Signup Component", () => {
@@ -116,6 +116,7 @@ describe("Signup Component", () => {
           });
     });
 
+    //test email input as lower case
     it("submits email as lowercase regardless of input", async () => {
         const email_input = screen.getByPlaceholderText("Enter your email");
         const name_input = screen.getByPlaceholderText("Enter your name");
@@ -147,7 +148,7 @@ describe("Signup Component", () => {
 
     });
 
-    // TODO: edge cases - like a password that is only made of spaces
+    // test a password that is only made of spaces - should not be allowed
     it("appropriate length password of only spaces submitted", async () => {
         const password_input = screen.getByPlaceholderText("Enter your password");
         fireEvent.change(password_input, { target: { value: "                " } });
@@ -159,6 +160,7 @@ describe("Signup Component", () => {
         });
     });
 
+    // test a password of length more than 25 - should not be allowed
     it("password of length more than 25 submitted", async () => {
         const password_input = screen.getByPlaceholderText("Enter your password");
         fireEvent.change(password_input, { target: { value: "abcdefghijklmnopqrstuvwxyz" } });
