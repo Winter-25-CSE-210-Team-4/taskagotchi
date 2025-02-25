@@ -148,6 +148,63 @@ describe("Signup Component", () => {
 
     });
 
+    // mockig backend call to test both duplicate and lower+uppercase emails
+    it("lowercase and uppercase emails treated the same and handling duplicates", async () => {
+
+        //mock backend call
+        vi.spyOn(global, "fetch")
+        .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ message: "User registered successfully" }),
+        })
+        .mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ message: "Email already in use" }),
+        });
+        
+        //first sumbission
+        const email_input = screen.getByPlaceholderText("Enter your email");
+        const name_input = screen.getByPlaceholderText("Enter your name");
+        const password_input = screen.getByPlaceholderText("Enter your password");
+        const confirm_password_input = screen.getByPlaceholderText("Confirm your password");
+
+
+        fireEvent.change(email_input, { target: { value: "test@example.com" } });
+        fireEvent.change(name_input, { target: { value: "TestUser" } });
+        fireEvent.change(password_input, { target: { value: "password123" } });
+        fireEvent.change(confirm_password_input, { target: { value: "password123" } });
+
+        fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+
+        await waitFor(() => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch).toHaveBeenCalledWith("http://localhost:5000/api/register", expect.any(Object));
+          });
+
+
+        // Clear form 
+        fireEvent.change(email_input, { target: { value: "" } });
+        fireEvent.change(name_input, { target: { value: "" } });
+        fireEvent.change(password_input, { target: { value: "" } });
+        fireEvent.change(confirm_password_input, { target: { value: "" } });
+        
+
+        //second submission
+        fireEvent.change(email_input, { target: { value: "TEST@example.com" } });
+        fireEvent.change(name_input, { target: { value: "user" } });
+        fireEvent.change(password_input, { target: { value: "123password" } });
+        fireEvent.change(confirm_password_input, { target: { value: "123password" } });
+  
+          fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+
+        await waitFor(() => {
+            expect(fetch).toHaveBeenCalledTimes(2);
+            expect(screen.getByText(/email already in use/i)).toBeInTheDocument();
+        });
+        
+
+    });
+
     // test a password that is only made of spaces - should not be allowed
     it("appropriate length password of only spaces submitted", async () => {
         const password_input = screen.getByPlaceholderText("Enter your password");
