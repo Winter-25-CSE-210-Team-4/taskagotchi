@@ -117,9 +117,59 @@ describe("Signup Component", () => {
           });
     });
 
-    // TODO: Case sensitivity in emails
+    it("submits email as lowercase regardless of input", async () => {
+        const email_input = screen.getByPlaceholderText("Enter your email");
+        const name_input = screen.getByPlaceholderText("Enter your name");
+        const password_input = screen.getByPlaceholderText("Enter your password");
+        const confirm_password_input = screen.getByPlaceholderText("Confirm your password");
+
+
+        fireEvent.change(email_input, { target: { value: "Test@example.COM" } });
+        fireEvent.change(name_input, { target: { value: "TestUser" } });
+        fireEvent.change(password_input, { target: { value: "password123" } });
+        fireEvent.change(confirm_password_input, { target: { value: "password123" } });
+
+        fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+
+        await waitFor(() => {
+            expect(fetch).toHaveBeenCalledWith(
+              "http://localhost:5000/api/register",
+              expect.objectContaining({
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "test@example.com",
+                    name: "TestUser",
+                    password: "password123",
+                  }),
+              })
+            );
+          });
+
+    });
 
     // TODO: edge cases - like a password that is only made of spaces
+    it("appropriate length password of only spaces submitted", async () => {
+        const password_input = screen.getByPlaceholderText("Enter your password");
+        fireEvent.change(password_input, { target: { value: "                " } });
+
+        fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+
+        await waitFor(() => {
+            expect(screen.queryByText(/password cannot contain spaces/i)).toBeInTheDocument();
+        });
+    });
+
+    it("password of length more than 25 submitted", async () => {
+        const password_input = screen.getByPlaceholderText("Enter your password");
+        fireEvent.change(password_input, { target: { value: "abcdefghijklmnopqrstuvwxyz" } });
+
+        fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+
+        await waitFor(() => {
+            expect(screen.queryByText(/password cannot be more than 20 characters/i)).toBeInTheDocument();
+        });
+    });
 
     // TODO: duplicate email case - when integrated with backend
 
