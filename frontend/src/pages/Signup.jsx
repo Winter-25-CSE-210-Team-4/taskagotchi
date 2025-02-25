@@ -155,7 +155,7 @@ const SignupPage = () => {
                                 value={confirm_password}
                                 onChange={handle_input}
                                 className="w-full p-1 mb-2 border border-black rounded-lg bg-white"
-                                placeholder="Confirm your password"
+                                placeholder="Confirm you password"
                             />
                             {errors.confirm_password && <p className="text-red-500 text-xs">{errors.confirm_password}</p>}
                         </div>
