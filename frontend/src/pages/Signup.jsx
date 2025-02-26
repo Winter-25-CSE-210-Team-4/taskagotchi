@@ -38,11 +38,18 @@ const SignupPage = () => {
     
             //checks if email and password, and username are present
             if (!form_data.email) {
-            curr_errs.email = "Email is required";
+                curr_errs.email = "Email is required";
             }
     
             if (!form_data.password) {
                 curr_errs.password = "Password is required";
+            } else {
+                if(form_data.password.includes(" ")) {
+                    curr_errs.password = "Password cannot contain spaces";
+                }
+                if(form_data.password.length > 20) {
+                    curr_errs.password = "Password cannot be more than 20 characters";
+                }
             }
     
             if (!form_data.name) {
@@ -57,6 +64,11 @@ const SignupPage = () => {
             else if (form_data.password !== confirm_password) {
                 curr_errs.confirm_password = "Passwords do not match";
             }
+
+            const submission_data = {
+                ...form_data,
+                email: form_data.email.toLowerCase(), // Email converted to lowercase here
+              };
     
             if (Object.keys(curr_errs).length > 0) {
                 set_errs(curr_errs);
@@ -71,7 +83,7 @@ const SignupPage = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(form_data),
+                    body: JSON.stringify(submission_data),
                 });
     
                 const data = await response.json();
@@ -93,7 +105,7 @@ const SignupPage = () => {
     
       
             //Sanity check
-            console.log("Form Submitted:", form_data);
+            console.log("Form Submitted:", submission_data);
         };
 
     return (
@@ -155,7 +167,7 @@ const SignupPage = () => {
                                 value={confirm_password}
                                 onChange={handle_input}
                                 className="w-full p-1 mb-2 border border-black rounded-lg bg-white"
-                                placeholder="Confirm you password"
+                                placeholder="Confirm your password"
                             />
                             {errors.confirm_password && <p className="text-red-500 text-xs">{errors.confirm_password}</p>}
                         </div>
