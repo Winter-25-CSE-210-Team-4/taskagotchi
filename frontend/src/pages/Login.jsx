@@ -1,5 +1,7 @@
 import Header from "../components/ui/Header";
 import { useState } from "react";
+import { useNavigate} from "react-router-dom";
+import axios from "axios";
 
 
 const LoginPage = () => {
@@ -59,7 +61,6 @@ const LoginPage = () => {
   // const curr_user = mock_data.find((user) => 
   //     user.email == form_data.email && user.password == form_data.password);
   try {
-
       // query the database and save the data recieved 
       // will error if data not there
       const response = await axios.post("http://localhost:5000/api/auth/login", form_data);
@@ -86,7 +87,6 @@ const LoginPage = () => {
   //Sanity check
   console.log("Form Submitted:", form_data);
   
-  // navigate("/home");
   };
  
   return (
