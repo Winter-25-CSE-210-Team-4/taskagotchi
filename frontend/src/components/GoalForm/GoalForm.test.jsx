@@ -28,7 +28,7 @@ describe('GoalForm Component', () => {
   it('should show error messages when submitting empty form', async () => {
     const user = userEvent.setup();
     render(<MockGoalForm onSubmit={vi.fn()} />);
-    const submitButton = screen.getByRole('button', { name: /create goal/i });
+    const submitButton = await screen.findByTestId('form-submit-button');
     await user.click(submitButton);
     await waitFor(() => {
       expect(screen.getByText('Missing Name!')).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('GoalForm Component', () => {
     const descriptionInput = await screen.findByTestId(
       'form-input-description-element'
     );
-    const submitButton = screen.getByRole('button', { name: /create goal/i });
+    const submitButton = await screen.findByTestId('form-submit-button');
 
     await user.type(nameInput, 'New Goal');
     await user.type(descriptionInput, 'Goal Description');
@@ -70,7 +70,7 @@ describe('GoalForm Component', () => {
     const descriptionInput = await screen.findByTestId(
       'form-input-description-element'
     );
-    const submitButton = screen.getByRole('button', { name: /create goal/i });
+    const submitButton = await screen.findByTestId('form-submit-button');
 
     await user.type(nameInput, '  New Goal  ');
     await user.type(descriptionInput, '  Goal Description  ');
@@ -95,7 +95,7 @@ describe('GoalForm Component', () => {
     const descriptionInput = await screen.findByTestId(
       'form-input-description-element'
     );
-    const submitButton = screen.getByRole('button', { name: /create goal/i });
+    const submitButton = await screen.findByTestId('form-submit-button');
 
     await user.type(nameInput, 'New Goal');
     await user.type(descriptionInput, 'Goal Description');
