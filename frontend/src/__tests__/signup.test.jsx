@@ -1,21 +1,34 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Signup from "../pages/Signup.jsx";
 import { describe, it, vi, expect, beforeEach, afterEach } from "vitest";
+import { MemoryRouter } from "react-router-dom";
+import axios from "axios";
+
+
+vi.mock("axios"); 
 
 beforeEach(() => {
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      ok: true,
-      json: async () => ({ message: "User registered successfully" }),
-    });
-  });
+  axios.post.mockReset();
+});
+
+// beforeEach(() => {
+//     vi.spyOn(global, "fetch").mockResolvedValue({
+//       ok: true,
+//       json: async () => ({ message: "User registered successfully" }),
+//     });
+//   });
   
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+//   afterEach(() => {
+//     vi.restoreAllMocks();
+//   });
 
 describe("Signup Component", () => {
     beforeEach(() => {
-    render(<Signup />);
+        render(
+            <MemoryRouter>
+              <Signup />
+            </MemoryRouter>
+          );
     });
 
 
@@ -81,7 +94,8 @@ describe("Signup Component", () => {
             target: {value: "password456"},
         });
 
-        fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
+        fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
+        
 
         await waitFor(() => {
             expect(screen.queryByText(/passwords do not match/i)).toBeInTheDocument();
@@ -110,9 +124,23 @@ describe("Signup Component", () => {
 
         fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
 
-        await waitFor(() => {
-            expect(fetch).toHaveBeenCalledTimes(1);
-            expect(fetch).toHaveBeenCalledWith("http://localhost:5000/api/register", expect.any(Object));
+        axios.post.mockResolvedValueOnce({
+            data: {
+              token: "mock-token",
+              user: { id: 1, email: "test@example.com", name: "test" },
+            },
+          });
+
+          await waitFor(() => {
+            expect(axios.post).toHaveBeenCalledTimes(1);
+            expect(axios.post).toHaveBeenCalledWith(
+              "http://localhost:5050/api/auth/register",
+              expect.objectContaining({
+                email: "test@example.com",
+                password: "password123",
+                name: "test",
+              })
+            );
           });
     });
 
@@ -131,20 +159,23 @@ describe("Signup Component", () => {
 
         fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
 
+        axios.post.mockResolvedValueOnce({
+            data: {
+                token: "mock-token",
+                user: { id: 1, email: "test@example.com", name: "TestUser" },
+            },
+        });
+
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalledWith(
-              "http://localhost:5000/api/register",
-              expect.objectContaining({
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: "test@example.com",
+            expect(axios.post).toHaveBeenCalledWith(
+                "http://localhost:5050/api/auth/register",
+                expect.objectContaining({
+                    email: "test@example.com", // ✅ Email should be lowercase
                     name: "TestUser",
                     password: "password123",
-                  }),
-              })
+                })
             );
-          });
+        });
 
     });
 
@@ -152,14 +183,12 @@ describe("Signup Component", () => {
     it("lowercase and uppercase emails treated the same and handling duplicates", async () => {
 
         //mock backend call
-        vi.spyOn(global, "fetch")
-        .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ message: "User registered successfully" }),
-        })
-        .mockResolvedValueOnce({
-            ok: false,
-            json: async () => ({ message: "Email already in use" }),
+        axios.post.mockResolvedValueOnce({
+            data: { message: "User registered successfully" },
+        });
+    
+        axios.post.mockRejectedValueOnce({
+            response: { data: { message: "Email already in use" } },
         });
         
         //first sumbission
@@ -177,9 +206,16 @@ describe("Signup Component", () => {
         fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
 
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalledTimes(1);
-            expect(fetch).toHaveBeenCalledWith("http://localhost:5000/api/register", expect.any(Object));
-          });
+            expect(axios.post).toHaveBeenCalledTimes(1);
+            expect(axios.post).toHaveBeenCalledWith(
+                "http://localhost:5050/api/auth/register",
+                expect.objectContaining({
+                    email: "test@example.com",
+                    name: "TestUser",
+                    password: "password123",
+                })
+            );
+        });
 
 
         // Clear form 
@@ -197,8 +233,8 @@ describe("Signup Component", () => {
   
           fireEvent.submit(screen.getByRole("button", { name: /sign up/i }));
 
-        await waitFor(() => {
-            expect(fetch).toHaveBeenCalledTimes(2);
+          await waitFor(() => {
+            expect(axios.post).toHaveBeenCalledTimes(2); // Ensuring both calls were made
             expect(screen.getByText(/email already in use/i)).toBeInTheDocument();
         });
         
