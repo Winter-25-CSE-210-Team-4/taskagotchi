@@ -1,5 +1,6 @@
 import { AuthContext } from '../../auth/AuthContextProvider';
 import { vi } from 'vitest';
+import PropTypes from 'prop-types';
 
 const mockAuthContextValue = {
   auth: {},
@@ -15,5 +16,7 @@ const MockAuthContextProvider = ({ children }) => (
     {children}
   </AuthContext.Provider>
 );
-
+MockAuthContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 export default MockAuthContextProvider;
