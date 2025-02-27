@@ -34,7 +34,7 @@ const HomePage = () => {
     };
 
     // Event handler for deleting a task
-    const handleDeleteTask = (index) => {
+    const handle_delete_task = (index) => {
         set_tasks(tasks.filter((_, i) => i !== index));
     };
 
@@ -48,7 +48,7 @@ const HomePage = () => {
     };
 
     //event handler for deleting a goal
-    const handleDeleteGoal = (index) => {
+    const handle_delete_goal = (index) => {
         set_goals(goals.filter((_, i) => i !== index));
     };
 
@@ -73,9 +73,15 @@ const HomePage = () => {
                             <label htmlFor={`task-modal-${index}`} className="flex justify-between text-sm cursor-pointer">
                                 {task.name} <span>{task.time}</span>
                             </label>
-                            <ExampleModal id={`task-modal-${index}`} title={task.name} description={`Scheduled for ${task.time}`} />       
+                            <ExampleModal id={`task-modal-${index}`} 
+                            title={task.name} 
+                            description={`Scheduled for ${task.time}`} 
+                            delete_func ={() => handle_delete_task(index)}
+                            
+                            
+                            />       
                         </li>
-                        )};
+                        )}
                     </ul>
                      {/*Goals*/}
                     <h3 className="text-base font-bold pb-2 pr-2 mb-2">Goals</h3>
@@ -83,7 +89,11 @@ const HomePage = () => {
                         {goals.map((goal, index) => (
                             <li key={index}>
                                 <label htmlFor={`goal-modal-${index}`} className="text-sm cursor-pointer">{goal.name}</label>
-                                <ExampleModal id={`goal-modal-${index}`} title={goal.name} description={goal.description || "No description"} />
+                                <ExampleModal id={`goal-modal-${index}`} 
+                                    title={goal.name} 
+                                    description={goal.description || "No description"}
+                                    delete_func ={() => handle_delete_goal(index)}
+                                />
                             </li>
                         ))}
                     </ul>
