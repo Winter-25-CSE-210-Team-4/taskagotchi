@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Signup from "../pages/Signup.jsx";
-import { describe, it, vi, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, vi, expect, beforeEach} from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import axios from "axios";
 
