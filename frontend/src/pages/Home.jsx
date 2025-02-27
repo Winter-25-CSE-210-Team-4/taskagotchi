@@ -1,6 +1,7 @@
 import Header from "../components/ui/Header";
 import { useNavigate } from "react-router-dom";
 import ExampleModal  from "../components/ui/ExampleModal";
+import React, {useState} from "react";
 
 
 
@@ -8,6 +9,48 @@ const HomePage = () => {
 
     const navigate = useNavigate();
 
+    const [tasks, set_tasks] = useState([    
+        {name: "💧 Drink water", time: "5:00pm"},
+        { name: "🚶 Take a walk", time: "6:00pm" }
+    ]);
+
+    const [goals, set_goals] = useState([
+        { name: "💪 Be healthier", description: "" },
+        { name: "🌲 Go outdoors more!", description: "" }
+    ]);
+
+
+    const [new_task, set_new_task] = useState({name: "", time: ""})
+
+    const [new_goal, set_new_goal] = useState({name: "", description: ""})
+
+
+    // Event handler for adding new task
+    const handle_add_task = () => {
+        if (new_task.name && new_task.time) {
+            set_tasks([...tasks, new_task]);
+            set_new_task({ name: "", time: "" });
+        }
+    };
+
+    // Event handler for deleting a task
+    const handleDeleteTask = (index) => {
+        set_tasks(tasks.filter((_, i) => i !== index));
+    };
+
+
+    // Event handler for adding a new goal
+    const handle_add_goal = () => {
+        if(new_goal.name && new_goal.description) {
+            set_goals([...goals, new_goal]);
+            set_new_goal({name: "", description: ""})
+        }
+    };
+
+    //event handler for deleting a goal
+    const handleDeleteGoal = (index) => {
+        set_goals(goals.filter((_, i) => i !== index));
+    };
 
     return (
         <div className="flex flex-col h-screen w-full min-w-[1024px]">
@@ -24,31 +67,25 @@ const HomePage = () => {
                     {/* Tasks*/}
                     <h3 className="text-base font-bold mb-2 pb-2 pr-2">Tasks</h3>
                     <ul className="mb-4">
-                        <li>
-                            <label htmlFor="drink-water-modal" className="flex justify-between text-sm cursor-pointer">
-                            💧 Drink water <span>5:00pm</span>
+                        {tasks.map((task, index) => 
+                        
+                        <li key={index}>
+                            <label htmlFor={`task-modal-${index}`} className="flex justify-between text-sm cursor-pointer">
+                                {task.name} <span>{task.time}</span>
                             </label>
-                             <ExampleModal id="drink-water-modal" title="Drink Water" description="Stay hydrated! Drink a glass of water at 5:00pm." />         
+                            <ExampleModal id={`task-modal-${index}`} title={task.name} description={`Scheduled for ${task.time}`} />       
                         </li>
-                        <li>
-
-                            <label htmlFor="take-walk-modal" className="flex justify-between text-sm cursor-pointer">
-                                🚶 Take a walk <span>6:00pm</span>
-                            </label>
-                            <ExampleModal id="take-walk-modal" title="Take a Walk" description="Get some fresh air and move your body at 6:00pm." />
-                        </li>
+                        )};
                     </ul>
                      {/*Goals*/}
                     <h3 className="text-base font-bold pb-2 pr-2 mb-2">Goals</h3>
                     <ul>
-                        <li>
-                            <label htmlFor="be-healthier-modal" className="text-sm cursor-pointer">💪 Be healthier</label>
-                            <ExampleModal id="be-healthier-modal" title="Be Healthier" description="Maintain a balanced diet and exercise regularly." />
-                        </li>
-                        <li>
-                            <label htmlFor="go-outdoors-modal" className="text-sm cursor-pointer">🌲 Go outdoors more!</label>
-                            <ExampleModal id="go-outdoors-modal" title="Go Outdoors More" description="Spend more time in nature for a healthier mind and body." />
-                        </li>
+                        {goals.map((goal, index) => (
+                            <li key={index}>
+                                <label htmlFor={`goal-modal-${index}`} className="text-sm cursor-pointer">{goal.name}</label>
+                                <ExampleModal id={`goal-modal-${index}`} title={goal.name} description={goal.description || "No description"} />
+                            </li>
+                        ))}
                     </ul>
 
                     {/*Add Tasks and Goals*/}
@@ -59,9 +96,20 @@ const HomePage = () => {
                                 title="Add New Task" 
                                 description={
                                     <div>
-                                        <input type="text" placeholder="Task Name" className="input input-bordered w-full my-2" />
-                                        <input type="time" className="input input-bordered w-full my-2" />
-                                        <button className="btn btn-primary w-full">Save Task</button>
+                                         <input 
+                                            type="text" 
+                                            placeholder="Task Name" 
+                                            className="input input-bordered w-full my-2"
+                                            value={new_task.name}
+                                            onChange={(e) => set_new_task({ ...new_task, name: e.target.value })}
+                                        />
+                                        <input 
+                                            type="time" 
+                                            className="input input-bordered w-full my-2"
+                                            value={new_task.time}
+                                            onChange={(e) => set_new_task({ ...new_task, time: e.target.value })}
+                                        />
+                                        <button onClick={handle_add_task} className="btn btn-primary w-full">Save Task</button>
                                     </div>
                                 } 
                             />
@@ -71,9 +119,20 @@ const HomePage = () => {
                                 title="Add New Goal" 
                                 description={
                                     <div>
-                                        <input type="text" placeholder="Goal Name" className="input input-bordered w-full my-2" />
-                                        <textarea placeholder="Goal Description" className="textarea textarea-bordered w-full my-2"></textarea>
-                                        <button className="btn btn-primary w-full">Save Goal</button>
+                                       <input 
+                                            type="text" 
+                                            placeholder="Goal Name" 
+                                            className="input input-bordered w-full my-2"
+                                            value={new_goal.name}
+                                            onChange={(e) => set_new_goal({ ...new_goal, name: e.target.value })}
+                                        />
+                                        <textarea 
+                                            placeholder="Goal Description" 
+                                            className="textarea textarea-bordered w-full my-2"
+                                            value={new_goal.description}
+                                            onChange={(e) => set_new_goal({ ...new_goal, description: e.target.value })}
+                                        ></textarea>
+                                        <button onClick={handle_add_goal} className="btn btn-primary w-full">Save Goal</button>
                                     </div>
                                 } 
                             />
