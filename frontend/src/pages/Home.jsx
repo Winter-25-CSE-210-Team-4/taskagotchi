@@ -30,7 +30,10 @@ const HomePage = () => {
         if (new_task.name && new_task.time) {
             set_tasks([...tasks, new_task]);
             set_new_task({ name: "", time: "" });
+
+            document.getElementById("add-task-modal").checked = false;
         }
+
     };
 
     // Event handler for deleting a task
@@ -44,8 +47,12 @@ const HomePage = () => {
         if(new_goal.name && new_goal.description) {
             set_goals([...goals, new_goal]);
             set_new_goal({name: "", description: ""})
+
+            document.getElementById("add-task-modal").checked = false
         }
+
     };
+
 
     //event handler for deleting a goal
     const handle_delete_goal = (index) => {
