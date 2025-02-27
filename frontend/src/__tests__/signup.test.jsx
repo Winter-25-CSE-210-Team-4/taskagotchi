@@ -11,16 +11,6 @@ beforeEach(() => {
   axios.post.mockReset();
 });
 
-// beforeEach(() => {
-//     vi.spyOn(global, "fetch").mockResolvedValue({
-//       ok: true,
-//       json: async () => ({ message: "User registered successfully" }),
-//     });
-//   });
-  
-//   afterEach(() => {
-//     vi.restoreAllMocks();
-//   });
 
 describe("Signup Component", () => {
     beforeEach(() => {
