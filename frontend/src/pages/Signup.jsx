@@ -79,11 +79,11 @@ const SignupPage = () => {
 
     // querying database to check if account with email already exists
     try {
-      const response = await axios.post('/auth/register', form_data);
+      const response = await axios.post('/auth/register', submission_data);
 
-      //   if (!response.ok) {
-      //     throw new Error(response.data || 'Failed to register');
-      //   }
+      if (response.status < 200 || response.status > 299) {
+        throw new Error(response.data.message || 'Failed to register');
+      }
 
       const { token, user } = response.data;
 
@@ -93,15 +93,14 @@ const SignupPage = () => {
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      //Sanity check
+      console.log('Form Submitted:', submission_data);
+
+      navigate('/');
     } catch (error) {
       console.error('Registration error:', error.message);
       set_errs({ general: error.message });
     }
-
-    //Sanity check
-    console.log('Form Submitted:', submission_data);
-
-    navigate('/');
   };
 
   return (

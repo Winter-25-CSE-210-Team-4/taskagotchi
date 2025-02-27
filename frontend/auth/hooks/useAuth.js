@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { AuthContext } from '../AuthContextProvider';
 
 const useAuth = () => {
-  const { auth, setUser, setLoggedIn } = useContext(AuthContext);
+  const { setUser, setLoggedIn } = useContext(AuthContext);
   useEffect(() => {
     // Check for stored auth data on hook initialization
     const storedUser = localStorage.getItem('user');
