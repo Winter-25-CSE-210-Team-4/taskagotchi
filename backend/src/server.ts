@@ -14,7 +14,10 @@ const app = express();
 
 // Middleware
 app.use(cors());  // Add CORS middleware
+app.options('*', cors());
 app.use(express.json());
+
+
 
 // Routes
 app.get('/', (req, res) => {

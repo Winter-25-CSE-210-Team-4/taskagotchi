@@ -7,6 +7,11 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 export default [
   { ignores: ['dist', 'coverage'] },
   {
+    env: {
+      browser: true,
+      es2021: true,
+      node: true,
+    },
     files: ['src/**/*.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 2020,
