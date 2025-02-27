@@ -97,11 +97,6 @@ const SignupPage = () => {
 
                 console.log("✅ User registered successfully:", user);
                 navigate('/home'); // TODO change if needed
-                
-    
-                if (!response.ok) {
-                    throw new Error(data.message || "Failed to register");
-                }
     
             } catch (error) {
                 console.error("Registration error:", error);
