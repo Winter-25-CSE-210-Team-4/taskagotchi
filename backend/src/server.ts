@@ -7,7 +7,7 @@ dotenv.config();
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/taskagotchi';
 
-// 连接 MongoDB（新版 Mongoose 不需要额外选项）
+// connect to MongoDB
 mongoose.connect(MONGO_URI)
     .then(() => {
         console.log('✅ MongoDB connected successfully');
