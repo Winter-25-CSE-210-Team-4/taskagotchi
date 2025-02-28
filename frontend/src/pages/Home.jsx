@@ -178,9 +178,10 @@ const HomePage = () => {
 
             
               {/* Stats button */}
+              {/* TODO: route properly */}
               <div className="absolute top-4 right-4">
                     <button className="btn btn-accent "
-                        onClick={() => navigate("/")}  {/* TODO: route properly */}
+                        onClick={() => navigate("/")}
                     >stats</button>
                 </div>
 
