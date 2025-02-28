@@ -4,7 +4,6 @@ import LoginPage from "./pages/Login"; // Import your LoginPage
 import SignupPage from "./pages/Signup";
 import Header from "./components/ui/Header";
 import HomePage from "./pages/Home";
-import DummyPage from "./pages/Dummy";
 
 function App() {
 
@@ -42,8 +41,6 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         {/* Home Page Route */}
         <Route path="/home" element={<HomePage />} />
-        {/* Dummy Page Route */}
-        <Route path="/dummy" element={<DummyPage />} />
       </Routes>
     </Router>
   );
