@@ -48,7 +48,7 @@ const HomePage = () => {
             set_goals([...goals, new_goal]);
             set_new_goal({name: "", description: ""})
 
-            document.getElementById("add-task-modal").checked = false
+            document.getElementById("add-goal-modal").checked = false
         }
 
     };
