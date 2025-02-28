@@ -180,7 +180,7 @@ const HomePage = () => {
               {/* Stats button */}
               <div className="absolute top-4 right-4">
                     <button className="btn btn-accent "
-                        onClick={() => navigate("/dummy")}
+                        onClick={() => navigate("/")}  {/* TODO: route properly */}
                     >stats</button>
                 </div>
 
