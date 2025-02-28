@@ -1,4 +1,5 @@
-import React from "react";
+import PropTypes from 'prop-types';
+
 
 const ExampleModal = ({ id, title, description, delete_func }) => {
     return (
@@ -28,6 +29,13 @@ const ExampleModal = ({ id, title, description, delete_func }) => {
             </div>
         </>
     );
+};
+
+ExampleModal.propTypes = {
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    delete_func: PropTypes.func,
 };
 
 export default ExampleModal;
