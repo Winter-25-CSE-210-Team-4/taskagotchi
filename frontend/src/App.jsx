@@ -3,10 +3,6 @@ import './App.css';
 import LoginPage from './pages/Login'; // Import your LoginPage
 import SignupPage from './pages/Signup';
 import HomePage from './pages/Home';
-<<<<<<< HEAD
-import Header from './components/ui/Header';
-=======
->>>>>>> f46aea2 (added mock auth context)
 
 function App() {
   return (

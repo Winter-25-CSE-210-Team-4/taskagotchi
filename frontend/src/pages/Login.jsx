@@ -64,11 +64,7 @@ const LoginPage = () => {
     try {
       // query the database and save the data recieved
       // will error if data not there
-<<<<<<< HEAD
-      const response = await axios.post("http://localhost:5050/api/auth/login", form_data);
-=======
       const response = await axios.post('/auth/login', form_data);
->>>>>>> 49a976f (cors: removed preflight restrictions, added private axios interceptors, added react context for auth, updated loging and signup pages)
 
       const { token, user } = response.data;
       console.log('logged in resp', response.data);
