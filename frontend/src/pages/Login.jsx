@@ -63,7 +63,7 @@ const LoginPage = () => {
   try {
       // query the database and save the data recieved 
       // will error if data not there
-      const response = await axios.post("http://localhost:5000/api/auth/login", form_data);
+      const response = await axios.post("http://localhost:5050/api/auth/login", form_data);
 
       const { token, user } = response.data;
 
