@@ -1,7 +1,7 @@
 import Header from "../components/ui/Header";
 import { useNavigate } from "react-router-dom";
 import ExampleModal  from "../components/ui/ExampleModal";
-import React, {useState} from "react";
+import {useState} from "react";
 
 
 
