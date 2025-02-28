@@ -3,9 +3,11 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes';
 import petRoutes from './routes/petRoutes';
 import goalRoutes from './routes/goalRoutes';
+import taskRoutes from "./routes/taskRoutes";
 import { errorHandler } from './middleware/errorHandler';
 import mongoose from 'mongoose';
 import config from './config/config';
+
 
 
 const app = express();
@@ -28,6 +30,7 @@ app.get('/test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/goals', goalRoutes);
+app.use("/api/tasks", taskRoutes);
 app.use(errorHandler);
 
 // MongoDB connection and server start
