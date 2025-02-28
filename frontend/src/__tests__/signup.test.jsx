@@ -165,18 +165,47 @@ describe('Signup Component', () => {
     });
   });
 
+  // test a password that is only made of spaces - should not be allowed
+  it('appropriate length password of only spaces submitted', async () => {
+    const password_input = screen.getByPlaceholderText('Enter your password');
+    fireEvent.change(password_input, { target: { value: '                ' } });
+
+    fireEvent.submit(screen.getByRole('button', { name: /sign up/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/password cannot contain spaces/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  // test a password of length more than 25 - should not be allowed
+  it('password of length more than 25 submitted', async () => {
+    const password_input = screen.getByPlaceholderText('Enter your password');
+    fireEvent.change(password_input, {
+      target: { value: 'abcdefghijklmnopqrstuvwxyz' },
+    });
+
+    fireEvent.submit(screen.getByRole('button', { name: /sign up/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/password cannot be more than 20 characters/i)
+      ).toBeInTheDocument();
+    });
+  });
+
   // mockig backend call to test both duplicate and lower+uppercase emails
   it('lowercase and uppercase emails treated the same and handling duplicates', async () => {
-    //mock backend call
     vi.spyOn(axios, 'post')
       .mockResolvedValueOnce({
         status: 201,
-        json: async () => ({ message: 'User registered successfully' }),
-      })
-      .mockResolvedValueOnce({
-        status: 400,
-        json: async () => ({ message: 'Email already in use' }),
-      });
+        data: { message: 'User registered successfully' },
+    })
+      .mockRejectedValueOnce({
+        response: { data: { message: 'Email already in use' } }, 
+    });
+
 
     //first sumbission
     const email_input = screen.getByPlaceholderText('Enter your email');
@@ -209,6 +238,7 @@ describe('Signup Component', () => {
     fireEvent.change(password_input, { target: { value: '' } });
     fireEvent.change(confirm_password_input, { target: { value: '' } });
 
+
     //second submission
     fireEvent.change(email_input, { target: { value: 'TEST@example.com' } });
     fireEvent.change(name_input, { target: { value: 'user' } });
@@ -225,35 +255,6 @@ describe('Signup Component', () => {
     });
   });
 
-  // test a password that is only made of spaces - should not be allowed
-  it('appropriate length password of only spaces submitted', async () => {
-    const password_input = screen.getByPlaceholderText('Enter your password');
-    fireEvent.change(password_input, { target: { value: '                ' } });
-
-    fireEvent.submit(screen.getByRole('button', { name: /sign up/i }));
-
-    await waitFor(() => {
-      expect(
-        screen.queryByText(/password cannot contain spaces/i)
-      ).toBeInTheDocument();
-    });
-  });
-
-  // test a password of length more than 25 - should not be allowed
-  it('password of length more than 25 submitted', async () => {
-    const password_input = screen.getByPlaceholderText('Enter your password');
-    fireEvent.change(password_input, {
-      target: { value: 'abcdefghijklmnopqrstuvwxyz' },
-    });
-
-    fireEvent.submit(screen.getByRole('button', { name: /sign up/i }));
-
-    await waitFor(() => {
-      expect(
-        screen.queryByText(/password cannot be more than 20 characters/i)
-      ).toBeInTheDocument();
-    });
-  });
-
+  
   // TODO: duplicate email case - when integrated with backend
 });

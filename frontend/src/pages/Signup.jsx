@@ -96,10 +96,15 @@ const SignupPage = () => {
       //Sanity check
       console.log('Form Submitted:', submission_data);
 
+      set_form_data({ email: '', name: '', password: '' });
+      set_confirm_password('');
+      set_errs({});
+
       navigate('/');
     } catch (error) {
-      console.error('Registration error:', error.message);
-      set_errs({ general: error.message });
+        console.error('Registration error:', error.response?.data?.message || error.message); //fix here 
+        set_errs({ general: error.response?.data?.message || 'Registration failed' });
+        //set_errs({ general: error.message });
     }
   };
 
