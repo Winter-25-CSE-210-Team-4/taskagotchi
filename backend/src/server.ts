@@ -1,23 +1,22 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes';
+import petRoutes from './routes/petRoutes';
+import goalRoutes from './routes/goalRoutes';
 import taskRoutes from "./routes/taskRoutes";
+import { errorHandler } from './middleware/errorHandler';
+import mongoose from 'mongoose';
+import config from './config/config';
 
-dotenv.config();
 
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/taskagotchi';
-
-// connect to MongoDB
-mongoose.connect(MONGO_URI)
-    .then(() => {
-        console.log('✅ MongoDB connected successfully');
-    })
-    .catch(err => {
-        console.error('❌ MongoDB connection error:', err);
-    });
 
 const app = express();
 
+// Middleware
+app.use(cors());  // Add CORS middleware
+app.use(express.json());
+
+// Routes
 app.get('/', (req, res) => {
     console.log('Root route hit!');
     res.json({ message: 'Hello from Express!' });
@@ -28,15 +27,27 @@ app.get('/test', (req, res) => {
     res.json({ message: 'Test endpoint working!' });
 });
 
-
-app.use(express.json());
+app.use('/api/auth', authRoutes);
+app.use('/api/pets', petRoutes);
+app.use('/api/goals', goalRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use(errorHandler);
 
+// MongoDB connection and server start
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect(config.mongoUri)
+        .then(() => {
+            console.log('📦 Connected to MongoDB successfully');
+            const PORT = config.port || 5050;
+            app.listen(PORT, () => {
+                console.log('=================================');
+                console.log(`🚀 Server running on port ${PORT}`);
+                console.log('=================================');
+            });
+        })
+        .catch(err => {
+            console.error('MongoDB connection error:', err);
+        });
+}
 
-
-const PORT = process.env.PORT || 5050;
-app.listen(PORT, () => {
-    console.log('=================================');
-    console.log(`🚀 Server is running at http://localhost:${PORT}`);
-    console.log('=================================');
-});
+export { app };
