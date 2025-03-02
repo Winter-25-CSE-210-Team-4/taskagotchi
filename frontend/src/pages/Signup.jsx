@@ -1,8 +1,10 @@
 import Header from "../components/ui/Header";
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
+import axios from 'axios'; 
 
 const SignupPage = () => {
+    const navigate = useNavigate();
 
     const [form_data, set_form_data] = useState({
             email: "",
@@ -38,11 +40,21 @@ const SignupPage = () => {
     
             //checks if email and password, and username are present
             if (!form_data.email) {
-            curr_errs.email = "Email is required";
+                curr_errs.email = "Email is required";
             }
     
             if (!form_data.password) {
                 curr_errs.password = "Password is required";
+            } else {
+                if(form_data.password.includes(" ")) {
+                    curr_errs.password = "Password cannot contain spaces";
+                }
+                if(form_data.password.length > 20) {
+                    curr_errs.password = "Password cannot be more than 20 characters";
+                }
+                if (form_data.password === form_data.name) {
+                    curr_errs.password = "Password cannot be the same as your username";
+                }
             }
     
             if (!form_data.name) {
@@ -57,6 +69,12 @@ const SignupPage = () => {
             else if (form_data.password !== confirm_password) {
                 curr_errs.confirm_password = "Passwords do not match";
             }
+
+            const submission_data = {
+                email: form_data.email.toLowerCase(), // Email converted to lowercase here
+                password: form_data.password,
+                name: form_data.name
+              };
     
             if (Object.keys(curr_errs).length > 0) {
                 set_errs(curr_errs);
@@ -66,35 +84,39 @@ const SignupPage = () => {
             // querying database to check if account with email already exists
             // TODO: Fix backend issues Discuss CORS issues, fronted not able to access backend
             try {
-                const response = await fetch("http://localhost:5000/api/register", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(form_data),
-                });
+                const response = await axios.post(
+                    "http://localhost:5050/api/auth/register",
+                    submission_data
+                );
     
-                const data = await response.json();
-    
-                if (!response.ok) {
-                    throw new Error(data.message || "Failed to register");
-                }
-    
-                //sanity check
-                console.log("✅ User registered successfully:", data);
-    
-    
-                // TODO: Store user token and redirect to homepage
+                // const data = await response.json();
+                const { token, user } = response.data;
+
+                localStorage.setItem("token", token);
+                localStorage.setItem("user", JSON.stringify(user));
+
+                console.log("✅ User registered successfully:", user);
+                navigate('/home'); // TODO change if needed
     
             } catch (error) {
-                console.error("Registration error:", error.message);
-                set_errs({ general: error.message });
+                console.error("Registration error:", error);
+                if (error.response) { // server response with error
+                    if (error.response.data.message.toLowerCase().includes('password')) {
+                        set_errs({ password: error.response.data.message });
+                    } else {
+                        set_errs({ general: error.response.data.message || 'Failed to register' });
+                    }
+                } else if (error.request) { // request made, no response
+                    set_errs({ general: "Unable to connect to databse" });
+                } else { // other errors
+                    set_errs({ general: 'An error occurred' });
             }
     
       
             //Sanity check
-            console.log("Form Submitted:", form_data);
+            console.log("Form Submitted:", submission_data);
         };
+    };
 
     return (
         <div className="flex flex-col h-screen w-full min-w-[1024px]">
@@ -155,7 +177,7 @@ const SignupPage = () => {
                                 value={confirm_password}
                                 onChange={handle_input}
                                 className="w-full p-1 mb-2 border border-black rounded-lg bg-white"
-                                placeholder="Confirm you password"
+                                placeholder="Confirm your password"
                             />
                             {errors.confirm_password && <p className="text-red-500 text-xs">{errors.confirm_password}</p>}
                         </div>

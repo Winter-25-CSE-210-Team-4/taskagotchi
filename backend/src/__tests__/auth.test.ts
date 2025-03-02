@@ -20,4 +20,41 @@ describe('Auth Endpoints', () => {
       expect(res.body).toHaveProperty('token');
       expect(res.body.user).toHaveProperty('email', 'test@example.com');
     });
+
+    it('should login with valid credentials', async () => {
+      // register user
+      await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'Test User'
+        });
+  
+      // login
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+          password: 'password123'
+        });
+  
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('token');
+      expect(res.body.user).toHaveProperty('email', 'test@example.com');
+      expect(res.body.user).toHaveProperty('name', 'Test User');
+    });
+
+    // failed login case
+
+    it('should not login with invalid credentials', async () => {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'test@example.com',
+          password: 'wrongpassword'
+        });
+  
+      expect(res.status).toBe(401);
+    });
   });

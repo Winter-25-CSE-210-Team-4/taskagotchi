@@ -14,7 +14,7 @@ interface Config {
 
 const config: Config = {
   env: process.env.NODE_ENV || 'development',
-  port: Number(process.env.PORT) || 5000,
+  port: Number(process.env.PORT) || 5050,
   mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/taskagotchi',
   jwtSecret: process.env.JWT_SECRET || 'b1225fccc38e28b26c21fda8f8d338145259d0fb48206cf843de7bab0eefd1b5',
   jwtExpiresIn: '24h',
