@@ -6,13 +6,19 @@ import MockAuthContextProvider from '../__mocks__/MockAuthContextProvider';
 import axios from '../../api/axios';
 
 beforeEach(() => {
-  vi.spyOn(axios, 'post').mockResolvedValue({
-    status: 201,
-    json: async () => ({ message: 'User registered successfully' }),
-  });
+  localStorage.setItem('user', JSON.stringify({ name: 'TestUser', token: 'mockToken' })); // Mock a valid stored user
+  vi.spyOn(axios, 'post')
+    .mockResolvedValueOnce({
+      status: 201,
+      data: { message: 'User registered successfully' }, // ✅ Proper axios data response
+    })
+    .mockRejectedValueOnce({
+      response: { data: { message: 'Email already in use' } }, // ✅ Proper error response
+    });
 });
 
 afterEach(() => {
+  localStorage.clear();
   vi.restoreAllMocks();
 });
 
@@ -197,14 +203,14 @@ describe('Signup Component', () => {
 
   // mockig backend call to test both duplicate and lower+uppercase emails
   it('lowercase and uppercase emails treated the same and handling duplicates', async () => {
-    vi.spyOn(axios, 'post')
-      .mockResolvedValueOnce({
-        status: 201,
-        data: { message: 'User registered successfully' },
-    })
-      .mockRejectedValueOnce({
-        response: { data: { message: 'Email already in use' } }, 
-    });
+    // vi.spyOn(axios, 'post')
+    //   .mockResolvedValueOnce({
+    //     status: 201,
+    //     data: { message: 'User registered successfully' },
+    // })
+    //   .mockRejectedValueOnce({
+    //     response: { data: { message: 'Email already in use' } }, 
+    // });
 
 
     //first sumbission
