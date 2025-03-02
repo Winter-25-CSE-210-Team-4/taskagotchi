@@ -6,14 +6,14 @@ import MockAuthContextProvider from '../__mocks__/MockAuthContextProvider';
 import axios from '../../api/axios';
 
 beforeEach(() => {
-  localStorage.setItem('user', JSON.stringify({ name: 'TestUser', token: 'mockToken' })); // Mock a valid stored user
+  localStorage.setItem('user', JSON.stringify({ name: 'TestUser', token: 'mockToken' })); // Mock local storage
   vi.spyOn(axios, 'post')
     .mockResolvedValueOnce({
       status: 201,
-      data: { message: 'User registered successfully' }, // ✅ Proper axios data response
+      data: { message: 'User registered successfully' },
     })
     .mockRejectedValueOnce({
-      response: { data: { message: 'Email already in use' } }, // ✅ Proper error response
+      response: { data: { message: 'Email already in use' } }, 
     });
 });
 
