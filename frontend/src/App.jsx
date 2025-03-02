@@ -4,7 +4,6 @@ import LoginPage from "./pages/Login"; // Import your LoginPage
 import SignupPage from "./pages/Signup";
 import HomePage from "./pages/Home";
 import Header from "./components/ui/Header";
-import HomePage from "./pages/Home";
 
 function App() {
 
