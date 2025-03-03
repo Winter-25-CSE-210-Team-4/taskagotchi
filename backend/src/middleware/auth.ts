@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config/config';
-import {IUser} from '../models/User';
+import { JwtPayload } from '../models/User';
 
 interface AuthRequest extends Request {
-  user?: IUser;
+  user?: JwtPayload;
 }
 
-export const auth = async (req: Request, res: Response, next: NextFunction) => {
+export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -15,7 +15,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       throw new Error();
     }
 
-    const decoded = jwt.verify(token, config.jwtSecret) as IUser;
+    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
     req.user = decoded;
     next();
   } catch (error) {
