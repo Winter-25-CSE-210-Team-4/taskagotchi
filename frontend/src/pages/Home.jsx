@@ -5,8 +5,6 @@ import { useState } from 'react';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  // add this hook to get the current auth state
-  const { user, loggedIn, auth } = useAuth();
   const [tasks, set_tasks] = useState([
     { name: '💧 Drink water', time: '5:00pm' },
     { name: '🚶 Take a walk', time: '6:00pm' },
