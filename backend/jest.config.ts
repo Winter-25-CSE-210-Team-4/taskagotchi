@@ -14,7 +14,7 @@ const config: Config.InitialOptions = {
     restoreMocks: true,
     detectOpenHandles: true,
     forceExit: true,
-    collectCoverage: true,
+    collectCoverage: process.env.COLLECT_COVERAGE === 'true',
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'clover'],
     coverageThreshold: {

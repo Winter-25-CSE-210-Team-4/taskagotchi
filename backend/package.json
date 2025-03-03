@@ -7,8 +7,8 @@
     "build": "tsc",
     "lint": "eslint . --ext .ts",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit",
-    "test:watch": "cross-env NODE_ENV=test jest --watch",
-    "test:coverage": "cross-env NODE_ENV=test jest --coverage --detectOpenHandles --forceExit"
+    "test:coverage": "cross-env NODE_ENV=test COLLECT_COVERAGE=true jest --detectOpenHandles --forceExit",
+    "test:watch": "cross-env NODE_ENV=test jest --watch"
   },
   "keywords": [],
   "author": "",
