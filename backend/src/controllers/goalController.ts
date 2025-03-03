@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import Goal from '../models/goal';
-import Task from '../models/Task';
-
+import { AuthRequest } from '../middleware/auth';
 
 //Create a new goal
-export const createGoal = async (req: Request, res: Response) => {
+export const createGoal = async (req: AuthRequest, res: Response) => {
     try {
         const { title, description, deadline } = req.body;
         
@@ -19,7 +18,8 @@ export const createGoal = async (req: Request, res: Response) => {
             description,
             deadline,
             status: 'active',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            userId: req.user?.id 
         });
 
         const savedGoal = await newGoal.save();
@@ -41,28 +41,43 @@ export const createGoal = async (req: Request, res: Response) => {
 
 
 
-export const getAllGoals = async (req: Request, res: Response) => {
+// export const getAllGoals = async (req: Request, res: Response) => {
+//     try {
+//         const goals = await Goal.find();
+//         res.json({ 
+//             success: true, 
+//             data: goals 
+//         });
+//     } catch (error) {
+//         console.error('Error fetching goals:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Error fetching goals',
+//             error: error instanceof Error ? error.message : 'Unknown error'
+//         });
+//     }
+// };
+
+export const getAllUserGoals = async (req: AuthRequest, res: Response) => {
     try {
-        const goals = await Goal.find();
+        const goals = await Goal.find({ userId: req.user?.id });
         res.json({ 
             success: true, 
             data: goals 
         });
     } catch (error) {
-        console.error('Error fetching goals:', error);
+        console.error('Error fetching user goals:', error);
         res.status(500).json({
             success: false,
-            message: 'Error fetching goals',
+            message: 'Error fetching user goals',
             error: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 };
 
-
-
 //getGoalList by userid
 //for the homepage, like every user will have a goal list that be presented
-export const getGoalById = async (req: Request, res: Response) => {
+export const getGoalById = async (req: AuthRequest, res: Response) => {
     try {
         const goalId = req.params.id;
         const goal = await Goal.findById(goalId);
@@ -89,13 +104,13 @@ export const getGoalById = async (req: Request, res: Response) => {
 };
 
 //edit goal - search the goal by is and update 
-export const updateGoal = async (req: Request, res: Response) => {
+export const updateGoal = async (req: AuthRequest, res: Response) => {
     try {
         const goalId = req.params.id;
         const updates = req.body;
 
-        const updatedGoal = await Goal.findByIdAndUpdate(
-            goalId,
+        const updatedGoal = await Goal.findOneAndUpdate(
+            { _id: goalId, userId: req.user?.id },
             updates,
             { new: true, runValidators: true }
         );
@@ -122,10 +137,13 @@ export const updateGoal = async (req: Request, res: Response) => {
 };
 
 //delete a goal when user don't need it 
-export const deleteGoal = async (req: Request, res: Response) => {
+export const deleteGoal = async (req: AuthRequest, res: Response) => {
     try {
         const goalId = req.params.id;
-        const deletedGoal = await Goal.findByIdAndDelete(goalId);
+        const deletedGoal = await Goal.findOneAndDelete({ 
+            _id: goalId,
+            userId: req.user?.id 
+        });
 
         if (!deletedGoal) {
             return res.status(404).json({
