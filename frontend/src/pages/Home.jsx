@@ -5,7 +5,11 @@ import {useState} from "react";
 
 
 
+
 const HomePage = () => {
+  const navigate = useNavigate();
+  // add this hook to get the current auth state
+  const { user, loggedIn, auth } = useAuth();
 
     const navigate = useNavigate();
 
