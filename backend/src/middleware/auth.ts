@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config/config';
+import {IUser} from '../models/User';
+
+interface AuthRequest extends Request {
+  user?: IUser;
+}
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -10,8 +15,8 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       throw new Error();
     }
 
-    const decoded = jwt.verify(token, config.jwtSecret);
-    req.user = decoded as any;
+    const decoded = jwt.verify(token, config.jwtSecret) as IUser;
+    req.user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ error: 'Please authenticate.' });
