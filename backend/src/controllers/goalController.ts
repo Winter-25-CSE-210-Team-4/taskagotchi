@@ -12,6 +12,7 @@ export const createGoal = async (req: AuthRequest, res: Response) => {
                 message: 'Please provide all required fields'
             });
         }
+        console.log('User ID from token:', req.user?.id);
 
         const newGoal = new Goal({
             title,
@@ -22,7 +23,11 @@ export const createGoal = async (req: AuthRequest, res: Response) => {
             userId: req.user?.id 
         });
 
+        console.log('Goal to be saved:', newGoal);
+
         const savedGoal = await newGoal.save();
+        console.log('Saved goal:', savedGoal);
+
 
         res.status(201).json({ 
             success: true, 
