@@ -4,8 +4,10 @@ import ChevronLeftIcon from '../../assets/chevron-left.svg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
+import useAxiosPrivate from '../../../auth/hooks/useAxiosPrivate';
 
 const GoalForm = ({ onSubmit, edit }) => {
+  const axiosPrivate = useAxiosPrivate();
   const emptyGoal = {
     name: '',
     description: '',
@@ -29,7 +31,7 @@ const GoalForm = ({ onSubmit, edit }) => {
     setGoal({ ...goal, description });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('submitting form');
     if (goal.name === '' || goal.description === '') {
@@ -41,12 +43,23 @@ const GoalForm = ({ onSubmit, edit }) => {
     } else {
       const trimmedName = goal.name.trim();
       const trimmedDescription = goal.description.trim();
-      onSubmit({
-        ...goal,
-        name: trimmedName,
-        description: trimmedDescription,
-        endDate: endDate,
-      });
+      try {
+        const requestBody = {
+          title: trimmedName,
+          description: trimmedDescription,
+          deadline: endDate,
+        };
+        const response = await axiosPrivate.post('/goals', requestBody);
+
+        const isSuccessful = response.data.success;
+        console.log('Response:', response.data, response.data.success);
+        if (!isSuccessful) {
+          throw new Error('Failed to create goal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+      document.getElementById('goal-form-modal').close();
       setGoal(emptyGoal);
     }
   };
@@ -61,14 +74,14 @@ const GoalForm = ({ onSubmit, edit }) => {
         >
           <div className='w-[32rem] flex flex-col gap-4'>
             <div className='flex flex-row gap-2'>
-              <button className='btn btn-outline btn-xs'>
+              {/* <button className='btn btn-outline btn-xs'>
                 <img
                   src={ChevronLeftIcon}
                   alt='back-icon'
                   width={16}
                   height={16}
                 ></img>
-              </button>
+              </button> */}
               <label htmlFor='goal'>Create a Goal</label>
             </div>
             <div className='flex flex-col gap-2'>
@@ -121,7 +134,7 @@ const GoalForm = ({ onSubmit, edit }) => {
                   document.getElementById('goal-form-modal').close()
                 }
               >
-                Close
+                Cancel
               </button>
               <button
                 type='submit'

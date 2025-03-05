@@ -1,9 +1,19 @@
 import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
 import ExampleModal from '../components/ui/ExampleModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import useAuth from '../../auth/hooks/useAuth';
+import GoalForm from '../components/GoalForm/GoalForm';
 
 const HomePage = () => {
+  // add this hook to get the current auth state
+  const { user, loggedIn, auth } = useAuth();
+
+  // used to demo changes in the auth state
+  useEffect(() => {
+    console.log('Auth state updated:', user, loggedIn, auth);
+  }, [user, loggedIn, auth]);
+
   const navigate = useNavigate();
   const [tasks, set_tasks] = useState([
     { name: '💧 Drink water', time: '5:00pm' },
@@ -138,43 +148,16 @@ const HomePage = () => {
                 </div>
               }
             />
-            <label
-              htmlFor='add-goal-modal'
+            <button
               className='btn btn-link text-accent cursor-pointer'
-            >
-              + Add Goal
-            </label>
-            <ExampleModal
-              id='add-goal-modal'
-              title='Add New Goal'
-              description={
-                <div>
-                  <input
-                    type='text'
-                    placeholder='Goal Name'
-                    className='input input-bordered w-full my-2'
-                    value={new_goal.name}
-                    onChange={(e) =>
-                      set_new_goal({ ...new_goal, name: e.target.value })
-                    }
-                  />
-                  <textarea
-                    placeholder='Goal Description'
-                    className='textarea textarea-bordered w-full my-2'
-                    value={new_goal.description}
-                    onChange={(e) =>
-                      set_new_goal({ ...new_goal, description: e.target.value })
-                    }
-                  ></textarea>
-                  <button
-                    onClick={handle_add_goal}
-                    className='btn btn-primary w-full'
-                  >
-                    Save Goal
-                  </button>
-                </div>
+              onClick={() =>
+                document.getElementById('goal-form-modal').showModal()
               }
-            />
+            >
+              {' '}
+              + Add Goal
+            </button>
+            <GoalForm onSubmit={() => {}} edit={false} />
           </div>
         </div>
 
