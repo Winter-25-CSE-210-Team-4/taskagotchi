@@ -1,6 +1,7 @@
 import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
-import ExampleModal from '../components/ui/ExampleModal';
+import GoalForm from '../components/GoalForm/GoalForm';
+import ExampleModal from '../components/ui/ExampleModal'
 import { useState } from 'react';
 
 const HomePage = () => {
@@ -16,8 +17,42 @@ const HomePage = () => {
   ]);
 
   const [new_task, set_new_task] = useState({ name: '', time: '' });
+  //const [new_goal, set_new_goal] = useState({ name: '', description: '' });
 
-  const [new_goal, set_new_goal] = useState({ name: '', description: '' });
+  const [curr_goal, set_curr_goal] = useState(null);
+  const [edit_goal, set_edit_goal] = useState(false);
+
+
+  //Event handler for opening goal form
+  const open_goal_form = (goal = null) => {
+    console.log("Opening form with: ", goal)
+    set_curr_goal(goal);
+    set_edit_goal(!!goal);
+    document.getElementById('goal-form-modal').showModal();
+    
+    setTimeout(() => {
+      const modal = document.getElementById('goal-form-modal');
+      if (modal) modal.showModal();
+    }, 0);
+  }
+
+   // Event handler for adding a new goal/submitting edits
+   const handle_submit_goal = (goal) => {
+    if(edit_goal) {
+      set_goals(goals.map((g) => (g.name === curr_goal.name ? goal : g)));
+    } else {
+      set_goals([...goals, goal]);
+    }
+
+    document.getElementById('goal-form-modal').close();
+    set_curr_goal(null);
+    set_edit_goal(false);
+  };
+  
+  //event handler for deleting a goal
+  const handle_delete_goal = (index) => {
+    set_goals(goals.filter((_, i) => i !== index));
+  };
 
   // Event handler for adding new task
   const handle_add_task = () => {
@@ -34,20 +69,6 @@ const HomePage = () => {
     set_tasks(tasks.filter((_, i) => i !== index));
   };
 
-  // Event handler for adding a new goal
-  const handle_add_goal = () => {
-    if (new_goal.name && new_goal.description) {
-      set_goals([...goals, new_goal]);
-      set_new_goal({ name: '', description: '' });
-
-      document.getElementById('add-goal-modal').checked = false;
-    }
-  };
-
-  //event handler for deleting a goal
-  const handle_delete_goal = (index) => {
-    set_goals(goals.filter((_, i) => i !== index));
-  };
 
   return (
     <div className='flex flex-col h-screen w-full min-w-[1024px]'>
@@ -58,47 +79,51 @@ const HomePage = () => {
       <div className='flex flex-1 bg-white font-inter'>
         {/* Sidebar*/}
         <div className='w-1/4 min-w-[250px] bg-zinc-100 p-4 flex flex-col border-r-4 border-zinc-200 shadow-2xl'>
-          {/* Tasks*/}
-          <h3 className='text-base font-bold mb-2 pb-2 pr-2'>Tasks</h3>
-          <ul className='mb-4'>
-            {tasks.map((task, index) => (
-              <li key={index}>
-                <label
-                  htmlFor={`task-modal-${index}`}
-                  className='flex justify-between text-sm cursor-pointer'
-                >
-                  {task.name} <span>{task.time}</span>
-                </label>
-                <ExampleModal
-                  id={`task-modal-${index}`}
-                  title={task.name}
-                  description={`Scheduled for ${task.time}`}
-                  delete_func={() => handle_delete_task(index)}
-                />
-              </li>
-            ))}
-          </ul>
           {/*Goals*/}
           <h3 className='text-base font-bold pb-2 pr-2 mb-2'>Goals</h3>
-          <ul>
-            {goals.map((goal, index) => (
-              <li key={index}>
-                <label
-                  htmlFor={`goal-modal-${index}`}
-                  className='text-sm cursor-pointer'
+            <ul>
+              {goals.map((goal, index) => (
+                <li key={index} 
+                  className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'
                 >
-                  {goal.name}
-                </label>
-                <ExampleModal
-                  id={`goal-modal-${index}`}
-                  title={goal.name}
-                  description={goal.description || 'No description'}
-                  delete_func={() => handle_delete_goal(index)}
-                />
-              </li>
-            ))}
-          </ul>
+                  <span
+                    className='text-sm cursor-pointer'
+                    onClick={() => open_goal_form(goal)}
+                  >
+                    {goal.name}
+                  </span>
+                  <button
+                    className='text-red-500 text-sm'
+                    onClick={() => handle_delete_goal(index)}
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
 
+            <GoalForm onSubmit={handle_submit_goal} edit={edit_goal} currentGoal={curr_goal} />
+
+            {/* Tasks*/}
+            <h3 className='text-base font-bold mb-2 pt-2 pb-2 pr-2'>Tasks</h3>
+            <ul className='mb-4'>
+              {tasks.map((task, index) => (
+                <li key={index} className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'>
+                  <label
+                    htmlFor={`task-modal-${index}`}
+                    className='flex text-sm justify-between cursor-pointer'
+                  >
+                    {task.name} <span>{task.time}</span>
+                  </label>
+                  <ExampleModal
+                    id={`task-modal-${index}`}
+                    title={task.name}
+                    description={`Scheduled for ${task.time}`}
+                    delete_func={() => handle_delete_task(index)}
+                  />
+                </li>
+              ))}
+            </ul>
           {/*Add Tasks and Goals*/}
           <div className='mt-auto flex flex-col gap-2'>
             <label
@@ -138,43 +163,11 @@ const HomePage = () => {
                 </div>
               }
             />
-            <label
-              htmlFor='add-goal-modal'
-              className='btn btn-link text-accent cursor-pointer'
-            >
-              + Add Goal
-            </label>
-            <ExampleModal
-              id='add-goal-modal'
-              title='Add New Goal'
-              description={
-                <div>
-                  <input
-                    type='text'
-                    placeholder='Goal Name'
-                    className='input input-bordered w-full my-2'
-                    value={new_goal.name}
-                    onChange={(e) =>
-                      set_new_goal({ ...new_goal, name: e.target.value })
-                    }
-                  />
-                  <textarea
-                    placeholder='Goal Description'
-                    className='textarea textarea-bordered w-full my-2'
-                    value={new_goal.description}
-                    onChange={(e) =>
-                      set_new_goal({ ...new_goal, description: e.target.value })
-                    }
-                  ></textarea>
-                  <button
-                    onClick={handle_add_goal}
-                    className='btn btn-primary w-full'
-                  >
-                    Save Goal
-                  </button>
-                </div>
-              }
-            />
+            <button
+            className='btn btn-link text-accent cursor-pointer mt-4'
+            onClick={() => open_goal_form(null)}>
+            + Add Goal
+          </button>
           </div>
         </div>
 
@@ -187,9 +180,9 @@ const HomePage = () => {
           />
 
           <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
-            {/* Health Bar*/}
+            {/* Experince Bar*/}
             <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
-              Health: 50/100
+              Experince: 50/100
             </span>
             <progress
               className='progress progress-secondary border border-accent w-96 h-10'
