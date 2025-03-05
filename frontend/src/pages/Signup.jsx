@@ -79,7 +79,7 @@ const SignupPage = () => {
 
     // querying database to check if account with email already exists
     try {
-      const response = await axios.post('/auth/register', submission_data);
+      const response = await axios.post('/auth/register', submission_data).then(axios.post()); //FIX 
 
       if (response.status < 200 || response.status > 299) {
         throw new Error(response.data.message || 'Failed to register');
@@ -95,15 +95,6 @@ const SignupPage = () => {
       localStorage.setItem('user', JSON.stringify(user));
       //Sanity check
       console.log('Form Submitted:', submission_data);
-
-      try {
-        await axios.post('http://localhost:5000/api/pets', { 
-          userId: user._id, 
-          name: `${user.name}'s Pet` 
-        });
-      } catch(petErr) {
-        console.error("Error creating pet:", petErr.response?.data?.message || petErr.message);
-      }
 
       set_form_data({ email: '', name: '', password: '' });
       set_confirm_password('');
