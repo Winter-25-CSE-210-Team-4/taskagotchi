@@ -145,7 +145,7 @@ const HomePage = () => {
             {/* Tasks*/}
             <h3 className='text-base font-bold mb-2 pt-2 pb-2 pr-2'>Tasks</h3>
             <ul className='mb-4'>
-              {tasks.filter(task => !task.completed).map((task, index) => (
+              {tasks.map((task, index) => (
                 <li key={index} className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'>
                   <label 
                     htmlFor={`task-checkbox-${index}`} 
@@ -158,9 +158,16 @@ const HomePage = () => {
                       checked={task.completed || false} 
                       onChange={() => handle_task_completion(index)} 
                     />
-                    <span>{task.name}</span> 
+
+                    <label 
+                      htmlFor={`task-modal-${index}`} 
+                      className='flex justify-between text-sm text-accent cursor-pointer underline'>
+
+                    <span className="pr-1">{task.name}</span> 
+                    </label>
                     <span>{task.time}</span>
                   </label>
+
                   <ExampleModal
                     id={`task-modal-${index}`}
                     title={task.name}
