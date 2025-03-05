@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import ExampleModal from '../components/ui/ExampleModal'
 import { useState } from 'react';
+import Confetti from "react-confetti"
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [tasks, set_tasks] = useState([
-    { name: '💧 Drink water', time: '5:00pm' },
-    { name: '🚶 Take a walk', time: '6:00pm' },
+    { name: '💧 Drink water', time: '5:00pm', completed: false},
+    { name: '🚶 Take a walk', time: '6:00pm', completed: false },
   ]);
 
   const [goals, set_goals] = useState([
@@ -21,6 +22,9 @@ const HomePage = () => {
 
   const [curr_goal, set_curr_goal] = useState(null);
   const [edit_goal, set_edit_goal] = useState(false);
+
+  const [xp, set_xp] = useState(0);
+  const [confetti, set_confetti] = useState(false);
 
 
   //Event handler for opening goal form
@@ -69,9 +73,43 @@ const HomePage = () => {
     set_tasks(tasks.filter((_, i) => i !== index));
   };
 
+  //Event handler for marking task as done
+  const handle_task_completion = (index) => {
+    set_tasks((prev_tasks) =>
+      prev_tasks.map((task, i) => {
+        if( i === index) {
+          const is_completed = !task.completed;
+
+          if(is_completed) {
+            set_confetti(true);
+            setTimeout(() => set_confetti(false), 5000);
+          }
+          return { ...task, completed: is_completed };
+        }
+        return task;
+      })
+    );
+
+    set_xp((prev_xp) => {
+      const curr_task = tasks[index];
+
+      if(!curr_task.completed) {
+        const updated_xp = Math.min(prev_xp + 5, 100);
+
+        return updated_xp;
+
+        //TODO: character changes, etc
+      }
+      return prev_xp;
+    })
+  };
+
 
   return (
     <div className='flex flex-col h-screen w-full min-w-[1024px]'>
+
+      {confetti && <Confetti />}
+
       {/* Header*/}
       <Header />
 
@@ -107,13 +145,21 @@ const HomePage = () => {
             {/* Tasks*/}
             <h3 className='text-base font-bold mb-2 pt-2 pb-2 pr-2'>Tasks</h3>
             <ul className='mb-4'>
-              {tasks.map((task, index) => (
+              {tasks.filter(task => !task.completed).map((task, index) => (
                 <li key={index} className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'>
-                  <label
-                    htmlFor={`task-modal-${index}`}
-                    className='flex text-sm justify-between cursor-pointer'
+                  <label 
+                    htmlFor={`task-checkbox-${index}`} 
+                    className='flex text-sm justify-between cursor-pointer items-center gap-2'
                   >
-                    {task.name} <span>{task.time}</span>
+                    <input 
+                      type="checkbox" 
+                      id={`task-checkbox-${index}`}
+                      className="checkbox-sm" 
+                      checked={task.completed || false} 
+                      onChange={() => handle_task_completion(index)} 
+                    />
+                    <span>{task.name}</span> 
+                    <span>{task.time}</span>
                   </label>
                   <ExampleModal
                     id={`task-modal-${index}`}
@@ -182,11 +228,11 @@ const HomePage = () => {
           <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
             {/* Experince Bar*/}
             <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
-              Experince: 50/100
+              Experince: {xp}/100
             </span>
             <progress
               className='progress progress-secondary border border-accent w-96 h-10'
-              value={50}
+              value={xp}
               max='100'
             ></progress>
           </div>
