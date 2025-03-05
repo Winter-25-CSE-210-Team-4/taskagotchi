@@ -25,11 +25,11 @@ const goalSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    // status: {
-    //     type: String,
-    //     enum: ['active', 'completed', 'cancelled'],
-    //     default: 'active'
-    // },
+    status: {
+        type: String,
+        enum: ['active', 'completed', 'cancelled'],
+        default: 'active'
+    },
     isCompleted: { 
         type: Boolean, 
         default: false 
@@ -37,7 +37,12 @@ const goalSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  }
 });
 
 goalSchema.methods.checkCompletion = async function(): Promise<boolean> {

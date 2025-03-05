@@ -27,6 +27,10 @@ beforeAll(async () => {
     authToken = registerResponse.body.token;
 });
 
+beforeEach(async () => {
+    await mongoose.connection.collection('goals').deleteMany({});
+});
+
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
@@ -143,7 +147,7 @@ describe('Goal Endpoints', () => {
     it('should return 404 when getting non-existent goal', async () => {
         const res = await request(app)
             .get(`/api/goals/${new mongoose.Types.ObjectId()}`)
-            .set('Authorization', `Bearer ${authToken}`); // Add auth header
+            .set('Authorization', `Bearer ${authToken}`);
 
         expect(res.status).toBe(404);
         expect(res.body.success).toBe(false);
@@ -152,17 +156,15 @@ describe('Goal Endpoints', () => {
     it('should return 400 when creating goal with missing required fields', async () => {
         const res = await request(app)
             .post('/api/goals')
-            .set('Authorization', `Bearer ${authToken}`) // Add auth header
+            .set('Authorization', `Bearer ${authToken}`)
             .send({
                 title: 'Test Goal'
-                // Missing description and deadline
             });
 
         expect(res.status).toBe(400);
         expect(res.body.message).toBe('Please provide all required fields');
     });
 
-    // Add more test cases
     it('should return 404 when updating non-existent goal', async () => {
         const res = await request(app)
             .put(`/api/goals/${new mongoose.Types.ObjectId()}`)
