@@ -66,7 +66,7 @@ const HomePage = () => {
           console.log('User Goals:', responseData.data);
           const goals = responseData.data.map((goal) => ({
             id: goal._id,
-            name: goal.title,
+            name: goal.name,
             description: goal.description,
             completed: goal.isCompleted,
             endDate: Date.parse(goal.deadline),
@@ -143,7 +143,7 @@ const HomePage = () => {
     } else {
       set_goals([...goals, goal]);
       const requestBody = {
-        title: goal.name,
+        name: goal.name,
         description: goal.description,
         deadline: goal.endDate,
       };
@@ -278,7 +278,7 @@ const HomePage = () => {
 
                 <ExampleModal
                   id={`task-modal-${index}`}
-                  title={task.name}
+                  name={task.name}
                   description={`Scheduled for ${task.time}`}
                   delete_func={() => handle_delete_task(index)}
                 />
@@ -295,7 +295,7 @@ const HomePage = () => {
             </label>
             <ExampleModal
               id='add-task-modal'
-              title='Add New Task'
+              name='Add New Task'
               description={
                 <div>
                   <input
