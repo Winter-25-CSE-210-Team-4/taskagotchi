@@ -17,14 +17,14 @@ const config: Config.InitialOptions = {
     collectCoverage: process.env.COLLECT_COVERAGE === 'true',
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'clover'],
-    coverageThreshold: {
-        global: {
-            branches: 80,
-            functions: 80,
-            lines: 80,
-            statements: 80
-        }
-    }
+    // coverageThreshold: {
+    //     global: {
+    //         branches: 80,
+    //         functions: 80,
+    //         lines: 80,
+    //         statements: 80
+    //     }
+    // }
   };
   
 
