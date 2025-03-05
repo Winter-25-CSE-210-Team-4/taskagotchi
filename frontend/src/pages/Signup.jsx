@@ -96,6 +96,15 @@ const SignupPage = () => {
       //Sanity check
       console.log('Form Submitted:', submission_data);
 
+      try {
+        await axios.post('http://localhost:5000/api/pets', { 
+          userId: user._id, 
+          name: `${user.name}'s Pet` 
+        });
+      } catch(petErr) {
+        console.error("Error creating pet:", petErr.response?.data?.message || petErr.message);
+      }
+
       set_form_data({ email: '', name: '', password: '' });
       set_confirm_password('');
       set_errs({});
@@ -103,7 +112,7 @@ const SignupPage = () => {
       navigate('/');
     } catch (error) {
         console.error('Registration error:', error.response?.data?.message || error.message); //fix here 
-        set_errs({ general: error.response?.data?.message || 'Registration failed' });
+        set_errs({ general: error.response.data.message || 'Registration failed' });
         //set_errs({ general: error.message });
     }
   };

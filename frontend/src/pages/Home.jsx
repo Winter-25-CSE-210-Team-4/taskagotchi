@@ -1,9 +1,12 @@
 import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import GoalForm from '../components/GoalForm/GoalForm';
 import ExampleModal from '../components/ui/ExampleModal'
 import { useState } from 'react';
 import Confetti from "react-confetti"
+
+const PET_ID = 1;
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -20,6 +23,13 @@ const HomePage = () => {
   const [new_task, set_new_task] = useState({ name: '', time: '' });
   //const [new_goal, set_new_goal] = useState({ name: '', description: '' });
 
+  const [pet, set_pet] = useState({
+    health: 100,
+    exp: 0,
+    level: 1,
+    pfp: "/images/monster_level1.png", // Default image
+  });
+
   const [curr_goal, set_curr_goal] = useState(null);
   const [edit_goal, set_edit_goal] = useState(false);
 
@@ -27,6 +37,23 @@ const HomePage = () => {
   const [confetti, set_confetti] = useState(false);
   const [image, set_image] = useState('/images/monster_level1.png');
 
+  useEffect(() => {
+    const fetchPet = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/pets/${PET_ID}`);
+        set_pet({
+          health: response.data.health,
+          exp: response.data.exp,
+          level: response.data.level,
+          pfp: response.data.pfp ? `data:image/png;base64,${response.data.pfp}` : `/images/monster_level1.png`,
+        });
+      } catch (error) {
+        console.error("Error fetching pet data", error);
+      }
+    };
+
+    fetchPet();
+  }, []);
 
 
   //Event handler for opening goal form
@@ -242,7 +269,7 @@ const HomePage = () => {
           <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
             {/* Experince Bar*/}
             <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
-              Experince: {xp}/100
+              Health: {xp}/100
             </span>
             <progress
               className='progress progress-secondary border border-accent w-96 h-10'

@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import Pet from '../models/Pet';
+import User from '../models/User';
 
 const router = Router();
 
@@ -36,23 +37,62 @@ router.get('/:id', async (req, res) => {
 
 // POST new pet
 router.post('/', async (req, res) => {
-    const pet = new Pet({
-        pet_id: req.body.pet_id,
-        name: req.body.name,
-        health: req.body.health || 100,
-        level: req.body.level || 1,
-        exp: req.body.exp || 0
-    });
+    // const pet = new Pet({
+    //     pet_id: req.body.pet_id,
+    //     name: req.body.name,
+    //     health: req.body.health || 100,
+    //     level: req.body.level || 1,
+    //     exp: req.body.exp || 0
+    // });
+
+    // try {
+    //     const newPet = await pet.save();
+    //     res.status(201).json(newPet);
+    // } catch (error) {
+    //     if (error instanceof Error) {
+    //         res.status(400).json({ message: error.message });
+    //     } else {
+    //         res.status(400).json({ message: 'An unknown error occurred' });
+    //     }
+    // }
 
     try {
-        const newPet = await pet.save();
-        res.status(201).json(newPet);
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ message: error.message });
-        } else {
-            res.status(400).json({ message: 'An unknown error occurred' });
+        const {userId, name} = req.body;
+
+        const user = await User.findById(userId);
+        if(!user) {
+            return res.status(404).json({message: "User Not Found"});
         }
+
+        const newPet = new Pet({
+            pet_id: Math.floor(Math.random() * 10000),
+            name: name || `${user.name}'s Pet`,
+            health: 100,
+            level: 1,
+            exp: 0,
+            user: user._id
+        });
+
+        await newPet.save();
+
+        res.status(201).json({ message: "Pet created successfully", pet: newPet });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating pet" });
+    }
+ });
+
+//PUT update expereince 
+router.put('/:id/gain-exp', async (req, res) => {
+    try {
+        const {exp} = req.body
+        const pet = await Pet.findOne({ pet_id: req.params.id });
+
+        if (!pet) return res.status(404).json({ message: 'Pet not found' });
+
+        await pet.gainExp(exp);
+        res.json({ message: 'XP Updated', pet });
+    } catch(error) {
+        res.status(500).json({ message: 'Error updating XP' });
     }
 });
 

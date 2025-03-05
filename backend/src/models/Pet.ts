@@ -11,6 +11,7 @@ interface IPet {
     level: number;
     exp: number;
     pfp: Buffer;
+    user: mongoose.Schema.Types.ObjectId;
 }
 
 interface IPetDocument extends IPet, Document {
@@ -55,6 +56,11 @@ const petSchema = new mongoose.Schema<IPetDocument>({
     pfp: {
         type: Buffer,
         required: false
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User',
+        required: true
     }
 }, {
     timestamps: true
