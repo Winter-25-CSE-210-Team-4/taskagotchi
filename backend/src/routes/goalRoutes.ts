@@ -6,7 +6,9 @@ import {
     getAllUserGoals, 
     getGoalById,
     updateGoal,
-    deleteGoal } from '../controllers/goalController';
+    deleteGoal,
+    addTaskToGoal,
+    getGoalTasks } from '../controllers/goalController';
 // import { auth } from '../middleware/auth';
 
 const router = express.Router();
@@ -18,6 +20,8 @@ router.get('/', auth, getAllUserGoals);
 router.get('/:id', auth, getGoalById);
 router.put('/:id', auth, updateGoal);  
 router.delete('/:id', auth, deleteGoal);
+router.post('/:id/tasks', addTaskToGoal);
+router.get('/:id/tasks', getGoalTasks);
 
 export default router;
 
