@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CheckIcon from '../../assets/check.svg';
 import ChevronLeftIcon from '../../assets/chevron-left.svg';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 
-const GoalForm = ({ onSubmit, edit }) => {
+const GoalForm = ({ onSubmit, edit, currentGoal }) => {
   const emptyGoal = {
     name: '',
     description: '',
@@ -19,14 +19,37 @@ const GoalForm = ({ onSubmit, edit }) => {
   };
   const [goal, setGoal] = useState(emptyGoal);
   const [incomplete, setIncomplete] = useState(incompleteState);
-  const [endDate, setEndDate] = useState(emptyGoal.endDate);
+  const [endDate, setEndDate] = useState(emptyGoal.endDate)
+
+
+
+  useEffect(() => {
+    if (currentGoal) {
+      setGoal({
+        name: currentGoal.name || '',
+        description: currentGoal.description || '',
+        completed: currentGoal.completed || false,
+        endDate: currentGoal.endDate || null,
+      });
+      setEndDate(currentGoal.endDate || emptyGoal.endDate);
+    } else {
+      setGoal(emptyGoal);
+      setEndDate(emptyGoal.endDate);
+    }
+
+    setIncomplete(incompleteState);
+
+  }, [currentGoal]);
+
 
   const setGoalName = (name) => {
-    setGoal({ ...goal, name });
+    setGoal((prevGoal) => ({ ...prevGoal, name }));
+    setIncomplete((prev) => ({ ...prev, name: false })); 
   };
 
   const setGoalDescription = (description) => {
-    setGoal({ ...goal, description });
+    setGoal((prevGoal) => ({ ...prevGoal, description }));
+    setIncomplete((prev) => ({ ...prev, description: false })); 
   };
 
   const handleSubmit = (e) => {
@@ -48,6 +71,7 @@ const GoalForm = ({ onSubmit, edit }) => {
         endDate: endDate,
       });
       setGoal(emptyGoal);
+      setEndDate(emptyGoal.endDate);
     }
   };
 
@@ -69,7 +93,7 @@ const GoalForm = ({ onSubmit, edit }) => {
                   height={16}
                 ></img>
               </button>
-              <label htmlFor='goal'>Create a Goal</label>
+              <label>{edit ? 'Edit Goal' : 'Create a Goal'}</label>
             </div>
             <div className='flex flex-col gap-2'>
               <p>Name</p>
@@ -117,9 +141,14 @@ const GoalForm = ({ onSubmit, edit }) => {
                 type='button'
                 className='btn'
                 data-testid='form-cancel-button'
-                onClick={() =>
-                  document.getElementById('goal-form-modal').close()
-                }
+                onClick={() => {
+                  document.getElementById('goal-form-modal').close();
+                  setIncomplete({
+                    submitted: false,
+                    name: false,
+                    description: false,
+                  });
+                }}
               >
                 Close
               </button>
@@ -142,6 +171,7 @@ const GoalForm = ({ onSubmit, edit }) => {
 GoalForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   edit: PropTypes.bool,
+  currentGoal: PropTypes.object,
 };
 
 export default GoalForm;
