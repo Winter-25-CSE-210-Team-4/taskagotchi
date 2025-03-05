@@ -99,6 +99,7 @@ const HomePage = () => {
         return updated_xp;
 
         //TODO: character changes, etc
+
       }
       return prev_xp;
     })
@@ -108,11 +109,11 @@ const HomePage = () => {
   return (
     <div className='flex flex-col h-screen w-full min-w-[1024px]'>
 
+      {/*Confetti for task completion */}
       {confetti && <Confetti />}
 
       {/* Header*/}
       <Header />
-
       {/* Main content */}
       <div className='flex flex-1 bg-white font-inter'>
         {/* Sidebar*/}

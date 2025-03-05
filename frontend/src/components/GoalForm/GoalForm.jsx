@@ -31,10 +31,10 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         completed: currentGoal.completed || false,
         endDate: currentGoal.endDate || null,
       });
-      setEndDate(currentGoal.endDate || null);
+      setEndDate(currentGoal.endDate || emptyGoal.endDate);
     } else {
       setGoal(emptyGoal);
-      setEndDate(null);
+      setEndDate(emptyGoal.endDate);
     }
 
     setIncomplete(incompleteState);
@@ -71,7 +71,7 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         endDate: endDate,
       });
       setGoal(emptyGoal);
-      setEndDate(null);
+      setEndDate(emptyGoal.endDate);
     }
   };
 
