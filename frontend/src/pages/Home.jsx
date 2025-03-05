@@ -25,6 +25,8 @@ const HomePage = () => {
 
   const [xp, set_xp] = useState(0);
   const [confetti, set_confetti] = useState(false);
+  const [image, set_image] = useState('/images/monster_level1.png');
+
 
 
   //Event handler for opening goal form
@@ -96,9 +98,13 @@ const HomePage = () => {
       if(!curr_task.completed) {
         const updated_xp = Math.min(prev_xp + 5, 100);
 
-        return updated_xp;
+        if(updated_xp >= 66) {
+          set_image('/images/monster_level3.png');
+        } else if (updated_xp >= 33) {
+          set_image('/images/monster_level2.png');
+        }
 
-        //TODO: character changes, etc
+        return updated_xp;
 
       }
       return prev_xp;
@@ -226,11 +232,11 @@ const HomePage = () => {
         </div>
 
         {/* Character*/}
-        <div className='flex flex-1 justify-center items-center flex-col pb-4'>
+        <div className='flex flex-1 justify-center items-center w-full h-full relative flex-col pb-4'>
           <img
-            src='/images/monster-transparentbg.png'
+            src={image}
             alt='TaskaGoTchi Character'
-            className='w-96 h-96 object-contain mt-8 mb-8'
+            className='w-96 h-96 object-contain mt-8 mb-8 mx-auto'
           />
 
           <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
