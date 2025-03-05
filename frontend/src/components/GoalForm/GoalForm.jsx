@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 
 const GoalForm = ({ onSubmit, edit, currentGoal }) => {
   const emptyGoal = {
+    id: '',
     name: '',
     description: '',
     completed: false,
@@ -19,13 +20,12 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
   };
   const [goal, setGoal] = useState(emptyGoal);
   const [incomplete, setIncomplete] = useState(incompleteState);
-  const [endDate, setEndDate] = useState(emptyGoal.endDate)
-
-
+  const [endDate, setEndDate] = useState(emptyGoal.endDate);
 
   useEffect(() => {
     if (currentGoal) {
       setGoal({
+        id: currentGoal.id || '',
         name: currentGoal.name || '',
         description: currentGoal.description || '',
         completed: currentGoal.completed || false,
@@ -38,18 +38,16 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
     }
 
     setIncomplete(incompleteState);
-
   }, [currentGoal]);
-
 
   const setGoalName = (name) => {
     setGoal((prevGoal) => ({ ...prevGoal, name }));
-    setIncomplete((prev) => ({ ...prev, name: false })); 
+    setIncomplete((prev) => ({ ...prev, name: false }));
   };
 
   const setGoalDescription = (description) => {
     setGoal((prevGoal) => ({ ...prevGoal, description }));
-    setIncomplete((prev) => ({ ...prev, description: false })); 
+    setIncomplete((prev) => ({ ...prev, description: false }));
   };
 
   const handleSubmit = (e) => {
