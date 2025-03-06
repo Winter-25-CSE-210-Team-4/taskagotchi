@@ -8,13 +8,23 @@ Frontend setup is done, backend may need some work from the backend team.
 Backend setup is done, it's on 'backend set up' branch
 1. ```cd taskagotchi/backend```  navigate to the backend directory
 2. Run ```npm npm install``` to install dependencies
-3. Create a .env file in the backend directory with the following content
+3. Create a .env file in the backend directory. To run run locally, have .env update the following content
 ```
 PORT=5050
-MONGODB_URI=mongodb://localhost:27017/taskagotchi
+MONGODB_URI_LOCAL=mongodb://localhost:27017/taskagotchi
+MONGODB_URI_CLOUD=mongodb+srv://admin:nwFJj1bpHhTawvP2@taskagotchi.npcrf.mongodb.net/taskagotchi?retryWrites=true&w=majority
 NODE_ENV=development
 JWT_SECRET=your-secret-key
 ```
+To run in deployment, and collect to the MongoDB Cloud instance, update .env as such
+```
+PORT=5050
+MONGODB_URI_LOCAL=mongodb://localhost:27017/taskagotchi
+MONGODB_URI_CLOUD=mongodb+srv://admin:nwFJj1bpHhTawvP2@taskagotchi.npcrf.mongodb.net/taskagotchi?retryWrites=true&w=majority
+NODE_ENV=deployment
+JWT_SECRET=your-secret-key
+```
+
 4. Run ```npm run dev``` to start the development server and visit http://localhost:5050/api/test in your browser or use curl: curl http://localhost:5050/api/test
 
 

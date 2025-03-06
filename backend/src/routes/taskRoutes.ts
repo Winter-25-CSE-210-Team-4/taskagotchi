@@ -29,10 +29,11 @@ router.put("/:id", updateTask);
 // Delete task
 router.delete("/:id", deleteTask);
 
-// mark task as complete
-router.put("/:id/complete", completeTask);
+// Mark task as complete
+router.patch("/:id/complete", completeTask);  // 保留这个，与其他路由保持一致使用 :id
 
-// delete completed tasks
+
+// Delete completed tasks
 router.delete("/completed", deleteCompletedTasks);
 
 export default router;

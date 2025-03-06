@@ -126,7 +126,7 @@ export const updateTask = async (req: Request, res: Response) => {
         }
 
         const updatedTask = await Task.findByIdAndUpdate(
-            taskId, // 用 `_id` 查找
+            taskId, // using id to search
             updates,
             { new: true, runValidators: true }
         );
@@ -175,23 +175,41 @@ export const deleteTask = async (req: Request, res: Response) => {
 };
 
 
+import Goal from "../models/goal";
 // 1. mark task as complete
-export const completeTask =
-    async (req: Request, res: Response) => {
+export const completeTask = async (req: Request, res: Response) => {
     try {
-        const { task_id } = req.params;
-        const updatedTask = await Task.findOneAndUpdate(
-            { task_id: Number(task_id) },  // seach task using id
-            { isCompleted: true },        // update isCompleted = true
-            { new: true }                 // return updated data
-        );
+        const taskId = req.params.id; // use id instead of task_id
 
-        if (!updatedTask) {
+        // make sure taskId is valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(taskId)) {
+            return res.status(400).json({ message: "Wrong ID " });
+        }
+
+        const task = await Task.findById(taskId);
+
+        if (!task) {
             return res.status(404).json({ message: "Task not found" });
         }
-        res.status(200).json(updatedTask);
+
+        task.isCompleted = true;
+        await task.save();
+
+        // check the status of goal if task is related to a goal
+        if (task.goal_id) {
+            const goal = await Goal.findById(task.goal_id);
+            if (goal) {
+                await goal.checkCompletion();
+            }
+        }
+
+        res.status(200).json(task);
     } catch (error) {
-        res.status(500).json({ message: "Server error", error });
+        console.error("Error when marking task as completed:", error);
+        res.status(500).json({
+            message: "Server Error",
+            error: error instanceof Error ? error.message : "Unknown Error"
+        });
     }
 };
 
@@ -199,8 +217,12 @@ export const completeTask =
 export const deleteCompletedTasks = async (req: Request, res: Response) => {
     try {
         const result = await Task.deleteMany({ isCompleted: true });
-        res.status(200).json({ message: `${result.deletedCount} completed tasks deleted` });
+        res.status(200).json({ message: `${result.deletedCount} completed tasks has been deleted` });
     } catch (error) {
-        res.status(500).json({ message: "Server error", error });
+        console.error("Error when deleting completed tasks:", error);
+        res.status(500).json({
+            message: "Server Error",
+            error: error instanceof Error ? error.message : "UnKnown Error"
+        });
     }
 };
