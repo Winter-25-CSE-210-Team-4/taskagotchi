@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import CheckIcon from '../../assets/check.svg';
 import ChevronLeftIcon from '../../assets/chevron-left.svg';
 import DatePicker from 'react-datepicker';
@@ -6,21 +6,39 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 
 const GoalForm = ({ onSubmit, edit, currentGoal }) => {
-  const emptyGoal = {
-    id: '',
-    name: '',
-    description: '',
-    completed: false,
-    endDate: Date.now(),
-  };
-  const incompleteState = {
-    submitted: false,
-    name: true,
-    description: true,
-  };
-  const [goal, setGoal] = useState(emptyGoal);
+  const emptyGoal = useMemo(
+    () => ({
+      id: '',
+      name: '',
+      description: '',
+      completed: false,
+      endDate: Date.now(),
+    }),
+    []
+  );
+  const initalGoal = currentGoal
+    ? {
+        id: currentGoal.id || '',
+        name: currentGoal.name || '',
+        description: currentGoal.description || '',
+        completed: currentGoal.completed || false,
+        endDate: currentGoal.endDate || null,
+      }
+    : emptyGoal;
+  const initalEndDate = currentGoal ? currentGoal.endDate : Date.now();
+  const incompleteState = useMemo(
+    () => ({
+      submitted: false,
+      name: true,
+      description: true,
+    }),
+    []
+  );
+  const [goal, setGoal] = useState(initalGoal);
   const [incomplete, setIncomplete] = useState(incompleteState);
-  const [endDate, setEndDate] = useState(emptyGoal.endDate);
+  const [endDate, setEndDate] = useState(initalEndDate);
+
+  // TODO: fix edit and lint
 
   useEffect(() => {
     if (currentGoal) {
@@ -31,14 +49,14 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         completed: currentGoal.completed || false,
         endDate: currentGoal.endDate || null,
       });
-      setEndDate(currentGoal.endDate || emptyGoal.endDate);
+      setEndDate(currentGoal.endDate);
     } else {
       setGoal(emptyGoal);
       setEndDate(emptyGoal.endDate);
     }
 
     setIncomplete(incompleteState);
-  }, [currentGoal]);
+  }, [currentGoal, emptyGoal, incompleteState]);
 
   const setGoalName = (name) => {
     setGoal((prevGoal) => ({ ...prevGoal, name }));
@@ -83,7 +101,18 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         >
           <div className='w-[32rem] flex flex-col gap-4'>
             <div className='flex flex-row gap-2'>
-              <button className='btn btn-outline btn-xs'>
+              <button
+                type='button'
+                onClick={() => {
+                  document.getElementById('goal-form-modal').close();
+                  setIncomplete({
+                    submitted: false,
+                    name: false,
+                    description: false,
+                  });
+                }}
+                className='btn btn-outline btn-xs'
+              >
                 <img
                   src={ChevronLeftIcon}
                   alt='back-icon'
@@ -124,7 +153,7 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
             </div>
             <div>
               <div className='flex flex-col gap-2'>
-                <p>Select End Date (optional)</p>
+                <p>Select End Date</p>
                 <DatePicker
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}

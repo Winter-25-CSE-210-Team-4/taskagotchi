@@ -7,7 +7,6 @@ import Confetti from 'react-confetti';
 import useAuth from '../../auth/hooks/useAuth';
 import { useCallback } from 'react';
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate';
-import { set } from 'mongoose';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -19,15 +18,9 @@ const HomePage = () => {
     console.log('Auth state updated:', user, loggedIn, auth);
   }, [user, loggedIn, auth]);
 
-  const [tasks, set_tasks] = useState([
-    { name: '💧 Drink water', time: '5:00pm', completed: false },
-    { name: '🚶 Take a walk', time: '6:00pm', completed: false },
-  ]);
+  const [tasks, set_tasks] = useState([]);
 
-  const [goals, set_goals] = useState([
-    { name: '💪 Be healthier', description: '' },
-    { name: '🌲 Go outdoors more!', description: '' },
-  ]);
+  const [goals, set_goals] = useState([]);
 
   const [new_task, set_new_task] = useState({ name: '', time: '' });
   //const [new_goal, set_new_goal] = useState({ name: '', description: '' });
@@ -40,30 +33,12 @@ const HomePage = () => {
 
   // API-----
 
-  const createUserGoals = useCallback(
-    async (responseBody) => {
-      if (loggedIn) {
-        const response = axiosPrivate
-          .post('/goals', responseBody)
-          .then((res) => {
-            const responseData = res.data;
-            console.log('Created Goal:', responseData);
-            fetchUserGoals();
-          })
-          .catch((err) => console.error(err));
-      }
-    },
-    [user, loggedIn]
-  );
-
   const fetchUserGoals = useCallback(async () => {
     if (loggedIn) {
-      console.log('logged in as', user);
-      const response = axiosPrivate
+      axiosPrivate
         .get('/goals')
         .then((res) => {
           const responseData = res.data;
-          console.log('User Goals:', responseData.data);
           const goals = responseData.data.map((goal) => ({
             id: goal._id,
             name: goal.name,
@@ -76,13 +51,26 @@ const HomePage = () => {
         })
         .catch((err) => console.error(err));
     }
-  }, [user, loggedIn, goals]);
+  }, [loggedIn, axiosPrivate]);
+
+  const createUserGoals = useCallback(
+    async (responseBody) => {
+      if (loggedIn) {
+        axiosPrivate
+          .post('/goals', responseBody)
+          .then(() => {
+            fetchUserGoals();
+          })
+          .catch((err) => console.error(err));
+      }
+    },
+    [loggedIn, axiosPrivate, fetchUserGoals]
+  );
 
   const deleteUserGoal = useCallback(
     async (goalId) => {
       if (loggedIn) {
-        // router.delete('/:id', auth, deleteGoal);
-        const response = axiosPrivate
+        axiosPrivate
           .delete(`/goals/${goalId}`)
           .then((res) => {
             const deletedGoal = res.data.data;
@@ -94,32 +82,32 @@ const HomePage = () => {
           .catch((err) => console.error(err));
       }
     },
-    [user, loggedIn, goals]
+    [loggedIn, goals, axiosPrivate]
   );
 
   const updateUserGoal = useCallback(
     // router.put('/:id', auth, updateGoal);
     async (goal) => {
       if (loggedIn) {
-        const response = axiosPrivate
+        axiosPrivate
           .put(`/goals/${goal.id}`, goal)
           .then((res) => {
             const updatedGoal = res.data.data;
-            console.log('Updated Goal:', updatedGoal);
             const updatedGoals = goals.map((goal) =>
               goal.id === updatedGoal._id ? updatedGoal : goal
             );
             set_goals(updatedGoals);
+            fetchUserGoals();
           })
           .catch((err) => console.error(err));
       }
     },
-    [user, loggedIn, goals]
+    [loggedIn, goals, axiosPrivate, fetchUserGoals]
   );
 
   useEffect(() => {
     fetchUserGoals();
-  }, [user]);
+  }, [user, fetchUserGoals]);
 
   //Event handler for opening goal form
   const open_goal_form = (goal = null) => {
