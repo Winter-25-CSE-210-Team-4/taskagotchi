@@ -12,7 +12,8 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.{js,jsx}'], // specify files to include
       exclude: ['src/generated/**/*.ts'], // specify files to exclude
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
+      reportsDirectory: './coverage'
     },
   },
 });
