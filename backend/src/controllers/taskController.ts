@@ -10,7 +10,7 @@ export const getAllTasks = async (req: AuthRequest, res: Response) => {
         if (req.user === undefined) {
             throw new Error("User does not exist");
         }
-        const tasks = await Task.find({ userId: req.user?.id })
+        const tasks = await Task.find({ user_id: req.user?.id })
             .populate('goal_id', 'title')
             .sort({ createdAt: -1 });
 
@@ -28,13 +28,17 @@ export const getAllTasks = async (req: AuthRequest, res: Response) => {
 // Create Task
 export const createTask = async (req: AuthRequest, res: Response) => {
     try {
-        const { description, goal_id, deadline, recurrs, recurringUnit } = req.body;
+        const { description, name, goal_id, deadline, recurrs, recurringUnit } = req.body;
         const user_id = req.user?.id;
         console.log("User ID from token:", user_id);
 
         // Validate required fields
         if (!description) {
             return res.status(400).json({ message: "Description is required" });
+        }
+
+        if (!name) {
+            return res.status(400).json({ message: "Name is required" });
         }
 
         if (!user_id) {
@@ -53,23 +57,16 @@ export const createTask = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: "Invalid user ID format" });
         }
 
-        // Create task object with required fields
-        const taskData: any = {
+
+        const newTask = new Task({
             description,
+            name,
             goal_id,
             user_id,
             recurrs: recurrs || false, // Default to non-recurring
-            recurringUnit: recurringUnit || null
-        };
-
-        console.log("taskdata", taskData);
-
-        // Add deadline if provided
-        if (deadline) {
-            taskData.deadline = new Date(deadline);
-        }
-
-        const newTask = new Task(taskData);
+            recurringUnit: recurringUnit || null,
+            deadline: deadline ? new Date(deadline) : undefined
+        });
         const savedTask = await newTask.save();
 
         // // Update goal completion status
