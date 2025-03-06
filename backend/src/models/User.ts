@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import config from '../config/config';
 
 
-interface IUser {
+export interface IUser {
   email: string;
   password: string;
   name: string;
@@ -13,13 +13,19 @@ interface IUser {
 }
 
 
-interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends IUser, Document {
+  _id: string;
   generateAuthToken(): string;
   comparePassword(password: string): Promise<boolean>;
 }
 
+export interface JwtPayload {
+  id: string;
+  email: string;
+  role: string;
+}
 
-interface IUserModel extends Model<IUserDocument> {
+export interface IUserModel extends Model<IUserDocument> {
   findByEmail(email: string): Promise<IUserDocument | null>;
 }
 
@@ -35,7 +41,6 @@ const userSchema = new mongoose.Schema<IUserDocument>({
   password: {
     type: String,
     required: true,
-    minlength: 6
   },
   name: {
     type: String,
@@ -53,16 +58,16 @@ const userSchema = new mongoose.Schema<IUserDocument>({
 
 
 userSchema.methods.generateAuthToken = function(this: IUserDocument) {
-  const token = jwt.sign(
-    {
-      id: this._id,
-      email: this.email,
-      role: this.role
-    },
-    process.env.JWT_SECRET || 'fallback-secret-key',
-    { expiresIn: '24h' }
-  );
-  return token;
+  const payload: JwtPayload = {
+    id: this._id,
+    email: this.email,
+    role: this.role
+  };
+    return jwt.sign(
+      payload,
+      config.jwtSecret,
+      { expiresIn: '24h' }
+    );
 };
 
 

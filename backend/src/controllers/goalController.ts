@@ -1,32 +1,38 @@
 import { Request, Response } from 'express';
 import Goal from '../models/goal';
 import Task from '../models/Task';
-
+import { AuthRequest } from '../middleware/auth';
 
 //Create a new goal
-export const createGoal = async (req: Request, res: Response) => {
+export const createGoal = async (req: AuthRequest, res: Response) => {
     try {
-        const { title, description, deadline } = req.body;
-        
-        if (!title || !description || !deadline) {
+        const { name, description, deadline } = req.body;
+
+        if (!name || !description || !deadline) {
             return res.status(400).json({
                 message: 'Please provide all required fields'
             });
         }
+        console.log('User ID from token:', req.user?.id);
 
         const newGoal = new Goal({
-            title,
+            name,
             description,
             deadline,
             status: 'active',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            userId: req.user?.id
         });
 
-        const savedGoal = await newGoal.save();
+        console.log('Goal to be saved:', newGoal);
 
-        res.status(201).json({ 
-            success: true, 
-            data: savedGoal 
+        const savedGoal = await newGoal.save();
+        console.log('Saved goal:', savedGoal);
+
+
+        res.status(201).json({
+            success: true,
+            data: savedGoal
         });
 
     } catch (error) {
@@ -41,32 +47,47 @@ export const createGoal = async (req: Request, res: Response) => {
 
 
 
-export const getAllGoals = async (req: Request, res: Response) => {
+// export const getAllGoals = async (req: Request, res: Response) => {
+//     try {
+//         const goals = await Goal.find();
+//         res.json({ 
+//             success: true, 
+//             data: goals 
+//         });
+//     } catch (error) {
+//         console.error('Error fetching goals:', error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Error fetching goals',
+//             error: error instanceof Error ? error.message : 'Unknown error'
+//         });
+//     }
+// };
+
+export const getAllUserGoals = async (req: AuthRequest, res: Response) => {
     try {
-        const goals = await Goal.find();
-        res.json({ 
-            success: true, 
-            data: goals 
+        const goals = await Goal.find({ userId: req.user?.id });
+        res.json({
+            success: true,
+            data: goals
         });
     } catch (error) {
-        console.error('Error fetching goals:', error);
+        console.error('Error fetching user goals:', error);
         res.status(500).json({
             success: false,
-            message: 'Error fetching goals',
+            message: 'Error fetching user goals',
             error: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 };
 
-
-
 //getGoalList by userid
 //for the homepage, like every user will have a goal list that be presented
-export const getGoalById = async (req: Request, res: Response) => {
+export const getGoalById = async (req: AuthRequest, res: Response) => {
     try {
         const goalId = req.params.id;
         const goal = await Goal.findById(goalId);
-        
+
         if (!goal) {
             return res.status(404).json({
                 success: false,
@@ -89,13 +110,13 @@ export const getGoalById = async (req: Request, res: Response) => {
 };
 
 //edit goal - search the goal by is and update 
-export const updateGoal = async (req: Request, res: Response) => {
+export const updateGoal = async (req: AuthRequest, res: Response) => {
     try {
         const goalId = req.params.id;
         const updates = req.body;
 
-        const updatedGoal = await Goal.findByIdAndUpdate(
-            goalId,
+        const updatedGoal = await Goal.findOneAndUpdate(
+            { _id: goalId, userId: req.user?.id },
             updates,
             { new: true, runValidators: true }
         );
@@ -122,10 +143,13 @@ export const updateGoal = async (req: Request, res: Response) => {
 };
 
 //delete a goal when user don't need it 
-export const deleteGoal = async (req: Request, res: Response) => {
+export const deleteGoal = async (req: AuthRequest, res: Response) => {
     try {
         const goalId = req.params.id;
-        const deletedGoal = await Goal.findByIdAndDelete(goalId);
+        const deletedGoal = await Goal.findOneAndDelete({
+            _id: goalId,
+            userId: req.user?.id
+        });
 
         if (!deletedGoal) {
             return res.status(404).json({
@@ -195,42 +219,42 @@ export const addTaskToGoal = async (req: Request, res: Response) => {
         data: newTask
       });
     } catch (error) {
-      console.error('Error adding task to goal:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error adding task to goal',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  };
-  
-  // 获取目标的所有子任务
-  export const getGoalTasks = async (req: Request, res: Response) => {
-    try {
-      const goalId = req.params.id;
-      
-      // 检查目标是否存在
-      const goal = await Goal.findById(goalId);
-      if (!goal) {
-        return res.status(404).json({
-          success: false,
-          message: 'Goal not found'
+        console.error('Error adding task to goal:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error adding task to goal',
+            error: error instanceof Error ? error.message : 'Unknown error'
         });
-      }
-      
-      // 获取关联的任务
-      const tasks = await Task.find({ goal_id: goalId });
-      
-      res.json({
-        success: true,
-        data: tasks
-      });
-    } catch (error) {
-      console.error('Error fetching goal tasks:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching goal tasks',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
     }
-  };
+};
+
+// 获取目标的所有子任务
+export const getGoalTasks = async (req: Request, res: Response) => {
+    try {
+        const goalId = req.params.id;
+
+        // 检查目标是否存在
+        const goal = await Goal.findById(goalId);
+        if (!goal) {
+            return res.status(404).json({
+                success: false,
+                message: 'Goal not found'
+            });
+        }
+
+        // 获取关联的任务
+        const tasks = await Task.find({ goal_id: goalId });
+
+        res.json({
+            success: true,
+            data: tasks
+        });
+    } catch (error) {
+        console.error('Error fetching goal tasks:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching goal tasks',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+};
