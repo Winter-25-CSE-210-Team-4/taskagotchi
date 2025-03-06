@@ -174,14 +174,13 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
 // Delete a specific task by ID
 export const deleteTask = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params;
-
+        const { task_id } = req.params;
         // Validate that id is a valid MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(task_id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
 
-        const task = await Task.findByIdAndDelete(id);
+        const task = await Task.findByIdAndDelete(task_id);
 
         if (!task) {
             return res.status(404).json({ message: "Task not found" });

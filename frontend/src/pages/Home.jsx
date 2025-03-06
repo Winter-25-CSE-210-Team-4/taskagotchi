@@ -145,6 +145,33 @@ const HomePage = () => {
     [loggedIn, axiosPrivate, fetchUserGoals]
   );
 
+  const deleteUserTask = useCallback(
+    async (taskId) => {
+      if (loggedIn) {
+        axiosPrivate
+          .delete(`/tasks/${taskId}`)
+          .then((res) => {
+            const deletedTask = res.data.deletedTask;
+            const deletedGoal = res.data.deletedGoal;
+            const updatedTasks = tasks.filter(
+              (task) => task.id !== deletedTask._id
+            );
+            set_tasks(updatedTasks);
+            fetchUserTasks();
+            if (deletedGoal !== undefined) {
+              const updatedGoals = goals.filter(
+                (goal) => goal.id !== deletedGoal._id
+              );
+              set_goals(updatedGoals);
+              fetchUserGoals();
+            }
+          })
+          .catch((err) => console.error(err));
+      }
+    },
+    [loggedIn, goals, axiosPrivate]
+  );
+
   const updateUserTask = useCallback(
     async (task) => {
       if (loggedIn) {
@@ -245,16 +272,6 @@ const HomePage = () => {
     set_curr_goal(null);
     set_edit_goal(false);
   };
-  // Event handler for adding new task
-  const handle_add_task = () => {
-    if (new_task.name && new_task.time) {
-      set_tasks([...tasks, new_task]);
-      createUserTask(new_task);
-      set_new_task({ name: '', time: '' });
-
-      document.getElementById('add-task-modal').checked = false;
-    }
-  };
 
   // Event handler for deleting a task
   const handle_delete_task = (index) => {
@@ -262,34 +279,21 @@ const HomePage = () => {
   };
 
   //Event handler for marking task as done
-  const handle_task_completion = (index) => {
-    set_tasks((prev_tasks) =>
-      prev_tasks.map((task, i) => {
-        if (i === index) {
-          const is_completed = !task.completed;
+  const handle_task_completion = (taskId) => {
+    deleteUserTask(taskId);
 
-          if (is_completed) {
-            set_confetti(true);
-            setTimeout(() => set_confetti(false), 5000);
-          }
-          return { ...task, completed: is_completed };
-        }
-        return task;
-      })
-    );
+    // set_xp((prev_xp) => {
+    //   const curr_task = tasks[index];
 
-    set_xp((prev_xp) => {
-      const curr_task = tasks[index];
+    //   if (!curr_task.completed) {
+    //     const updated_xp = Math.min(prev_xp + 5, 100);
 
-      if (!curr_task.completed) {
-        const updated_xp = Math.min(prev_xp + 5, 100);
+    //     return updated_xp;
 
-        return updated_xp;
-
-        //TODO: character changes, etc
-      }
-      return prev_xp;
-    });
+    //     //TODO: character changes, etc
+    //   }
+    //   return prev_xp;
+    // });
   };
 
   return (
@@ -349,7 +353,7 @@ const HomePage = () => {
                     id={`task-checkbox-${index}`}
                     className='checkbox-sm'
                     checked={task.completed || false}
-                    onChange={() => handle_task_completion(index)}
+                    onChange={() => handle_task_completion(task.id)}
                   />
 
                   <label
