@@ -26,11 +26,10 @@ beforeAll(async () => {
         });
         
     console.log('Registration response:', registerResponse.body);
-    if (!registerResponse.body.data?.token) {
-        throw new Error('No token received from registration');
+    authToken = registerResponse.body.data.token;
+    if (!authToken) {
+        throw new Error('Failed to get auth token');
     }
-    authToken = registerResponse.body.token;
-    console.log('Auth token received:', authToken);
 });
 
 afterAll(async () => {
@@ -53,7 +52,7 @@ describe('Goal Endpoints', () => {
                     deadline: '2024-03-01T00:00:00.000Z'
                 });
             
-            console.log('Create response:', createRes.body);
+            console.log('Goal creation response:', createRes.body);
             if (!createRes.body.data?._id) {
                 throw new Error('No goal ID received from creation');
             }

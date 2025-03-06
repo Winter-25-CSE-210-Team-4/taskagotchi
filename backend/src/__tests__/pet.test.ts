@@ -33,12 +33,29 @@ beforeEach(async () => {
 });
 
 describe('Pet Endpoints', () => {
+    let userId: string;
+    let authToken: string;
+
+    beforeAll(async () => {
+        const registerRes = await request(app)
+            .post('/api/auth/register')
+            .send({
+                email: 'test@example.com',
+                password: 'password123',
+                name: 'Test User'
+            });
+
+        userId = registerRes.body.data.user._id;
+        authToken = registerRes.body.data.token;
+    });
+
     // Test: Creating a new pet with valid data
     it('should create a new pet', async () => {
         const res = await request(app)
             .post('/api/pets')
+            .set('Authorization', `Bearer ${authToken}`)
             .send({
-                pet_id: 1,
+                userId: userId,
                 name: 'TestPet',
                 health: 100,
                 level: 1,
