@@ -1,5 +1,5 @@
 import Landing from "../pages/Landing";
-import { MemoryRouter, useNavigate } from "react-router-dom";
+import { MemoryRouter} from "react-router-dom";
 import { render, screen, fireEvent} from "@testing-library/react"
 import { describe, it, vi, beforeEach, expect } from "vitest";
 import MockAuthContextProvider from '../__mocks__/MockAuthContextProvider';
