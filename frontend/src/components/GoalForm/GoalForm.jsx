@@ -6,7 +6,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 
 const GoalForm = ({ onSubmit, edit, currentGoal }) => {
-
   const emptyGoal = useMemo(
     () => ({
       id: '',
@@ -40,6 +39,9 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
   const [endDate, setEndDate] = useState(initalEndDate);
 
   // TODO: fix edit and lint
+  const [endDate, setEndDate] = useState(initalEndDate);
+
+  // TODO: fix edit and lint
 
   useEffect(() => {
     if (currentGoal) {
@@ -57,7 +59,6 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
     }
 
     setIncomplete(incompleteState);
-
   }, [currentGoal, emptyGoal, incompleteState]);
 
   const setGoalName = (name) => {
