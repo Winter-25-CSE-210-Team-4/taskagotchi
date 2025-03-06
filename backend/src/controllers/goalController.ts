@@ -223,6 +223,31 @@ export const addTaskToGoal = async (req: Request, res: Response) => {
             message: 'Task added to goal successfully',
             data: newTask
         });
+
+      }
+      
+      // 创建新任务
+      const newTask = new Task({
+        user_id: user_id || req.body.user_id, // 假设有用户ID在请求中
+        goal_id: goal._id,
+        deadline: new Date(deadline),
+        recurrs: recurrs || false,
+        recurringUnit: recurringUnit,
+        description,
+        isCompleted: false
+      });
+      
+      // 保存新任务
+      await newTask.save();
+      
+      // 检查目标完成状态（虽然新任务不会影响）
+      await goal.checkCompletion();
+      
+      res.status(201).json({
+        success: true,
+        message: 'Task added to goal successfully',
+        data: newTask
+      });
     } catch (error) {
         console.error('Error adding task to goal:', error);
         res.status(500).json({

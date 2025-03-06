@@ -6,21 +6,40 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 
 const GoalForm = ({ onSubmit, edit, currentGoal }) => {
-  const emptyGoal = {
-    id: '',
-    name: '',
-    description: '',
-    completed: false,
-    endDate: Date.now(),
-  };
-  const incompleteState = {
-    submitted: false,
-    name: true,
-    description: true,
-  };
-  const [goal, setGoal] = useState(emptyGoal);
+
+  const emptyGoal = useMemo(
+    () => ({
+      id: '',
+      name: '',
+      description: '',
+      completed: false,
+      endDate: Date.now(),
+    }),
+    []
+  );
+  const initalGoal = currentGoal
+    ? {
+        id: currentGoal.id || '',
+        name: currentGoal.name || '',
+        description: currentGoal.description || '',
+        completed: currentGoal.completed || false,
+        endDate: currentGoal.endDate || null,
+      }
+    : emptyGoal;
+  const initalEndDate = currentGoal ? currentGoal.endDate : Date.now();
+  const incompleteState = useMemo(
+    () => ({
+      submitted: false,
+      name: true,
+      description: true,
+    }),
+    []
+  );
+  const [goal, setGoal] = useState(initalGoal);
   const [incomplete, setIncomplete] = useState(incompleteState);
-  const [endDate, setEndDate] = useState(emptyGoal.endDate);
+  const [endDate, setEndDate] = useState(initalEndDate);
+
+  // TODO: fix edit and lint
 
   useEffect(() => {
     if (currentGoal) {
@@ -38,7 +57,8 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
     }
 
     setIncomplete(incompleteState);
-  }, [currentGoal]);
+
+  }, [currentGoal, emptyGoal, incompleteState]);
 
   const setGoalName = (name) => {
     setGoal((prevGoal) => ({ ...prevGoal, name }));
