@@ -36,35 +36,48 @@ describe('Pet Endpoints', () => {
     let userId: string;
     let authToken: string;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
+        await Pet.deleteMany({});
         const registerRes = await request(app)
             .post('/api/auth/register')
             .send({
-                email: 'test@example.com',
+                email: `test${Date.now()}@example.com`,
                 password: 'password123',
                 name: 'Test User'
             });
 
+        console.log('Registration response:', registerRes.body);
+        
         userId = registerRes.body.data.user._id;
         authToken = registerRes.body.data.token;
+
+        if (!userId || !authToken) {
+            throw new Error('Failed to set up test user');
+        }
     });
 
     // Test: Creating a new pet with valid data
     it('should create a new pet', async () => {
-        const res = await request(app)
-            .post('/api/pets')
-            .set('Authorization', `Bearer ${authToken}`)
-            .send({
-                userId: userId,
-                name: 'TestPet',
-                health: 100,
-                level: 1,
-                exp: 0
-            });
+        // User should already have a pet from registration
+        const existingPet = await Pet.findOne({ userId });
+        expect(existingPet).toBeTruthy();
+        expect(existingPet?.name).toBe("Test User's Pet");
 
-        expect(res.status).toBe(201);
-        expect(res.body).toHaveProperty('name', 'TestPet');
-        expect(res.body).toHaveProperty('health', 100);
+        // create a second pet should fail
+        const res = await request(app)
+        .post('/api/pets')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+            userId: userId,
+            name: 'SecondPet',
+            health: 100,
+            level: 1,
+            exp: 0
+        });
+
+        // Should return 400 because user already has a pet
+        expect(res.status).toBe(400);
+        expect(res.body).toHaveProperty('message', 'User already has a pet');
     });
 
     // Test: Retrieving all pets from the database
