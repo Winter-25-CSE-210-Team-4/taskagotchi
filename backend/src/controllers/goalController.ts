@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Goal from '../models/goal';
+import Task from '../models/Task';
 import { AuthRequest } from '../middleware/auth';
 
 //Create a new goal
