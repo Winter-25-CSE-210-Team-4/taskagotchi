@@ -265,7 +265,7 @@ const HomePage = () => {
       createUserTask(requestBody);
     }
 
-    document.getElementById('goal-form-modal').close();
+    document.getElementById('task-form-modal').close();
     set_curr_goal(null);
     set_edit_goal(false);
   };
