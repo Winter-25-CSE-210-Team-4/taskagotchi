@@ -79,7 +79,7 @@ const LoginPage = () => {
       // set_login_status(true);
       set_errs({});
 
-      navigate('/');
+      navigate('/home');
     } catch {
       set_num_attempts(num_attempts + 1);
       set_errs({ general: 'Invalid email or password' });

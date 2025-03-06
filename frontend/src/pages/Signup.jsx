@@ -85,6 +85,8 @@ const SignupPage = () => {
         throw new Error(response.data.message || 'Failed to register');
       }
 
+
+
       const { token, user } = response.data;
 
       setAuth({ accessToken: token });
@@ -100,7 +102,7 @@ const SignupPage = () => {
       set_confirm_password('');
       set_errs({});
 
-      navigate('/');
+      navigate('/home');
     } catch (error) {
         console.error('Registration error:', error.response?.data?.message || error.message); //fix here 
         set_errs({ general: error.response?.data?.message || 'Registration failed' });
