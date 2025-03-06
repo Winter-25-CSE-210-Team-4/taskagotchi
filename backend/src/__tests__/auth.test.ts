@@ -17,7 +17,7 @@ describe('Auth Endpoints', () => {
         });
   
       expect(res.status).toBe(201);
-      expect(res.body).toHaveProperty('token');
+      expect(res.body.data).toHaveProperty('token');
       expect(res.body.user).toHaveProperty('email', 'test@example.com');
     });
 
