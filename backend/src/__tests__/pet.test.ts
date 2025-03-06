@@ -35,6 +35,7 @@ beforeEach(async () => {
 describe('Pet Endpoints', () => {
     let userId: string;
     let authToken: string;
+    let existingPetId: string;
 
     beforeEach(async () => {
         await Pet.deleteMany({});
@@ -50,30 +51,26 @@ describe('Pet Endpoints', () => {
         
         userId = registerRes.body.data.user._id;
         authToken = registerRes.body.data.token;
-
+        existingPetId = registerRes.body.data.pet._id;
         if (!userId || !authToken) {
             throw new Error('Failed to set up test user');
         }
     });
 
-    // Test: Creating a new pet with valid data
-    it('should create a new pet', async () => {
-        // User should already have a pet from registration
+    it('should prevent creating a second pet', async () => {
         const existingPet = await Pet.findOne({ userId });
         expect(existingPet).toBeTruthy();
         expect(existingPet?.name).toBe("Test User's Pet");
-
-        // create a second pet should fail
         const res = await request(app)
-        .post('/api/pets')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({
-            userId: userId,
-            name: 'SecondPet',
-            health: 100,
-            level: 1,
-            exp: 0
-        });
+            .post('/api/pets')
+            .set('Authorization', `Bearer ${authToken}`)
+            .send({
+                userId: userId,
+                name: 'SecondPet',
+                health: 100,
+                level: 1,
+                exp: 0
+            });
 
         // Should return 400 because user already has a pet
         expect(res.status).toBe(400);
@@ -111,21 +108,12 @@ describe('Pet Endpoints', () => {
 
     // Test: Retrieving a single pet by its ID
     it('should get a single pet by ID', async () => {
-        const pet = await Pet.create({
-            userId: userId,
-            name: 'FindMe',
-            health: 100,
-            level: 1,
-            exp: 0
-        });
-
-        // Attempt to retrieve the pet by its ID
         const res = await request(app)
-        .get(`/api/pets/${pet._id}`)
-        .set('Authorization', `Bearer ${authToken}`);
+            .get(`/api/pets/${existingPetId}`)
+            .set('Authorization', `Bearer ${authToken}`);
 
         expect(res.status).toBe(200);
-        expect(res.body).toHaveProperty('name', 'FindMe');
+        expect(res.body.data).toHaveProperty('name', "Test User's Pet");
     });
 
     // Test: Handling requests for non-existent pets
