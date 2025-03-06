@@ -2,17 +2,15 @@ import { Request, Response } from "express";
 import mongoose from 'mongoose';
 import Task from "../models/Task";
 import Goal from "../models/goal";
-
+import { AuthRequest } from '../middleware/auth';
 // Get all tasks
-export const getAllTasks = async (req: Request, res: Response) => {
+export const getAllTasks = async (req: AuthRequest, res: Response) => {
     try {
         // Filter by user_id if provided in query
-        const filter: any = {};
-        if (req.query.user_id) {
-            filter.user_id = req.query.user_id;
+        if (req.user === undefined) {
+            throw new Error("User does not exist");
         }
-
-        const tasks = await Task.find(filter)
+        const tasks = await Task.find({ userId: req.user?.id })
             .populate('goal_id', 'title')
             .sort({ createdAt: -1 });
 
@@ -28,9 +26,11 @@ export const getAllTasks = async (req: Request, res: Response) => {
 };
 
 // Create Task
-export const createTask = async (req: Request, res: Response) => {
+export const createTask = async (req: AuthRequest, res: Response) => {
     try {
-        const { description, goal_id, deadline, user_id, recurrs, recurringUnit } = req.body;
+        const { description, goal_id, deadline, recurrs, recurringUnit } = req.body;
+        const user_id = req.user?.id;
+        console.log("User ID from token:", user_id);
 
         // Validate required fields
         if (!description) {
@@ -62,23 +62,25 @@ export const createTask = async (req: Request, res: Response) => {
             recurringUnit: recurringUnit || null
         };
 
+        console.log("taskdata", taskData);
+
         // Add deadline if provided
         if (deadline) {
             taskData.deadline = new Date(deadline);
         }
 
-        const task = new Task(taskData);
-        await task.save();
+        const newTask = new Task(taskData);
+        const savedTask = await newTask.save();
 
-        // Update goal completion status
-        const goal = await Goal.findById(goal_id);
-        if (goal) {
-            await goal.checkCompletion();
-        }
+        // // Update goal completion status
+        // const goal = await Goal.findById(goal_id);
+        // if (goal) {
+        //     await goal.checkCompletion();
+        // }
 
         res.status(201).json({
             message: "Task created successfully",
-            task
+            savedTask
         });
     } catch (error) {
         console.error('Task creation error:', error);
@@ -87,7 +89,7 @@ export const createTask = async (req: Request, res: Response) => {
 };
 
 // Update Task
-export const updateTask = async (req: Request, res: Response) => {
+export const updateTask = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
         const { description, isCompleted, goal_id, deadline, recurrs, recurringUnit } = req.body;
@@ -139,15 +141,15 @@ export const updateTask = async (req: Request, res: Response) => {
 };
 
 // Mark task as complete
-export const completeTask = async (req: Request, res: Response) => {
+export const completeTask = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-        
+
         // Validate MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
-        
+
         const task = await Task.findById(id);
 
         if (!task) {
@@ -173,15 +175,15 @@ export const completeTask = async (req: Request, res: Response) => {
 };
 
 // Delete a specific task by ID
-export const deleteTask = async (req: Request, res: Response) => {
+export const deleteTask = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-        
+
         // Validate that id is a valid MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
-        
+
         const task = await Task.findByIdAndDelete(id);
 
         if (!task) {
@@ -192,11 +194,11 @@ export const deleteTask = async (req: Request, res: Response) => {
         if (task.goal_id) {
             // Count remaining tasks for this goal
             const remainingTasksCount = await Task.countDocuments({ goal_id: task.goal_id });
-            
+
             if (remainingTasksCount === 0) {
                 // This was the last task for the goal, delete the goal
                 const deletedGoal = await Goal.findByIdAndDelete(task.goal_id);
-                
+
                 return res.status(200).json({
                     message: "Task and associated goal successfully deleted",
                     deletedTask: task,
@@ -222,7 +224,7 @@ export const deleteTask = async (req: Request, res: Response) => {
 };
 
 // Delete all completed tasks
-export const deleteCompletedTasks = async (req: Request, res: Response) => {
+export const deleteCompletedTasks = async (req: AuthRequest, res: Response) => {
     try {
         // Filter for user_id if provided in query
         const filter: any = { isCompleted: true };
@@ -232,21 +234,21 @@ export const deleteCompletedTasks = async (req: Request, res: Response) => {
 
         // Find all completed tasks first (to check for goal updates later)
         const completedTasks = await Task.find(filter);
-        
+
         // Extract goal IDs to update after deletion
         const goalIds = [...new Set(completedTasks
             .filter(task => task.goal_id)
             .map(task => task.goal_id.toString()))];
-        
+
         // Delete all completed tasks
         const deleteResult = await Task.deleteMany(filter);
-        
+
         // Update completion status for affected goals
         for (const goalId of goalIds) {
             const goal = await Goal.findById(goalId);
             if (goal) {
                 await goal.checkCompletion();
-                
+
                 // Check if any tasks remain for this goal
                 const remainingTasksCount = await Task.countDocuments({ goal_id: goalId });
                 if (remainingTasksCount === 0) {
@@ -255,7 +257,7 @@ export const deleteCompletedTasks = async (req: Request, res: Response) => {
                 }
             }
         }
-        
+
         res.status(200).json({
             message: "Completed tasks deleted successfully",
             count: deleteResult.deletedCount,

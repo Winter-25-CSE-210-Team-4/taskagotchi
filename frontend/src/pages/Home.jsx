@@ -7,6 +7,7 @@ import Confetti from 'react-confetti';
 import useAuth from '../../auth/hooks/useAuth';
 import { useCallback } from 'react';
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate';
+import TaskForm from '../components/TaskForm/TaskForm';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -18,15 +19,14 @@ const HomePage = () => {
     console.log('Auth state updated:', user, loggedIn, auth);
   }, [user, loggedIn, auth]);
 
-  const [tasks, set_tasks] = useState([]);
-
   const [goals, set_goals] = useState([]);
-
-  const [new_task, set_new_task] = useState({ name: '', time: '' });
-  //const [new_goal, set_new_goal] = useState({ name: '', description: '' });
-
   const [curr_goal, set_curr_goal] = useState(null);
   const [edit_goal, set_edit_goal] = useState(false);
+
+  const [tasks, set_tasks] = useState([]);
+  const [new_task, set_new_task] = useState({ name: '', time: '' });
+  const [currTask, setCurrTask] = useState(null);
+  const [editTask, setEditTask] = useState(false);
 
   const [xp, set_xp] = useState(0);
   const [confetti, set_confetti] = useState(false);
@@ -105,9 +105,67 @@ const HomePage = () => {
     [loggedIn, goals, axiosPrivate, fetchUserGoals]
   );
 
+  const fetchUserTasks = useCallback(async () => {
+    if (loggedIn) {
+      axiosPrivate
+        .get('/tasks')
+        .then((res) => {
+          const responseData = res.data;
+          const tasks = responseData.tasks;
+          //   const tasks = responseData.data.map((task) => ({
+          //     id: task._id,
+          //     name: task.name,
+          //     description: goal.description,
+          //     completed: goal.isCompleted,
+          //     endDate: Date.parse(goal.deadline),
+          //   }));
+          console.log('Task fetched:', tasks);
+          //   set_goals(goals);
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [loggedIn, axiosPrivate]);
+
+  const createUserTask = useCallback(
+    async (responseBody) => {
+      console.log('createUserTask', responseBody);
+      if (loggedIn) {
+        axiosPrivate
+          .post('/tasks', responseBody)
+          .then(() => {
+            fetchUserTasks();
+          })
+          .catch((err) => console.error(err));
+      }
+    },
+    [loggedIn, axiosPrivate, fetchUserGoals]
+  );
+
+  const updateUserTask = useCallback(
+    async (task) => {
+      if (loggedIn) {
+        axiosPrivate
+          .put(`/tasks/${task.id}`, task)
+          .then((res) => {
+            const updatedTask = res.data.tasks;
+            const updatedTasks = tasks.map((task) =>
+              task.id === updatedTask._id ? updatedTask : task
+            );
+            set_tasks(updatedTasks);
+          })
+          .catch((err) => console.error(err));
+      }
+    },
+    [loggedIn, tasks, axiosPrivate]
+  );
+
   useEffect(() => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
+
+  useEffect(() => {
+    fetchUserTasks();
+  }, [user, fetchUserTasks]);
 
   //Event handler for opening goal form
   const open_goal_form = (goal = null) => {
@@ -149,10 +207,45 @@ const HomePage = () => {
     deleteUserGoal(goalId);
   };
 
+  const openTaskForm = (task = null) => {
+    console.log('Opening form with: ', task);
+    set_curr_goal(task);
+    set_edit_goal(!!task);
+    document.getElementById('task-form-modal').showModal();
+
+    setTimeout(() => {
+      const modal = document.getElementById('task-form-modal');
+      if (modal) modal.showModal();
+    }, 0);
+  };
+
+  const handleSubmitTask = (newTask) => {
+    console.log('handle', newTask);
+    if (editTask) {
+      set_tasks(
+        tasks.map((task) => (task.name === currTask.name ? newTask : task))
+      );
+      updateUserTask(task);
+    } else {
+      set_tasks([...tasks, newTask]);
+      const requestBody = {
+        name: newTask.name,
+        description: newTask.description,
+        deadline: newTask.endDate,
+        goal_id: newTask.goalId,
+      };
+      createUserTask(requestBody);
+    }
+
+    document.getElementById('goal-form-modal').close();
+    set_curr_goal(null);
+    set_edit_goal(false);
+  };
   // Event handler for adding new task
   const handle_add_task = () => {
     if (new_task.name && new_task.time) {
       set_tasks([...tasks, new_task]);
+      createUserTask(new_task);
       set_new_task({ name: '', time: '' });
 
       document.getElementById('add-task-modal').checked = false;
@@ -273,45 +366,22 @@ const HomePage = () => {
               </li>
             ))}
           </ul>
+
+          <TaskForm
+            onSubmit={handleSubmitTask}
+            edit={editTask}
+            currentTask={currTask}
+            goals={goals}
+          />
           {/*Add Tasks and Goals*/}
           <div className='mt-auto flex flex-col gap-2'>
             <label
               htmlFor='add-task-modal'
               className='btn btn-link text-accent cursor-pointer'
+              onClick={() => openTaskForm(null)}
             >
               + Add Task
             </label>
-            <ExampleModal
-              id='add-task-modal'
-              name='Add New Task'
-              description={
-                <div>
-                  <input
-                    type='text'
-                    placeholder='Task Name'
-                    className='input input-bordered w-full my-2'
-                    value={new_task.name}
-                    onChange={(e) =>
-                      set_new_task({ ...new_task, name: e.target.value })
-                    }
-                  />
-                  <input
-                    type='time'
-                    className='input input-bordered w-full my-2'
-                    value={new_task.time}
-                    onChange={(e) =>
-                      set_new_task({ ...new_task, time: e.target.value })
-                    }
-                  />
-                  <button
-                    onClick={handle_add_task}
-                    className='btn btn-primary w-full'
-                  >
-                    Save Task
-                  </button>
-                </div>
-              }
-            />
             <button
               className='btn btn-link text-accent cursor-pointer mt-4'
               onClick={() => open_goal_form(null)}
