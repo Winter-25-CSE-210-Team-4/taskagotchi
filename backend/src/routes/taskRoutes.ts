@@ -1,10 +1,36 @@
 import express from "express";
-import { completeTask, deleteCompletedTasks } from "../controllers/taskController";
+import {
+    createTask,
+    getAllTasks,
+    getTasksByUserId,
+    getTaskById,
+    updateTask,
+    deleteTask,
+    completeTask,
+    deleteCompletedTasks } from "../controllers/taskController";
 
 const router = express.Router();
 
+// Create new task
+router.post("/", createTask);
+
+// Get all tasks
+router.get("/", getAllTasks);
+
+// Get task by ID
+router.get("/:id", getTaskById);
+
+// Get tasks by user ID
+router.get("/user/:user_id", getTasksByUserId);
+
+// Update task
+router.put("/:id", updateTask);
+
+// Delete task
+router.delete("/:id", deleteTask);
+
 // mark task as complete
-router.put("/:task_id/complete", completeTask);
+router.put("/:id/complete", completeTask);
 
 // delete completed tasks
 router.delete("/completed", deleteCompletedTasks);
