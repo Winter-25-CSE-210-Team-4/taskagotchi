@@ -111,14 +111,18 @@ const HomePage = () => {
         .get('/tasks')
         .then((res) => {
           const responseData = res.data;
-          const tasks = responseData.tasks;
-          //   const tasks = responseData.data.map((task) => ({
-          //     id: task._id,
-          //     name: task.name,
-          //     description: goal.description,
-          //     completed: goal.isCompleted,
-          //     endDate: Date.parse(goal.deadline),
-          //   }));
+          const uncompletedTasks = responseData.tasks.filter(
+            (task) => !task.isCompleted
+          );
+          const tasks = uncompletedTasks.map((task) => ({
+            id: task._id,
+            name: task.name,
+            description: task.description,
+            completed: task.isCompleted,
+            endDate: Date.parse(task.deadline),
+            goalId: task.goal_id,
+          }));
+          set_tasks(tasks);
           console.log('Task fetched:', tasks);
           //   set_goals(goals);
         })
