@@ -1,17 +1,47 @@
 import { Request, Response } from "express";
+import mongoose from 'mongoose';
 import Task from "../models/Task";
-import mongoose from "mongoose";
+import Goal from "../models/goal";
 
-// Create a new task
+// Get all tasks
+export const getAllTasks = async (req: Request, res: Response) => {
+    try {
+        // Filter by user_id if provided in query
+        const filter: any = {};
+        if (req.query.user_id) {
+            filter.user_id = req.query.user_id;
+        }
+
+        const tasks = await Task.find(filter)
+            .populate('goal_id', 'title')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            message: "Tasks retrieved successfully",
+            count: tasks.length,
+            tasks
+        });
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        res.status(500).json({
+            message: "Server error",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+};
+
+// Create Task
 export const createTask = async (req: Request, res: Response) => {
     try {
-        const { user_id, deadline, recurrs, recurringUnit, description } = req.body;
+        const { description, goal_id, deadline, user_id, recurrs, recurringUnit } = req.body;
 
         // Validate required fields
-        if (!user_id || !deadline || recurrs === undefined || !description) {
-            return res.status(400).json({
-                message: "Please provide all required fields: user_id, deadline, recurrs, and description"
-            });
+        if (!description) {
+            return res.status(400).json({ message: "Description is required" });
+        }
+
+        if (!user_id) {
+            return res.status(400).json({ message: "User ID is required" });
         }
 
         // Validate recurringUnit if task recurrs
@@ -21,35 +51,51 @@ export const createTask = async (req: Request, res: Response) => {
             });
         }
 
-        const newTask = new Task({
-            user_id,
-            deadline,
-            recurrs,
-            recurringUnit: recurrs ? recurringUnit : null,
-            description,
-            isCompleted: false
-        });
+        if (goal_id && !mongoose.Types.ObjectId.isValid(goal_id)) {
+            return res.status(400).json({ message: "Invalid goal ID format" });
+        }
 
-        const savedTask = await newTask.save();
-        res.status(201).json(savedTask);
+        if (!mongoose.Types.ObjectId.isValid(user_id)) {
+            return res.status(400).json({ message: "Invalid user ID format" });
+        }
+
+        // Create task object with required fields
+        const taskData: any = {
+            description,
+            user_id,
+            recurrs: recurrs || false, // Default to non-recurring
+            recurringUnit: recurringUnit || null
+        };
+
+        // Add goal_id if provided
+        if (goal_id) {
+            taskData.goal_id = goal_id;
+        }
+
+        // Add deadline if provided
+        if (deadline) {
+            taskData.deadline = new Date(deadline);
+        }
+
+        const task = new Task(taskData);
+        await task.save();
+
+        // Update goal completion status if task is associated with a goal
+        if (goal_id) {
+            const goal = await Goal.findById(goal_id);
+            if (goal) {
+                await goal.checkCompletion();
+            }
+        }
+
+        res.status(201).json({
+            message: "Task created successfully",
+            task
+        });
     } catch (error) {
-        console.error("Error creating task:", error);
+        console.error('Task creation error:', error);
         res.status(500).json({
             message: "Error creating task",
-            error: error instanceof Error ? error.message : "Unknown error"
-        });
-    }
-};
-
-// Get all tasks
-export const getAllTasks = async (req: Request, res: Response) => {
-    try {
-        const tasks = await Task.find();
-        res.status(200).json(tasks);
-    } catch (error) {
-        console.error("Error fetching tasks:", error);
-        res.status(500).json({
-            message: "Error fetching tasks",
             error: error instanceof Error ? error.message : "Unknown error"
         });
     }
@@ -58,14 +104,25 @@ export const getAllTasks = async (req: Request, res: Response) => {
 // Get tasks by user_id
 export const getTasksByUserId = async (req: Request, res: Response) => {
     try {
-        const user_id = Number(req.params.user_id);
-        const tasks = await Task.find({ user_id });
+        const userId = req.params.user_id;
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid user ID format" });
+        }
+
+        const tasks = await Task.find({ user_id: userId })
+            .populate('goal_id', 'title')
+            .sort({ createdAt: -1 });
 
         if (tasks.length === 0) {
             return res.status(404).json({ message: "No tasks found for this user" });
         }
 
-        res.status(200).json(tasks);
+        res.status(200).json({
+            message: "User tasks retrieved successfully",
+            count: tasks.length,
+            tasks
+        });
     } catch (error) {
         console.error("Error fetching user tasks:", error);
         res.status(500).json({
@@ -75,23 +132,26 @@ export const getTasksByUserId = async (req: Request, res: Response) => {
     }
 };
 
-// Get task by task's id
+// Get task by ID
 export const getTaskById = async (req: Request, res: Response) => {
     try {
         const taskId = req.params.id;
-
 
         if (!mongoose.Types.ObjectId.isValid(taskId)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
 
-        const task = await Task.findById(taskId);
+        const task = await Task.findById(taskId)
+            .populate('goal_id', 'title');
 
         if (!task) {
             return res.status(404).json({ message: "Task not found" });
         }
 
-        res.status(200).json(task);
+        res.status(200).json({
+            message: "Task retrieved successfully",
+            task
+        });
     } catch (error) {
         console.error("Error fetching task:", error);
         res.status(500).json({
@@ -101,41 +161,75 @@ export const getTaskById = async (req: Request, res: Response) => {
     }
 };
 
-// Update task by task_id
+// Update Task
 export const updateTask = async (req: Request, res: Response) => {
     try {
-        const taskId = req.params.id;
+        const { id } = req.params;
+        const { description, isCompleted, goal_id, deadline, recurrs, recurringUnit } = req.body;
 
-        //make sure taskId is valid MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        // Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
 
-        const updates = req.body;
-
-        // Make sure we're not trying to update the task_id
-        if (updates._id) {
-            return res.status(400).json({ message: "Cannot change _id" });
+        // Validate goal_id if provided
+        if (goal_id && !mongoose.Types.ObjectId.isValid(goal_id)) {
+            return res.status(400).json({ message: "Invalid goal ID format" });
         }
 
         // Validate recurringUnit if recurrs is true
-        if (updates.recurrs === true && !updates.recurringUnit) {
+        if (recurrs === true && !recurringUnit) {
             return res.status(400).json({
                 message: "For recurring tasks, please provide a recurringUnit (daily, weekly, or monthly)"
             });
         }
 
-        const updatedTask = await Task.findByIdAndUpdate(
-            taskId, // using id to search
-            updates,
-            { new: true, runValidators: true }
-        );
+        const task = await Task.findById(id);
 
-        if (!updatedTask) {
+        if (!task) {
             return res.status(404).json({ message: "Task not found" });
         }
 
-        res.status(200).json(updatedTask);
+        if (description !== undefined) task.description = description;
+        if (isCompleted !== undefined) task.isCompleted = isCompleted;
+        if (goal_id !== undefined) task.goal_id = goal_id;
+
+        // Handle deadline
+        if (deadline === null) {
+            task.deadline = undefined;
+        } else if (deadline) {
+            task.deadline = new Date(deadline);
+        }
+
+        if (recurrs !== undefined) task.recurrs = recurrs;
+        if (recurringUnit !== undefined) task.recurringUnit = recurringUnit;
+
+        await task.save();
+
+        // If completion status changed or goal changed, update goal completion
+        if ((isCompleted !== undefined || goal_id !== undefined) && task.goal_id) {
+            const goal = await Goal.findById(task.goal_id);
+            if (goal) {
+                await goal.checkCompletion();
+            }
+        }
+
+        // If old goal_id is different, update old goal completion too
+        const oldGoalId = task.goal_id && goal_id && task.goal_id.toString() !== goal_id.toString()
+            ? task.goal_id.toString()
+            : null;
+
+        if (oldGoalId) {
+            const oldGoal = await Goal.findById(oldGoalId);
+            if (oldGoal) {
+                await oldGoal.checkCompletion();
+            }
+        }
+
+        res.status(200).json({
+            message: "Task updated successfully",
+            task
+        });
     } catch (error) {
         console.error("Error updating task:", error);
         res.status(500).json({
@@ -145,25 +239,88 @@ export const updateTask = async (req: Request, res: Response) => {
     }
 };
 
-// Delete task by task_id
-export const deleteTask = async (req: Request, res: Response) => {
+// Mark task as complete
+export const completeTask = async (req: Request, res: Response) => {
     try {
-        const taskId = req.params.id;
+        const { id } = req.params;
 
-        // makesure taskId is valid MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(taskId)) {
+        // Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
 
-        const deletedTask = await Task.findByIdAndDelete(taskId);
+        const task = await Task.findById(id);
 
-        if (!deletedTask) {
+        if (!task) {
             return res.status(404).json({ message: "Task not found" });
+        }
+
+        task.isCompleted = true;
+        await task.save();
+
+        // Update associated goal completion status
+        if (task.goal_id) {
+            const goal = await Goal.findById(task.goal_id);
+            if (goal) {
+                await goal.checkCompletion();
+            }
+        }
+
+        res.status(200).json({
+            message: "Task marked as complete",
+            task
+        });
+    } catch (error) {
+        console.error("Error completing task:", error);
+        res.status(500).json({
+            message: "Error marking task as complete",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+};
+
+// Delete a specific task by ID
+export const deleteTask = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        // Validate that id is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid task ID format" });
+        }
+
+        const task = await Task.findByIdAndDelete(id);
+
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
+        }
+
+        // If the task is linked to a goal, check if it's the last task for that goal
+        if (task.goal_id) {
+            // Count remaining tasks for this goal
+            const remainingTasksCount = await Task.countDocuments({ goal_id: task.goal_id });
+
+            if (remainingTasksCount === 0) {
+                // This was the last task for the goal, delete the goal
+                const deletedGoal = await Goal.findByIdAndDelete(task.goal_id);
+
+                return res.status(200).json({
+                    message: "Task and associated goal successfully deleted",
+                    deletedTask: task,
+                    deletedGoal: deletedGoal
+                });
+            } else {
+                // Still has tasks, just update goal completion status
+                const goal = await Goal.findById(task.goal_id);
+                if (goal) {
+                    await goal.checkCompletion();
+                }
+            }
         }
 
         res.status(200).json({
             message: "Task successfully deleted",
-            task: deletedTask
+            deletedTask: task
         });
     } catch (error) {
         console.error("Error deleting task:", error);
@@ -174,55 +331,51 @@ export const deleteTask = async (req: Request, res: Response) => {
     }
 };
 
-
-import Goal from "../models/goal";
-// 1. mark task as complete
-export const completeTask = async (req: Request, res: Response) => {
+// Delete all completed tasks
+export const deleteCompletedTasks = async (req: Request, res: Response) => {
     try {
-        const taskId = req.params.id; // use id instead of task_id
-
-        // make sure taskId is valid MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(taskId)) {
-            return res.status(400).json({ message: "Wrong ID " });
+        // Filter for user_id if provided in query
+        const filter: any = { isCompleted: true };
+        if (req.query.user_id) {
+            filter.user_id = req.query.user_id;
         }
 
-        const task = await Task.findById(taskId);
+        // Find all completed tasks first (to check for goal updates later)
+        const completedTasks = await Task.find(filter);
 
-        if (!task) {
-            return res.status(404).json({ message: "Task not found" });
-        }
+        // Extract goal IDs to update after deletion
+        const goalIds = [...new Set(completedTasks
+            .filter(task => task.goal_id)
+            .map(task => task.goal_id.toString()))];
 
-        task.isCompleted = true;
-        await task.save();
+        // Delete all completed tasks
+        const deleteResult = await Task.deleteMany(filter);
 
-        // check the status of goal if task is related to a goal
-        if (task.goal_id) {
-            const goal = await Goal.findById(task.goal_id);
+        // Update completion status for affected goals
+        for (const goalId of goalIds) {
+            const goal = await Goal.findById(goalId);
             if (goal) {
                 await goal.checkCompletion();
+
+                // Check if any tasks remain for this goal
+                const remainingTasksCount = await Task.countDocuments({ goal_id: goalId });
+                if (remainingTasksCount === 0) {
+                    // No tasks left for this goal, delete it
+                    await Goal.findByIdAndDelete(goalId);
+                }
             }
         }
 
-        res.status(200).json(task);
-    } catch (error) {
-        console.error("Error when marking task as completed:", error);
-        res.status(500).json({
-            message: "Server Error",
-            error: error instanceof Error ? error.message : "Unknown Error"
+        res.status(200).json({
+            message: "Completed tasks deleted successfully",
+            count: deleteResult.deletedCount,
+            affectedGoals: goalIds.length
         });
-    }
-};
-
-// 2. delete all completed tasks
-export const deleteCompletedTasks = async (req: Request, res: Response) => {
-    try {
-        const result = await Task.deleteMany({ isCompleted: true });
-        res.status(200).json({ message: `${result.deletedCount} completed tasks has been deleted` });
     } catch (error) {
-        console.error("Error when deleting completed tasks:", error);
+        console.error("Error deleting completed tasks:", error);
         res.status(500).json({
-            message: "Server Error",
-            error: error instanceof Error ? error.message : "UnKnown Error"
+            message: "Error deleting completed tasks",
+            error: error instanceof Error ? error.message : "Unknown error"
         });
     }
 };

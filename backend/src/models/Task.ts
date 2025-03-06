@@ -1,28 +1,30 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// define the interface of Task
+// 定义 Task 接口
 export interface ITask extends Document {
-    user_id: mongoose.Schema.Types.ObjectId;
-    deadline: Date;
-    recurrs: boolean;
-    recurringUnit: string; // 
+    user_id: mongoose.Types.ObjectId;
+    goal_id: mongoose.Types.ObjectId;
     description: string;
     isCompleted: boolean;
-    goal_id?: mongoose.Types.ObjectId; //new the task belong to which one
+    deadline?: Date;
+    recurrs?: boolean;
+    recurringUnit?: string; // Daily, Weekly, Monthly
 }
 
-// define schema of task
+// 定义 Task Schema
 const TaskSchema: Schema = new Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    deadline: { type: Date, required: true },
-    recurrs: { type: Boolean, required: true },
-    goal_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Goal' },//new
-    recurringUnit: { type: String, enum: ["daily", "weekly", "monthly"], default: null },
-    description: { type: String, required: true },
-    isCompleted: { type: Boolean, default: false }
-});
+        user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        goal_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Goal', required: true },
+        description: { type: String, required: true },
+        isCompleted: { type: Boolean, default: false },
+        deadline: { type: Date, required: true },
+        recurrs: { type: Boolean, default: false },
+        recurringUnit: { type: String, enum: ["daily", "weekly", "monthly"], default: null },
+    },
+    { timestamps: true }
+);
 
-// create Task Model
+// 创建 Task 模型
 const Task = mongoose.model<ITask>("Task", TaskSchema);
 
 export default Task;
