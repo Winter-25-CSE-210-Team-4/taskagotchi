@@ -27,7 +27,7 @@ const HomePage = () => {
 
   const [xp, set_xp] = useState(0);
   const [confetti, set_confetti] = useState(false);
-  const [image, set_image] = useState('/images/monster_level1.png');
+  const [image, set_image] = useState('/images/pet-1.png');
 
 
 
@@ -101,9 +101,9 @@ const HomePage = () => {
         const updated_xp = Math.min(prev_xp + 5, 100);
 
         if(updated_xp >= 66) {
-          set_image('/images/monster_level3.png');
+          set_image('/images/pet-2.png');
         } else if (updated_xp >= 33) {
-          set_image('/images/monster_level2.png');
+          set_image('/images/pet-3.png');
         }
 
         return updated_xp;
