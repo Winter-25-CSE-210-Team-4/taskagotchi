@@ -6,6 +6,7 @@ import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/glo
 
 let mongoServer: MongoMemoryServer;
 let authToken: string;
+let goalId: string;
 
 beforeAll(async () => {
     if (mongoose.connection.readyState !== 0) {
@@ -23,12 +24,13 @@ beforeAll(async () => {
             password: 'password123',
             name: 'Test User'
         });
-
+        
+    console.log('Registration response:', registerResponse.body);
+    if (!registerResponse.body.data?.token) {
+        throw new Error('No token received from registration');
+    }
     authToken = registerResponse.body.token;
-});
-
-beforeEach(async () => {
-    await mongoose.connection.collection('goals').deleteMany({});
+    console.log('Auth token received:', authToken);
 });
 
 afterAll(async () => {
@@ -40,6 +42,7 @@ describe('Goal Endpoints', () => {
     let goalId: string;
 
     beforeEach(async () => {
+        await mongoose.connection.collection('goals').deleteMany({});
         try {
             const createRes = await request(app)
                 .post('/api/goals')
@@ -51,10 +54,14 @@ describe('Goal Endpoints', () => {
                 });
             
             console.log('Create response:', createRes.body);
+            if (!createRes.body.data?._id) {
+                throw new Error('No goal ID received from creation');
+            }
             goalId = createRes.body.data._id;
             console.log('Created goal ID:', goalId);
         } catch (error) {
-            console.error('Error in beforeEach:', error);
+            console.error('Goal creation error:', error);
+            throw error;
         }
     });
 
@@ -207,4 +214,9 @@ describe('Goal Endpoints', () => {
         expect(res.status).toBe(401);
         expect(res.body).toHaveProperty('error', 'Please authenticate.');
     });
+});
+
+afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
 });
