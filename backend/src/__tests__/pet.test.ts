@@ -71,14 +71,14 @@ describe('Pet Endpoints', () => {
     it('should get all pets', async () => {
         await Pet.create([
             {
-                pet_id: 1,
+                userId: userId,
                 name: 'Pet1',
                 health: 100,
                 level: 1,
                 exp: 0
             },
             {
-                pet_id: 2,
+                userId: userId,
                 name: 'Pet2',
                 health: 100,
                 level: 1,
@@ -88,7 +88,8 @@ describe('Pet Endpoints', () => {
 
         // Attempt to retrieve all pets
         const res = await request(app)
-            .get('/api/pets');
+            .get('/api/pets')
+            .set('Authorization', `Bearer ${authToken}`);
 
         expect(res.status).toBe(200);
         expect(Array.isArray(res.body)).toBeTruthy();
@@ -98,7 +99,7 @@ describe('Pet Endpoints', () => {
     // Test: Retrieving a single pet by its ID
     it('should get a single pet by ID', async () => {
         const pet = await Pet.create({
-            pet_id: 2,
+            userId: userId,
             name: 'FindMe',
             health: 100,
             level: 1,
@@ -107,7 +108,8 @@ describe('Pet Endpoints', () => {
 
         // Attempt to retrieve the pet by its ID
         const res = await request(app)
-            .get(`/api/pets/${pet.pet_id}`);
+            .get(`/api/pets/${pet.pet_id}`)
+            .set('Authorization', `Bearer ${authToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('name', 'FindMe');

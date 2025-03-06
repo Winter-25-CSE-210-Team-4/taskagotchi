@@ -18,8 +18,8 @@ describe('Auth Endpoints', () => {
   
       expect(res.status).toBe(201);
       expect(res.body.data).toHaveProperty('token');
-      expect(res.body.user).toHaveProperty('email', 'test@example.com');
-    });
+      expect(res.body.data.user).toHaveProperty('email', 'test@example.com');
+  });
 
     it('should login with valid credentials', async () => {
       // register user
