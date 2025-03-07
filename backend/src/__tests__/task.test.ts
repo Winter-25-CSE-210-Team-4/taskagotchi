@@ -755,4 +755,176 @@ describe('Task Endpoints', () => {
         const secondGoalAfterDelete = await Goal.findById(secondGoal._id);
         expect(secondGoalAfterDelete).not.toBeNull();
     });
+
+    // Tests for getTasksSortedByDeadline
+    describe('Get Tasks Sorted By Deadline', () => {
+        it('should retrieve tasks sorted by deadline in ascending order', async () => {
+            // Create tasks with different deadlines
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+
+            // Create tasks with different deadlines
+            await Task.create([
+                {
+                    description: 'Next Week Task',
+                    user_id: userId,
+                    goal_id: goalId,
+                    deadline: nextWeek,
+                    isCompleted: false
+                },
+                {
+                    description: 'Tomorrow Task',
+                    user_id: userId,
+                    goal_id: goalId,
+                    deadline: tomorrow,
+                    isCompleted: false
+                },
+                {
+                    description: 'Today Task',
+                    user_id: userId,
+                    goal_id: goalId,
+                    deadline: today,
+                    isCompleted: false
+                }
+            ]);
+
+            // Test ascending order
+            const resAsc = await request(app)
+                .get('/api/tasks/bydeadline')
+                .query({ order: 'asc' });
+
+            expect(resAsc.status).toBe(200);
+            expect(resAsc.body).toHaveProperty('message', 'Tasks retrieved and sorted by deadline');
+            expect(resAsc.body).toHaveProperty('count', 3);
+            expect(Array.isArray(resAsc.body.tasks)).toBe(true);
+            expect(resAsc.body.tasks).toHaveLength(3);
+
+            // Check if sorted correctly (ascending)
+            expect(new Date(resAsc.body.tasks[0].deadline).getTime()).toBeLessThanOrEqual(
+                new Date(resAsc.body.tasks[1].deadline).getTime()
+            );
+            expect(new Date(resAsc.body.tasks[1].deadline).getTime()).toBeLessThanOrEqual(
+                new Date(resAsc.body.tasks[2].deadline).getTime()
+            );
+        });
+
+        it('should retrieve tasks sorted by deadline in descending order', async () => {
+            // Create tasks with different deadlines if not already created
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+
+            // Check if tasks already exist, if not create them
+            const existingTasks = await Task.countDocuments({ user_id: userId });
+            if (existingTasks < 3) {
+                await Task.create([
+                    {
+                        description: 'Next Week Task',
+                        user_id: userId,
+                        goal_id: goalId,
+                        deadline: nextWeek,
+                        isCompleted: false
+                    },
+                    {
+                        description: 'Tomorrow Task',
+                        user_id: userId,
+                        goal_id: goalId,
+                        deadline: tomorrow,
+                        isCompleted: false
+                    },
+                    {
+                        description: 'Today Task',
+                        user_id: userId,
+                        goal_id: goalId,
+                        deadline: today,
+                        isCompleted: false
+                    }
+                ]);
+            }
+
+            // Test descending order (default)
+            const resDesc = await request(app)
+                .get('/api/tasks/bydeadline');  // No order specified should default to desc
+
+            expect(resDesc.status).toBe(200);
+            expect(resDesc.body).toHaveProperty('message', 'Tasks retrieved and sorted by deadline');
+            expect(Array.isArray(resDesc.body.tasks)).toBe(true);
+            expect(resDesc.body.tasks.length).toBeGreaterThan(0);
+
+            // Check if sorted correctly (descending)
+            if (resDesc.body.tasks.length >= 2) {
+                expect(new Date(resDesc.body.tasks[0].deadline).getTime()).toBeGreaterThanOrEqual(
+                    new Date(resDesc.body.tasks[1].deadline).getTime()
+                );
+            }
+            if (resDesc.body.tasks.length >= 3) {
+                expect(new Date(resDesc.body.tasks[1].deadline).getTime()).toBeGreaterThanOrEqual(
+                    new Date(resDesc.body.tasks[2].deadline).getTime()
+                );
+            }
+        });
+
+        it('should filter tasks by completion status and user_id', async () => {
+            // Create a different user ID
+            const differentUserId = new mongoose.Types.ObjectId().toString();
+
+            // Create completed and incomplete tasks for both users
+            await Task.create([
+                {
+                    description: 'Completed Task - Main User',
+                    user_id: userId,
+                    goal_id: goalId,
+                    deadline: new Date(),
+                    isCompleted: true
+                },
+                {
+                    description: 'Completed Task - Different User',
+                    user_id: differentUserId,
+                    goal_id: goalId,
+                    deadline: new Date(),
+                    isCompleted: true
+                }
+            ]);
+
+            // Test filtering by completion status and user_id
+            const res = await request(app)
+                .get('/api/tasks/bydeadline')
+                .query({
+                    isCompleted: 'true',
+                    user_id: userId
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('message', 'Tasks retrieved and sorted by deadline');
+            expect(Array.isArray(res.body.tasks)).toBe(true);
+
+            // All returned tasks should be completed and belong to main user
+            for (const task of res.body.tasks) {
+                expect(task.isCompleted).toBe(true);
+                expect(task.user_id).toBe(userId);
+            }
+
+            // Ensure we didn't get tasks from the different user
+            const differentUserTasks = res.body.tasks.filter(
+                (task: any) => task.user_id === differentUserId
+            );
+            expect(differentUserTasks.length).toBe(0);
+        });
+
+        it('should handle invalid query parameters gracefully', async () => {
+            // Test with invalid order parameter
+            const res = await request(app)
+                .get('/api/tasks/bydeadline')
+                .query({ order: 'invalid' });
+
+            // Should default to desc order but still return successfully
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('message', 'Tasks retrieved and sorted by deadline');
+        });
+    });
 });

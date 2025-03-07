@@ -382,3 +382,40 @@ export const deleteCompletedTasks = async (req: Request, res: Response) => {
         });
     }
 };
+
+// Get tasks sorted by deadline
+export const getTasksSortedByDeadline = async (req: Request, res: Response) => {
+    try {
+        // Build filter object based on query parameters
+        const filter: any = {};
+
+        // Filter by user_id if provided
+        if (req.query.user_id) {
+            filter.user_id = req.query.user_id;
+        }
+
+        // Filter by completion status if provided
+        if (req.query.isCompleted !== undefined) {
+            filter.isCompleted = req.query.isCompleted === 'true';
+        }
+
+        // Determine sort order (asc or desc)
+        const sortOrder = req.query.order === 'asc' ? 1 : -1;
+
+        const tasks = await Task.find(filter)
+            .populate('goal_id', 'title')
+            .sort({ deadline: sortOrder });
+
+        res.status(200).json({
+            message: "Tasks retrieved and sorted by deadline",
+            count: tasks.length,
+            tasks
+        });
+    } catch (error) {
+        console.error('Error fetching tasks by deadline:', error);
+        res.status(500).json({
+            message: "Server error",
+            error: error instanceof Error ? error.message : "Unknown error"
+        });
+    }
+};

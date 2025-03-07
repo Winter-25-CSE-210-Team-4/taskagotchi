@@ -7,7 +7,9 @@ import {
     updateTask,
     deleteTask,
     completeTask,
-    deleteCompletedTasks } from "../controllers/taskController";
+    deleteCompletedTasks,
+    getTasksSortedByDeadline
+} from "../controllers/taskController";
 
 const router = express.Router();
 
@@ -16,6 +18,8 @@ router.post("/", createTask);
 
 // Get all tasks
 router.get("/", getAllTasks);
+
+router.get('/bydeadline', getTasksSortedByDeadline);
 
 // Get task by ID
 router.get("/:id", getTaskById);
