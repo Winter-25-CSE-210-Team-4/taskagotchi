@@ -202,6 +202,14 @@ const HomePage = () => {
     fetchUserTasks();
   }, [user, fetchUserTasks]);
 
+  const get_user = (loggedIn, user) => {
+    if(loggedIn) {
+      return user.name.charAt(0).toUpperCase();
+    } else {
+      return '?';
+    }
+  };
+
   //Event handler for opening goal form
   const openGoalForm = (goal = null) => {
     console.log('Opening form with: ', goal);
@@ -463,12 +471,15 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Stats button */}
-        {/* TODO: route properly */}
+        {/* User icon */}
         <div className='absolute top-4 right-4'>
-          <button className='btn btn-accent ' onClick={() => navigate('/')}>
-            stats
-          </button>
+          <div className="avatar">
+            <div className="bg-neutral text-neutral-content w-12 rounded-full flex items-center justify-center leading-none text-center">
+              <div className="text-3xl py-1 font-bold">
+                {get_user(loggedIn, user)}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
