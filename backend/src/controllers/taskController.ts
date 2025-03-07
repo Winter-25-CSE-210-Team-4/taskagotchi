@@ -72,10 +72,12 @@ export const createTask = async (req: Request, res: Response) => {
             taskData.goal_id = goal_id;
         }
 
-        // Add deadline if provided
-        if (deadline) {
-            taskData.deadline = new Date(deadline);
+
+        // Validate deadline
+        if (!deadline) {
+            return res.status(400).json({ message: "Deadline is required" });
         }
+        taskData.deadline = new Date(deadline);
 
         const task = new Task(taskData);
         await task.save();
@@ -195,11 +197,12 @@ export const updateTask = async (req: Request, res: Response) => {
         if (goal_id !== undefined) task.goal_id = goal_id;
 
         // Handle deadline
-        if (deadline === null) {
-            task.deadline = undefined;
-        } else if (deadline) {
-            task.deadline = new Date(deadline);
+        // Validate deadline
+        if (!deadline) {
+            return res.status(400).json({ message: "Deadline is required" });
         }
+        task.deadline = new Date(deadline);
+
 
         if (recurrs !== undefined) task.recurrs = recurrs;
         if (recurringUnit !== undefined) task.recurringUnit = recurringUnit;
