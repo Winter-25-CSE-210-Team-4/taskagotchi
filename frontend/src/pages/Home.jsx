@@ -8,6 +8,7 @@ import useAuth from '../../auth/hooks/useAuth';
 import { useCallback } from 'react';
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate';
 import TaskForm from '../components/TaskForm/TaskForm';
+import GoalModal from '../components/ui/GoalModal';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const HomePage = () => {
             name: goal.name,
             description: goal.description,
             completed: goal.isCompleted,
-            endDate: Date.parse(goal.deadline),
+            deadline: Date.parse(goal.deadline),
           }));
           console.log('Goals fetched:', goals);
           setGoals(goals);
@@ -120,7 +121,7 @@ const HomePage = () => {
             name: task.name,
             description: task.description,
             completed: task.isCompleted,
-            endDate: Date.parse(task.deadline),
+            deadline: Date.parse(task.deadline),
             goalId: task.goal_id._id,
           }));
           setTasks(tasks);
@@ -177,7 +178,7 @@ const HomePage = () => {
           .then((res) => {
             const updatedTask = {
               ...res.data.task,
-              endDate: Date.parse(res.data.task.deadline),
+              deadline: Date.parse(res.data.task.deadline),
             };
 
             const updatedTasks = tasks.map((task) =>
@@ -200,7 +201,7 @@ const HomePage = () => {
   }, [user, fetchUserTasks]);
 
   //Event handler for opening goal form
-  const open_goal_form = (goal = null) => {
+  const openGoalForm = (goal = null) => {
     console.log('Opening form with: ', goal);
     setCurrGoal(goal);
     setEditGoal(!!goal);
@@ -223,7 +224,7 @@ const HomePage = () => {
       const requestBody = {
         name: goal.name,
         description: goal.description,
-        deadline: goal.endDate,
+        deadline: goal.deadline,
       };
       createUserGoals(requestBody);
     }
@@ -263,7 +264,7 @@ const HomePage = () => {
       const requestBody = {
         name: newTask.name,
         description: newTask.description,
-        deadline: newTask.endDate,
+        deadline: newTask.deadline,
         goal_id: newTask.goalId,
       };
       createUserTask(requestBody);
@@ -310,31 +311,57 @@ const HomePage = () => {
           {/*Goals*/}
           <h3 className='text-base font-bold pb-2 pr-2 mb-2'>Goals</h3>
           <ul>
-            {goals.map((goal, index) => (
-              <li
-                key={index}
-                className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'
-              >
-                <span
-                  className='text-sm cursor-pointer'
-                  onClick={() => open_goal_form(goal)}
+            {goals.map((goal, index) => {
+              const goalEndDateTime = new Date(goal.deadline);
+              const goalDeadline = goalEndDateTime.toLocaleDateString();
+              console.log(
+                'goal end date',
+                goal.deadline,
+                goalEndDateTime,
+                'deadline',
+                goalDeadline
+              );
+
+              return (
+                <li
+                  key={index}
+                  className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'
                 >
-                  {goal.name}
-                </span>
-                <button
-                  className='text-red-500 text-sm'
-                  onClick={() => handle_delete_goal(index, goal.id)}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
+                  <label
+                    htmlFor={`goal-modal-${index}`}
+                    className='flex justify-between text-sm text-accent cursor-pointer underline'
+                  >
+                    <span className='pr-1'> {goal.name}</span>
+                  </label>
+                  <button
+                    className='text-red-500 text-sm'
+                    onClick={() => handle_delete_goal(index, goal.id)}
+                  >
+                    Delete
+                  </button>
+                  <GoalModal
+                    id={`goal-modal-${index}`}
+                    name={goal.name}
+                    description={goal.description}
+                    deadline={goalDeadline}
+                    onEdit={() => {
+                      setEditGoal(true);
+                      openGoalForm(goal);
+                    }}
+                  />
+                </li>
+              );
+            })}
           </ul>
 
           <GoalForm
             onSubmit={handle_submit_goal}
             edit={editGoal}
             currentGoal={currGoal}
+            onEdit={() => {
+              setEditGoal(true);
+              openGoalForm(goal);
+            }}
           />
 
           {/* Tasks*/}
@@ -343,7 +370,7 @@ const HomePage = () => {
             {tasks.map((task, index) => {
               let taskDeadline = null;
               const now = new Date();
-              const taskEndDateTime = new Date(task.endDate);
+              const taskEndDateTime = new Date(task.deadline);
               if (taskEndDateTime.toDateString() === now.toDateString()) {
                 taskDeadline = taskEndDateTime.toLocaleTimeString('en-US', {
                   hour: '2-digit',
@@ -419,7 +446,7 @@ const HomePage = () => {
             </label>
             <button
               className='btn btn-link text-accent cursor-pointer mt-4'
-              onClick={() => open_goal_form(null)}
+              onClick={() => openGoalForm(null)}
             >
               + Add Goal
             </button>
