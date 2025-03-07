@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// 定义 Task 接口
+// define Task interface
 export interface ITask extends Document {
     user_id: mongoose.Types.ObjectId;
     goal_id: mongoose.Types.ObjectId;
@@ -11,7 +11,7 @@ export interface ITask extends Document {
     recurringUnit?: string; // Daily, Weekly, Monthly
 }
 
-// 定义 Task Schema
+// define Task Schema
 const TaskSchema: Schema = new Schema({
         user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         goal_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Goal', required: true },
@@ -24,7 +24,7 @@ const TaskSchema: Schema = new Schema({
     { timestamps: true }
 );
 
-// 创建 Task 模型
+// create task model
 const Task = mongoose.model<ITask>("Task", TaskSchema);
 
 export default Task;
