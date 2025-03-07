@@ -420,7 +420,10 @@ const HomePage = () => {
                     deadline={taskDeadline}
                     onEdit={() => {
                       setEditTask(true);
-                      openTaskForm(task);
+                      openTaskForm({
+                        ...task,
+                        deadline: new Date(task.deadline),
+                      });
                     }}
                   />
                 </li>
