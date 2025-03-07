@@ -217,11 +217,16 @@ describe('Task Endpoints', () => {
             isCompleted: false
         });
 
+        // Include deadline in the update request
+        const updatedDeadline = new Date();
+        updatedDeadline.setDate(updatedDeadline.getDate() + 3); // Set deadline 3 days from now
+
         const res = await request(app)
             .put(`/api/tasks/${task._id}`)
             .send({
                 description: 'Updated Task Description',
-                isCompleted: true
+                isCompleted: true,
+                deadline: updatedDeadline.toISOString() // Include the deadline field
             });
 
         expect(res.status).toBe(200);

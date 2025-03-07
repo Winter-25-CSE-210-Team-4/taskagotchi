@@ -73,11 +73,13 @@ export const createTask = async (req: Request, res: Response) => {
         }
 
 
-        // Validate deadline
-        if (!deadline) {
-            return res.status(400).json({ message: "Deadline is required" });
+        // the deadline should always be required
+        if (deadline !== undefined) {
+            if (!deadline) {
+                return res.status(400).json({ message: "Deadline cannot be empty if provided" });
+            }
+            taskData.deadline = new Date(deadline);
         }
-        taskData.deadline = new Date(deadline);
 
         const task = new Task(taskData);
         await task.save();
@@ -196,12 +198,13 @@ export const updateTask = async (req: Request, res: Response) => {
         if (isCompleted !== undefined) task.isCompleted = isCompleted;
         if (goal_id !== undefined) task.goal_id = goal_id;
 
-        // Handle deadline
-        // Validate deadline
-        if (!deadline) {
-            return res.status(400).json({ message: "Deadline is required" });
+        // All task's deadline is required.
+        if (deadline !== undefined) {
+            if (!deadline) {
+                return res.status(400).json({ message: "Deadline cannot be empty if provided" });
+            }
+            task.deadline = new Date(deadline);
         }
-        task.deadline = new Date(deadline);
 
 
         if (recurrs !== undefined) task.recurrs = recurrs;
