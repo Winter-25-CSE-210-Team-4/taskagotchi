@@ -157,6 +157,7 @@ describe('Pet Endpoints', () => {
     it('should validate pet health range', async () => {
         const res = await request(app)
             .post('/api/pets')
+            .set('Authorization', `Bearer ${authToken}`)
             .send({
                 pet_id: 3,
                 name: 'HealthyPet',
