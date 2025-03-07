@@ -2,7 +2,7 @@ import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import TaskModal from '../components/ui/TaskModal';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Confetti from 'react-confetti';
 import useAuth from '../../auth/hooks/useAuth';
 import { useCallback } from 'react';
@@ -419,6 +419,9 @@ const HomePage = () => {
                     name={task.name}
                     description={task.description}
                     deadline={taskDeadline}
+                    goalName={
+                      goals.find((goal) => goal.id === task.goalId).name
+                    }
                     onEdit={() => {
                       setEditTask(true);
                       openTaskForm({

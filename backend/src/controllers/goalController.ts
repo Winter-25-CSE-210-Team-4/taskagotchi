@@ -151,6 +151,8 @@ export const deleteGoal = async (req: AuthRequest, res: Response) => {
             userId: req.user?.id
         });
 
+        await Task.deleteMany({ goal_id: goalId });
+
         if (!deletedGoal) {
             return res.status(404).json({
                 success: false,
