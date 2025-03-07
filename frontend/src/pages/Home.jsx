@@ -19,17 +19,16 @@ const HomePage = () => {
     console.log('Auth state updated:', user, loggedIn, auth);
   }, [user, loggedIn, auth]);
 
-  const [goals, set_goals] = useState([]);
-  const [curr_goal, set_curr_goal] = useState(null);
-  const [edit_goal, set_edit_goal] = useState(false);
+  const [goals, setGoals] = useState([]);
+  const [currGoal, setCurrGoal] = useState(null);
+  const [edit_goal, setEditGoal] = useState(false);
 
-  const [tasks, set_tasks] = useState([]);
-  const [new_task, set_new_task] = useState({ name: '', time: '' });
-  const [currTask, setCurrTask] = useState(null);
-  const [editTask, setEditTask] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [currTask] = useState(null);
+  const [editTask] = useState(false);
 
-  const [xp, set_xp] = useState(0);
-  const [confetti, set_confetti] = useState(false);
+  const [xp] = useState(0);
+  const [confetti] = useState(false);
 
   // API-----
 
@@ -47,7 +46,8 @@ const HomePage = () => {
             completed: goal.isCompleted,
             endDate: Date.parse(goal.deadline),
           }));
-          set_goals(goals);
+          console.log('Goals fetched:', goals);
+          setGoals(goals);
         })
         .catch((err) => console.error(err));
     }
@@ -77,7 +77,7 @@ const HomePage = () => {
             const updatedGoals = goals.filter(
               (goal) => goal.id !== deletedGoal._id
             );
-            set_goals(updatedGoals);
+            setGoals(updatedGoals);
           })
           .catch((err) => console.error(err));
       }
@@ -96,7 +96,7 @@ const HomePage = () => {
             const updatedGoals = goals.map((goal) =>
               goal.id === updatedGoal._id ? updatedGoal : goal
             );
-            set_goals(updatedGoals);
+            setGoals(updatedGoals);
             fetchUserGoals();
           })
           .catch((err) => console.error(err));
@@ -122,9 +122,9 @@ const HomePage = () => {
             endDate: Date.parse(task.deadline),
             goalId: task.goal_id,
           }));
-          set_tasks(tasks);
+          setTasks(tasks);
           console.log('Task fetched:', tasks);
-          //   set_goals(goals);
+          //   setGoals(goals);
         })
         .catch((err) => console.error(err));
     }
@@ -156,13 +156,13 @@ const HomePage = () => {
             const updatedTasks = tasks.filter(
               (task) => task.id !== deletedTask._id
             );
-            set_tasks(updatedTasks);
+            setTasks(updatedTasks);
             fetchUserTasks();
             if (deletedGoal !== undefined) {
               const updatedGoals = goals.filter(
                 (goal) => goal.id !== deletedGoal._id
               );
-              set_goals(updatedGoals);
+              setGoals(updatedGoals);
               fetchUserGoals();
             }
           })
@@ -182,7 +182,7 @@ const HomePage = () => {
             const updatedTasks = tasks.map((task) =>
               task.id === updatedTask._id ? updatedTask : task
             );
-            set_tasks(updatedTasks);
+            setTasks(updatedTasks);
           })
           .catch((err) => console.error(err));
       }
@@ -200,8 +200,10 @@ const HomePage = () => {
 
   //Event handler for opening goal form
   const open_goal_form = (goal = null) => {
-    set_curr_goal(goal);
-    set_edit_goal(!!goal);
+    console.log('Opening form with: ', goal);
+    setCurrGoal(goal);
+    setEditGoal(!!goal);
+    document.getElementById('goal-form-modal').showModal();
 
     setTimeout(() => {
       const modal = document.getElementById('goal-form-modal');
@@ -212,10 +214,10 @@ const HomePage = () => {
   // Event handler for adding a new goal/submitting edits
   const handle_submit_goal = (goal) => {
     if (edit_goal) {
-      set_goals(goals.map((g) => (g.name === curr_goal.name ? goal : g)));
+      setGoals(goals.map((g) => (g.name === currGoal.name ? goal : g)));
       updateUserGoal(goal);
     } else {
-      set_goals([...goals, goal]);
+      setGoals([...goals, goal]);
       const requestBody = {
         name: goal.name,
         description: goal.description,
@@ -225,20 +227,20 @@ const HomePage = () => {
     }
 
     document.getElementById('goal-form-modal').close();
-    set_curr_goal(null);
-    set_edit_goal(false);
+    setCurrGoal(null);
+    setEditGoal(false);
   };
 
   //event handler for deleting a goal
   const handle_delete_goal = (index, goalId) => {
-    set_goals(goals.filter((_, i) => i !== index));
+    setGoals(goals.filter((_, i) => i !== index));
     deleteUserGoal(goalId);
   };
 
   const openTaskForm = (task = null) => {
     console.log('Opening form with: ', task);
-    set_curr_goal(task);
-    set_edit_goal(!!task);
+    setCurrGoal(task);
+    setEditGoal(!!task);
     document.getElementById('task-form-modal').showModal();
 
     setTimeout(() => {
@@ -250,12 +252,12 @@ const HomePage = () => {
   const handleSubmitTask = (newTask) => {
     console.log('handle', newTask);
     if (editTask) {
-      set_tasks(
+      setTasks(
         tasks.map((task) => (task.name === currTask.name ? newTask : task))
       );
-      updateUserTask(task);
+      updateUserTask(newTask);
     } else {
-      set_tasks([...tasks, newTask]);
+      setTasks([...tasks, newTask]);
       const requestBody = {
         name: newTask.name,
         description: newTask.description,
@@ -266,13 +268,13 @@ const HomePage = () => {
     }
 
     document.getElementById('task-form-modal').close();
-    set_curr_goal(null);
-    set_edit_goal(false);
+    setCurrGoal(null);
+    setEditGoal(false);
   };
 
   // Event handler for deleting a task
   const handle_delete_task = (index) => {
-    set_tasks(tasks.filter((_, i) => i !== index));
+    setTasks(tasks.filter((_, i) => i !== index));
   };
 
   //Event handler for marking task as done
@@ -330,46 +332,61 @@ const HomePage = () => {
           <GoalForm
             onSubmit={handle_submit_goal}
             edit={edit_goal}
-            currentGoal={curr_goal}
+            currentGoal={currGoal}
           />
 
           {/* Tasks*/}
           <h3 className='text-base font-bold mb-2 pt-2 pb-2 pr-2'>Tasks</h3>
           <ul className='mb-4'>
-            {tasks.map((task, index) => (
-              <li
-                key={index}
-                className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'
-              >
-                <label
-                  htmlFor={`task-checkbox-${index}`}
-                  className='flex text-sm justify-between cursor-pointer items-center gap-2'
+            {tasks.map((task, index) => {
+              let taskDeadline = null;
+              const now = new Date();
+              const taskEndDateTime = new Date(task.endDate);
+              if (taskEndDateTime.toDateString() === now.toDateString()) {
+                taskDeadline = taskEndDateTime.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+              } else {
+                taskDeadline = taskEndDateTime.toLocaleDateString();
+              }
+              return (
+                <li
+                  key={index}
+                  className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'
                 >
-                  <input
-                    type='checkbox'
-                    id={`task-checkbox-${index}`}
-                    className='checkbox-sm'
-                    checked={task.completed || false}
-                    onChange={() => handle_task_completion(task.id)}
+                  <div className='flex justify-start gap-2'>
+                    <label
+                      htmlFor={`task-checkbox-${index}`}
+                      className='text-sm cursor-pointer items-center'
+                    >
+                      <input
+                        type='checkbox'
+                        id={`task-checkbox-${index}`}
+                        className='checkbox-sm'
+                        onClick={() => handle_task_completion(task.id)}
+                      />
+                    </label>
+
+                    <label
+                      htmlFor={`task-modal-${index}`}
+                      className='flex justify-between text-sm text-accent cursor-pointer underline'
+                    >
+                      <span className='pr-1'>{task.name}</span>
+                    </label>
+                  </div>
+                  <span>{taskDeadline}</span>
+
+                  <ExampleModal
+                    id={`task-modal-${index}`}
+                    name={task.name}
+                    description={`Scheduled for ${taskDeadline}`}
+                    delete_func={() => handle_delete_task(index)}
                   />
-
-                  <label
-                    htmlFor={`task-modal-${index}`}
-                    className='flex justify-between text-sm text-accent cursor-pointer underline'
-                  >
-                    <span className='pr-1'>{task.name}</span>
-                  </label>
-                  <span>{task.time}</span>
-                </label>
-
-                <ExampleModal
-                  id={`task-modal-${index}`}
-                  name={task.name}
-                  description={`Scheduled for ${task.time}`}
-                  delete_func={() => handle_delete_task(index)}
-                />
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           <TaskForm
