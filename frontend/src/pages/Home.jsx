@@ -1,5 +1,4 @@
 import Header from '../components/ui/Header';
-import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import TaskModal from '../components/ui/TaskModal';
 import { useState, useEffect } from 'react';
@@ -11,7 +10,6 @@ import TaskForm from '../components/TaskForm/TaskForm';
 import GoalModal from '../components/ui/GoalModal';
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const { user, loggedIn, auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
 
