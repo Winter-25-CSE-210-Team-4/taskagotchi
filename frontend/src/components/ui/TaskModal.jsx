@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 
-const TaskModal = ({ id, name, description, deadline, delete_func }) => {
+const TaskModal = ({ id, name, description, deadline, onEdit }) => {
   return (
     <>
       <input type='checkbox' id={id} className='modal-toggle' />
@@ -8,9 +8,11 @@ const TaskModal = ({ id, name, description, deadline, delete_func }) => {
         <div className='modal-box'>
           <h3 className='text-lg font-bold'>{name}</h3>
           <div className='py-4'>{description}</div>
-
           <div className='py-4'>Scheduled for {deadline}</div>
           <div className='modal-action'>
+            <label className='btn btn-primary' onClick={() => onEdit(id)}>
+              Edit
+            </label>
             <label htmlFor={id} className='btn'>
               Close
             </label>
@@ -25,7 +27,8 @@ TaskModal.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   description: PropTypes.string,
-  delete_func: PropTypes.func,
+  deadline: PropTypes.string,
+  onEdit: PropTypes.func,
 };
 
 export default TaskModal;

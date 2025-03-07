@@ -21,12 +21,12 @@ const HomePage = () => {
 
   const [goals, setGoals] = useState([]);
   const [currGoal, setCurrGoal] = useState(null);
-  const [edit_goal, setEditGoal] = useState(false);
+  const [editGoal, setEditGoal] = useState(false);
   const [checkedTasks, setCheckedTasks] = useState({});
 
   const [tasks, setTasks] = useState([]);
-  const [currTask] = useState(null);
-  const [editTask] = useState(false);
+  const [currTask, setCurrTask] = useState(null);
+  const [editTask, setEditTask] = useState(false);
 
   const [xp] = useState(0);
   const [confetti] = useState(false);
@@ -120,7 +120,7 @@ const HomePage = () => {
             description: task.description,
             completed: task.isCompleted,
             endDate: Date.parse(task.deadline),
-            goalId: task.goal_id,
+            goalId: task.goal_id._id,
           }));
           setTasks(tasks);
           console.log('Task fetched:', tasks);
@@ -142,7 +142,7 @@ const HomePage = () => {
           .catch((err) => console.error(err));
       }
     },
-    [loggedIn, axiosPrivate, fetchUserGoals]
+    [loggedIn, axiosPrivate, fetchUserTasks]
   );
 
   const deleteUserTask = useCallback(
@@ -157,9 +157,6 @@ const HomePage = () => {
               ...prevState,
               [deletedTask._id]: false, // Uncheck the task by setting it to false
             }));
-            const updatedTasks = tasks.filter(
-              (task) => task.id !== deletedTask._id
-            );
             fetchUserTasks();
             if (deletedGoal !== undefined) {
               fetchUserGoals();
@@ -168,16 +165,20 @@ const HomePage = () => {
           .catch((err) => console.error(err));
       }
     },
-    [loggedIn, goals, axiosPrivate]
+    [loggedIn, axiosPrivate, fetchUserTasks, fetchUserGoals]
   );
 
   const updateUserTask = useCallback(
     async (task) => {
       if (loggedIn) {
         axiosPrivate
-          .put(`/tasks/${task.id}`, task)
+          .patch(`/tasks/${task.id}`, task)
           .then((res) => {
-            const updatedTask = res.data.tasks;
+            const updatedTask = {
+              ...res.data.task,
+              endDate: Date.parse(res.data.task.deadline),
+            };
+
             const updatedTasks = tasks.map((task) =>
               task.id === updatedTask._id ? updatedTask : task
             );
@@ -213,7 +214,7 @@ const HomePage = () => {
   // Event handler for adding a new goal/submitting edits
   const handle_submit_goal = (goal) => {
     console.log('handle', goal);
-    if (edit_goal) {
+    if (editGoal) {
       setGoals(goals.map((g) => (g.name === currGoal.name ? goal : g)));
       updateUserGoal(goal);
     } else {
@@ -239,8 +240,8 @@ const HomePage = () => {
 
   const openTaskForm = (task = null) => {
     console.log('Opening form with: ', task);
-    setCurrGoal(task);
-    setEditGoal(!!task);
+    setCurrTask(task);
+    setEditTask(!!task);
     document.getElementById('task-form-modal').showModal();
 
     setTimeout(() => {
@@ -268,8 +269,8 @@ const HomePage = () => {
     }
 
     document.getElementById('task-form-modal').close();
-    setCurrGoal(null);
-    setEditGoal(false);
+    setCurrTask(null);
+    setEditTask(false);
   };
 
   // Event handler for deleting a task
@@ -331,7 +332,7 @@ const HomePage = () => {
 
           <GoalForm
             onSubmit={handle_submit_goal}
-            edit={edit_goal}
+            edit={editGoal}
             currentGoal={currGoal}
           />
 
@@ -390,7 +391,10 @@ const HomePage = () => {
                     name={task.name}
                     description={task.description}
                     deadline={taskDeadline}
-                    delete_func={() => handle_delete_task(index)}
+                    onEdit={() => {
+                      setEditTask(true);
+                      openTaskForm(task);
+                    }}
                   />
                 </li>
               );
