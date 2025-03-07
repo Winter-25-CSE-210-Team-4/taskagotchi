@@ -2,7 +2,7 @@ import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import TaskModal from '../components/ui/TaskModal';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import useAuth from '../../auth/hooks/useAuth';
 import { useCallback } from 'react';
@@ -214,7 +214,7 @@ const HomePage = () => {
   };
 
   // Event handler for adding a new goal/submitting edits
-  const handle_submit_goal = (goal) => {
+  const handleSubmitGoal = (goal) => {
     console.log('handle', goal);
     if (editGoal) {
       setGoals(goals.map((g) => (g.name === currGoal.name ? goal : g)));
@@ -235,7 +235,7 @@ const HomePage = () => {
   };
 
   //event handler for deleting a goal
-  const handle_delete_goal = (index, goalId) => {
+  const handleDeleteGoal = (index, goalId) => {
     setGoals(goals.filter((_, i) => i !== index));
     deleteUserGoal(goalId);
   };
@@ -275,27 +275,9 @@ const HomePage = () => {
     setEditTask(false);
   };
 
-  // Event handler for deleting a task
-  const handle_delete_task = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
-  };
-
   //Event handler for marking task as done
-  const handle_task_completion = (taskId) => {
+  const handleTaskCompletion = (taskId) => {
     deleteUserTask(taskId);
-
-    // set_xp((prev_xp) => {
-    //   const curr_task = tasks[index];
-
-    //   if (!curr_task.completed) {
-    //     const updated_xp = Math.min(prev_xp + 5, 100);
-
-    //     return updated_xp;
-
-    //     //TODO: character changes, etc
-    //   }
-    //   return prev_xp;
-    // });
   };
 
   return (
@@ -335,7 +317,7 @@ const HomePage = () => {
                   </label>
                   <button
                     className='text-red-500 text-sm'
-                    onClick={() => handle_delete_goal(index, goal.id)}
+                    onClick={() => handleDeleteGoal(index, goal.id)}
                   >
                     Delete
                   </button>
@@ -349,20 +331,19 @@ const HomePage = () => {
                       openGoalForm(goal);
                     }}
                   />
+                  <GoalForm
+                    onSubmit={handleSubmitGoal}
+                    edit={editGoal}
+                    currentGoal={currGoal}
+                    onEdit={() => {
+                      setEditGoal(true);
+                      openGoalForm(goal);
+                    }}
+                  />
                 </li>
               );
             })}
           </ul>
-
-          <GoalForm
-            onSubmit={handle_submit_goal}
-            edit={editGoal}
-            currentGoal={currGoal}
-            onEdit={() => {
-              setEditGoal(true);
-              openGoalForm(goal);
-            }}
-          />
 
           {/* Tasks*/}
           <h3 className='text-base font-bold mb-2 pt-2 pb-2 pr-2'>Tasks</h3>
@@ -380,6 +361,9 @@ const HomePage = () => {
               } else {
                 taskDeadline = taskEndDateTime.toLocaleDateString();
               }
+              const goalName =
+                goals.find((goal) => goal.id === task.goalId)?.name ??
+                'No goal';
               return (
                 <li
                   key={index}
@@ -400,7 +384,7 @@ const HomePage = () => {
                             ...prevState,
                             [task._id]: true,
                           }));
-                          handle_task_completion(task.id);
+                          handleTaskCompletion(task.id);
                         }}
                       />
                     </label>
@@ -419,9 +403,7 @@ const HomePage = () => {
                     name={task.name}
                     description={task.description}
                     deadline={taskDeadline}
-                    goalName={
-                      goals.find((goal) => goal.id === task.goalId).name
-                    }
+                    goalName={goalName}
                     onEdit={() => {
                       setEditTask(true);
                       openTaskForm({
