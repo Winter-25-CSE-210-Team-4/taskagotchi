@@ -24,7 +24,7 @@ router.get("/:id", getTaskById);
 router.get("/user/:user_id", getTasksByUserId);
 
 // Update task
-router.put("/:id", updateTask);
+router.patch("/:id", updateTask);
 
 // Delete completed tasks
 router.delete("/completed", deleteCompletedTasks);
