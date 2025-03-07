@@ -1,5 +1,4 @@
 import Header from '../components/ui/Header';
-import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import ExampleModal from '../components/ui/ExampleModal';
 import { useState, useEffect } from 'react';
@@ -9,7 +8,6 @@ import { useCallback } from 'react';
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate';
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const { user, loggedIn, auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
 
