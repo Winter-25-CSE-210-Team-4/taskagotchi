@@ -13,7 +13,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
       description: '',
       goalId: '',
       completed: false,
-      endDate: new Date(),
+      deadline: new Date(),
     }),
     []
   );
@@ -24,10 +24,10 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
         description: currentTask.description || '',
         goalId: currentTask.goalId || '',
         completed: currentTask.completed || false,
-        endDate: currentTask.endDate || null,
+        deadline: currentTask.deadline || null,
       }
     : emptyTask;
-  const initalEndDate = currentTask ? currentTask.endDate : new Date();
+  const initalDeadline = currentTask ? currentTask.deadline : new Date();
   const incompleteState = useMemo(
     () => ({
       submitted: false,
@@ -39,7 +39,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
   );
   const [task, setTask] = useState(initalTask);
   const [incomplete, setIncomplete] = useState(incompleteState);
-  const [endDate, setEndDate] = useState(initalEndDate);
+  const [deadline, setDeadline] = useState(initalDeadline);
 
   useEffect(() => {
     if (currentTask) {
@@ -49,12 +49,12 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
         goalId: currentTask.goalId || '',
         description: currentTask.description || '',
         completed: currentTask.completed || false,
-        endDate: currentTask.endDate || null,
+        deadline: currentTask.deadline || null,
       });
-      setEndDate(currentTask.endDate);
+      setDeadline(currentTask.deadline);
     } else {
       setTask(emptyTask);
-      setEndDate(emptyTask.endDate);
+      setDeadline(emptyTask.deadline);
     }
 
     setIncomplete(incompleteState);
@@ -93,10 +93,10 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
         ...task,
         name: trimmedName,
         description: trimmedDescription,
-        endDate: endDate,
+        deadline: deadline,
       });
       setTask(emptyTask);
-      setEndDate(emptyTask.endDate);
+      setDeadline(emptyTask.deadline);
       document.getElementById('goal-selection').selectedIndex = 0;
     }
   };
@@ -180,8 +180,8 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
               <div className='flex flex-col gap-2'>
                 <p>Select End Date and time</p>
                 <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
+                  selected={deadline}
+                  onChange={(date) => setDeadline(date)}
                   className='input input-bordered w-full'
                   showTimeSelect
                   dateFormat='MMMM d, yyyy h:mm aa'

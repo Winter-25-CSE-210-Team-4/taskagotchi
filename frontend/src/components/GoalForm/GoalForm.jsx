@@ -12,7 +12,7 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
       name: '',
       description: '',
       completed: false,
-      endDate: Date.now(),
+      deadline: new Date(),
     }),
     []
   );
@@ -22,10 +22,10 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         name: currentGoal.name || '',
         description: currentGoal.description || '',
         completed: currentGoal.completed || false,
-        endDate: currentGoal.endDate || null,
+        deadline: currentGoal.deadline || null,
       }
     : emptyGoal;
-  const initalEndDate = currentGoal ? currentGoal.endDate : Date.now();
+  const initalDeadline = currentGoal ? currentGoal.deadline : Date.now();
   const incompleteState = useMemo(
     () => ({
       submitted: false,
@@ -36,7 +36,7 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
   );
   const [goal, setGoal] = useState(initalGoal);
   const [incomplete, setIncomplete] = useState(incompleteState);
-  const [endDate, setEndDate] = useState(initalEndDate);
+  const [deadline, setDeadline] = useState(initalDeadline);
 
   // TODO: fix edit and lint
 
@@ -47,12 +47,12 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         name: currentGoal.name || '',
         description: currentGoal.description || '',
         completed: currentGoal.completed || false,
-        endDate: currentGoal.endDate || null,
+        deadline: currentGoal.deadline || null,
       });
-      setEndDate(currentGoal.endDate);
+      setDeadline(currentGoal.deadline);
     } else {
       setGoal(emptyGoal);
-      setEndDate(emptyGoal.endDate);
+      setDeadline(emptyGoal.deadline);
     }
 
     setIncomplete(incompleteState);
@@ -84,10 +84,10 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
         ...goal,
         name: trimmedName,
         description: trimmedDescription,
-        endDate: endDate,
+        deadline: deadline,
       });
       setGoal(emptyGoal);
-      setEndDate(emptyGoal.endDate);
+      setDeadline(emptyGoal.deadline);
     }
   };
 
@@ -155,8 +155,8 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
               <div className='flex flex-col gap-2'>
                 <p>Select End Date</p>
                 <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
+                  selected={deadline}
+                  onChange={(date) => setDeadline(date)}
                   className='input input-bordered w-full'
                 />
               </div>
