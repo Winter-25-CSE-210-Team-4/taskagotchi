@@ -54,6 +54,31 @@ const HomePage = () => {
     }
   }, [loggedIn, axiosPrivate]);
 
+  const fetchUserTasks = useCallback(async () => {
+    if (loggedIn) {
+      axiosPrivate
+        .get('/tasks')
+        .then((res) => {
+          const responseData = res.data;
+          const uncompletedTasks = responseData.tasks.filter(
+            (task) => !task.isCompleted
+          );
+          const tasks = uncompletedTasks.map((task) => ({
+            id: task._id,
+            name: task.name,
+            description: task.description,
+            completed: task.isCompleted,
+            deadline: Date.parse(task.deadline),
+            goalId: task.goal_id._id,
+          }));
+          setTasks(tasks);
+          console.log('Task fetched:', tasks);
+          //   setGoals(goals);
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [loggedIn, axiosPrivate]);
+
   const createUserGoals = useCallback(
     async (responseBody) => {
       if (loggedIn) {
@@ -79,11 +104,12 @@ const HomePage = () => {
               (goal) => goal.id !== deletedGoal._id
             );
             setGoals(updatedGoals);
+            fetchUserTasks();
           })
           .catch((err) => console.error(err));
       }
     },
-    [loggedIn, goals, axiosPrivate]
+    [loggedIn, goals, axiosPrivate, fetchUserTasks]
   );
 
   const updateUserGoal = useCallback(
@@ -105,31 +131,6 @@ const HomePage = () => {
     },
     [loggedIn, goals, axiosPrivate, fetchUserGoals]
   );
-
-  const fetchUserTasks = useCallback(async () => {
-    if (loggedIn) {
-      axiosPrivate
-        .get('/tasks')
-        .then((res) => {
-          const responseData = res.data;
-          const uncompletedTasks = responseData.tasks.filter(
-            (task) => !task.isCompleted
-          );
-          const tasks = uncompletedTasks.map((task) => ({
-            id: task._id,
-            name: task.name,
-            description: task.description,
-            completed: task.isCompleted,
-            deadline: Date.parse(task.deadline),
-            goalId: task.goal_id._id,
-          }));
-          setTasks(tasks);
-          console.log('Task fetched:', tasks);
-          //   setGoals(goals);
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [loggedIn, axiosPrivate]);
 
   const createUserTask = useCallback(
     async (responseBody) => {
@@ -330,15 +331,6 @@ const HomePage = () => {
                       openGoalForm(goal);
                     }}
                   />
-                  <GoalForm
-                    onSubmit={handleSubmitGoal}
-                    edit={editGoal}
-                    currentGoal={currGoal}
-                    onEdit={() => {
-                      setEditGoal(true);
-                      openGoalForm(goal);
-                    }}
-                  />
                 </li>
               );
             })}
@@ -422,6 +414,11 @@ const HomePage = () => {
             currentTask={currTask}
             goals={goals}
           />
+          <GoalForm
+            onSubmit={handleSubmitGoal}
+            edit={editGoal}
+            currentGoal={currGoal}
+          />
           {/*Add Tasks and Goals*/}
           <div className='mt-auto flex flex-col gap-2'>
             <label
@@ -431,12 +428,13 @@ const HomePage = () => {
             >
               + Add Task
             </label>
-            <button
+            <label
+              htmlFor='add-goal-modal'
               className='btn btn-link text-accent cursor-pointer mt-4'
               onClick={() => openGoalForm(null)}
             >
               + Add Goal
-            </button>
+            </label>
           </div>
         </div>
 
