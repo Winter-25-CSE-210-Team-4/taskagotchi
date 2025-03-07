@@ -88,21 +88,21 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 // Update Task
 export const updateTask = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params;
-        const { description, isCompleted, goal_id, deadline, recurrs, recurringUnit } = req.body;
+        const { task_id } = req.params;
+        const { name, description, isCompleted, goal_id, deadline, recurrs, recurringUnit } = req.body;
 
         // Validate MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(task_id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
 
-        const task = await Task.findById(id);
+        const task = await Task.findById(task_id);
 
         if (!task) {
             return res.status(404).json({ message: "Task not found" });
             return res.status(404).json({ message: "Task not found" });
         }
-
+        if (name !== undefined) task.name = name;
         if (description !== undefined) task.description = description;
         if (isCompleted !== undefined) task.isCompleted = isCompleted;
         if (goal_id !== undefined) task.goal_id = goal_id;
