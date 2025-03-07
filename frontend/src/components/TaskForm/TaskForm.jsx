@@ -97,7 +97,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
       });
       setTask(emptyTask);
       setDeadline(emptyTask.deadline);
-      document.getElementById('goal-selection').selectedIndex = 0;
+      document.getElementById(`goal-selection-${task.id}`).selectedIndex = 0;
     }
   };
 
@@ -146,7 +146,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
             <div className='flex flex-col gap-2'>
               <p>Select Goal</p>
               <select
-                id='goal-selection'
+                id={`goal-selection-${task.id}`}
                 defaultValue={task.goalId ? task.goalId : 'Select a goal'}
                 className='select'
                 onChange={(e) => setTaskGoalId(e.target.value)}
