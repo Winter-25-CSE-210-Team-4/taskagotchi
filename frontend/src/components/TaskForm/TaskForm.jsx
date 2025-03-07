@@ -13,7 +13,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
       description: '',
       goalId: '',
       completed: false,
-      endDate: Date.now(),
+      endDate: new Date(),
     }),
     []
   );
@@ -27,7 +27,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
         endDate: currentTask.endDate || null,
       }
     : emptyTask;
-  const initalEndDate = currentTask ? currentTask.endDate : Date.now();
+  const initalEndDate = currentTask ? currentTask.endDate : new Date();
   const incompleteState = useMemo(
     () => ({
       submitted: false,
@@ -178,11 +178,13 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
             </div>
             <div>
               <div className='flex flex-col gap-2'>
-                <p>Select End Date</p>
+                <p>Select End Date and time</p>
                 <DatePicker
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}
                   className='input input-bordered w-full'
+                  showTimeSelect
+                  dateFormat='MMMM d, yyyy h:mm aa'
                 />
               </div>
             </div>
