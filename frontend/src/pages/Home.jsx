@@ -1,7 +1,7 @@
 import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
-import ExampleModal from '../components/ui/ExampleModal';
+import TaskModal from '../components/ui/TaskModal';
 import { useState, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import useAuth from '../../auth/hooks/useAuth';
@@ -22,6 +22,7 @@ const HomePage = () => {
   const [goals, setGoals] = useState([]);
   const [currGoal, setCurrGoal] = useState(null);
   const [edit_goal, setEditGoal] = useState(false);
+  const [checkedTasks, setCheckedTasks] = useState({});
 
   const [tasks, setTasks] = useState([]);
   const [currTask] = useState(null);
@@ -153,16 +154,15 @@ const HomePage = () => {
           .then((res) => {
             const deletedTask = res.data.deletedTask;
             const deletedGoal = res.data.deletedGoal;
+            setCheckedTasks((prevState) => ({
+              ...prevState,
+              [deletedTask._id]: false, // Uncheck the task by setting it to false
+            }));
             const updatedTasks = tasks.filter(
               (task) => task.id !== deletedTask._id
             );
-            setTasks(updatedTasks);
             fetchUserTasks();
             if (deletedGoal !== undefined) {
-              const updatedGoals = goals.filter(
-                (goal) => goal.id !== deletedGoal._id
-              );
-              setGoals(updatedGoals);
               fetchUserGoals();
             }
           })
@@ -365,7 +365,14 @@ const HomePage = () => {
                         type='checkbox'
                         id={`task-checkbox-${index}`}
                         className='checkbox-sm'
-                        onClick={() => handle_task_completion(task.id)}
+                        checked={checkedTasks[task.id]}
+                        onChange={() => {
+                          setCheckedTasks((prevState) => ({
+                            ...prevState,
+                            [task._id]: true,
+                          }));
+                          handle_task_completion(task.id);
+                        }}
                       />
                     </label>
 
@@ -378,10 +385,11 @@ const HomePage = () => {
                   </div>
                   <span>{taskDeadline}</span>
 
-                  <ExampleModal
+                  <TaskModal
                     id={`task-modal-${index}`}
                     name={task.name}
-                    description={`Scheduled for ${taskDeadline}`}
+                    description={task.description}
+                    deadline={taskDeadline}
                     delete_func={() => handle_delete_task(index)}
                   />
                 </li>
