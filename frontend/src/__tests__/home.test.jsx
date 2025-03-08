@@ -294,7 +294,7 @@ describe("Homepage Compoenet", () => {
 
         fireEvent.change(nameInput, { target: { value: "Learn piano" } });
 
-        fireEvent.click(submitButton);
+    //     fireEvent.click(submitButton);
 
         await waitFor(() => {
             expect(mockAxios.put).toHaveBeenCalledTimes(1);

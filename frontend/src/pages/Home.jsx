@@ -37,6 +37,7 @@ const HomePage = () => {
       axiosPrivate
         .get('/goals')
         .then((res) => {
+          console.log("Fetched goals:", res.data.data);
           const responseData = res.data;
           const goals = responseData.data.map((goal) => ({
             id: goal._id,
