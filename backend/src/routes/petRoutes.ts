@@ -1,58 +1,86 @@
-import express, { Router } from 'express';
+import express, { Router, Request } from 'express';
 import Pet from '../models/Pet';
+import { auth, AuthRequest } from '../middleware/auth';
+
 
 const router = Router();
 
+
 // GET all pets
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req: AuthRequest, res: express.Response) => {
     try {
-        const pets = await Pet.find();
-        res.json(pets);
+        const pets = await Pet.find({ userId: req.user?.id });
+        res.json({
+            success: true,
+            data: pets
+        });
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({ message: error.message });
-        } else {
-            res.status(500).json({ message: 'An unknown error occurred' });
-        }
+        console.error('Error getting pets:', error);
+        res.status(500).json({
+            success: false,
+            message: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
     }
 });
 
 // GET single pet by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req: AuthRequest, res: express.Response) => {
     try {
-        const pet = await Pet.findOne({ pet_id: req.params.id });
+        const pet = await Pet.findOne({ 
+            _id: req.params.id,
+            userId: req.user?.id 
+        });
+        
         if (!pet) {
-            return res.status(404).json({ message: 'Pet not found' });
+            return res.status(404).json({
+                success: false,
+                message: 'Pet not found'
+            });
         }
-        res.json(pet);
+        
+        res.json({
+            success: true,
+            data: pet
+        });
     } catch (error) {
-        if (error instanceof Error) {
-            res.status(500).json({ message: error.message });
-        } else {
-            res.status(500).json({ message: 'An unknown error occurred' });
-        }
+        console.error('Error getting pet:', error);
+        res.status(500).json({
+            success: false,
+            message: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
     }
 });
 
 // POST new pet
-router.post('/', async (req, res) => {
-    const pet = new Pet({
-        pet_id: req.body.pet_id,
-        name: req.body.name,
-        health: req.body.health || 100,
-        level: req.body.level || 1,
-        exp: req.body.exp || 0
-    });
-
+router.post('/', auth, async (req: AuthRequest, res: express.Response) => {
     try {
-        const newPet = await pet.save();
-        res.status(201).json(newPet);
-    } catch (error) {
-        if (error instanceof Error) {
-            res.status(400).json({ message: error.message });
-        } else {
-            res.status(400).json({ message: 'An unknown error occurred' });
+        const existingPet = await Pet.findOne({ userId: req.user?.id });
+        if (existingPet) {
+            return res.status(400).json({
+                success: false,
+                message: 'User already has a pet'
+            });
         }
+
+        const pet = new Pet({
+            userId: req.user?.id,
+            name: req.body.name,
+            health: 100,
+            level: 1,
+            exp: 0
+        });
+
+        const savedPet = await pet.save();
+        res.status(201).json({
+            success: true,
+            data: savedPet
+        });
+    } catch (error) {
+        console.error('Error creating pet:', error);
+        res.status(400).json({
+            success: false,
+            message: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
     }
 });
 
