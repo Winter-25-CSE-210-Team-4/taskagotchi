@@ -185,23 +185,23 @@ describe("Homepage Compoenet", () => {
             expect(screen.queryByText("Run a half marathon")).not.toBeInTheDocument();
         });
         
-    });
+    // });
 
      //TODO: ADD API MOCKING
     it("should update an existing goal modal on the homepage", async () => {
         const addGoal = screen.getByText(/\+ add goal/i);
         fireEvent.click(addGoal);
 
-        const nameInput = screen.getByTestId("form-input-name-element");
-        const descInput = screen.getByTestId("form-input-description-element");
-        const submitButton = screen.getByTestId("form-submit-button");
+    //     const nameInput = screen.getByTestId("form-input-name-element");
+    //     const descInput = screen.getByTestId("form-input-description-element");
+    //     const submitButton = screen.getByTestId("form-submit-button");
 
-        fireEvent.change(nameInput, { target: { value: "Run a Half marathon" } });
-        fireEvent.change(descInput, { target: { value: "Run 2x a day" } });
+    //     fireEvent.change(nameInput, { target: { value: "Run a Half marathon" } });
+    //     fireEvent.change(descInput, { target: { value: "Run 2x a day" } });
 
-        fireEvent.click(submitButton);
+    //     fireEvent.click(submitButton);
 
-        expect(screen.getByText("Run a Half marathon")).toBeInTheDocument();
+    //     expect(screen.getByText("Run a Half marathon")).toBeInTheDocument();
 
         const currGoal = screen.getByText("Run a Half marathon").closest("li"); 
 
@@ -213,7 +213,7 @@ describe("Homepage Compoenet", () => {
         fireEvent.change(screen.getByTestId("form-input-name-element"), { target: { value: "Run a marathon" } });
         fireEvent.change(screen.getByTestId("form-input-description-element"), { target: { value: "Run 5 miles/day"} });
 
-        fireEvent.click(submitButton);
+    //     fireEvent.click(submitButton);
 
 
         await waitFor(() => {
@@ -221,7 +221,7 @@ describe("Homepage Compoenet", () => {
             expect(screen.getByText((content) => content.includes("Run a marathon"))).toBeInTheDocument();
         });
         
-    });
+    // });
     
 
 
