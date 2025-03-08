@@ -38,6 +38,7 @@ const HomePage = () => {
       axiosPrivate
         .get('/goals')
         .then((res) => {
+          console.log("Fetched goals:", res.data.data);
           const responseData = res.data;
           const goals = responseData.data.map((goal) => ({
             id: goal._id,
@@ -46,7 +47,6 @@ const HomePage = () => {
             completed: goal.isCompleted,
             endDate: Date.parse(goal.deadline),
           }));
-          console.log('Goals fetched:', goals);
           set_goals(goals);
         })
         .catch((err) => console.error(err));
@@ -111,10 +111,8 @@ const HomePage = () => {
 
   //Event handler for opening goal form
   const open_goal_form = (goal = null) => {
-    console.log('Opening form with: ', goal);
     set_curr_goal(goal);
     set_edit_goal(!!goal);
-    document.getElementById('goal-form-modal').showModal();
 
     setTimeout(() => {
       const modal = document.getElementById('goal-form-modal');
@@ -124,7 +122,6 @@ const HomePage = () => {
 
   // Event handler for adding a new goal/submitting edits
   const handle_submit_goal = (goal) => {
-    console.log('handle', goal);
     if (edit_goal) {
       set_goals(goals.map((g) => (g.name === curr_goal.name ? goal : g)));
       updateUserGoal(goal);
