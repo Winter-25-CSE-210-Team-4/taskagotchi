@@ -195,7 +195,7 @@ export const addTaskToGoal = async (req: Request, res: Response) => {
           message: 'Goal not found'
         });
       }
-      
+
       // 创建新任务
       const newTask = new Task({
         user_id: user_id || req.body.user_id, // 假设有用户ID在请求中

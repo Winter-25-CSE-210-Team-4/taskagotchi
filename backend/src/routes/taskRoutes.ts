@@ -1,21 +1,38 @@
 import express from "express";
 import {
     createTask,
+    getAllTasks,
+    getTasksByUserId,
+    getTaskById,
     updateTask,
     deleteTask,
     completeTask,
-    deleteCompletedTasks,
-    getAllTasks 
-} from "../controllers/taskController";
+    deleteCompletedTasks } from "../controllers/taskController";
 
 const router = express.Router();
 
-// Interactions
-router.get("/", getAllTasks);
+// Create new task
 router.post("/", createTask);
-router.patch("/:task_id", updateTask);
-router.patch("/:task_id/complete", completeTask);
-router.delete("/:task_id", deleteTask);
+
+// Get all tasks
+router.get("/", getAllTasks);
+
+// Get task by ID
+router.get("/:id", getTaskById);
+
+// Get tasks by user ID
+router.get("/user/:user_id", getTasksByUserId);
+
+// Update task
+router.patch("/:id", updateTask);
+
+// Delete completed tasks
 router.delete("/completed", deleteCompletedTasks);
+
+// Delete task
+router.delete("/:id", deleteTask);
+
+// Mark task as complete
+router.patch("/:id/complete", completeTask);  // 保留这个，与其他路由保持一致使用 :id
 
 export default router;
