@@ -268,6 +268,7 @@ const HomePage = () => {
         deadline: newTask.deadline,
         goal_id: newTask.goalId,
       };
+      console.log("request body to add task", requestBody)
       createUserTask(requestBody);
     }
 
