@@ -10,6 +10,8 @@ export interface IUser {
   password: string;
   name: string;
   role: string;
+  passwordResetToken?: string | null;
+  passwordResetExpires?: Date | null;
 }
 
 
@@ -51,6 +53,14 @@ const userSchema = new mongoose.Schema<IUserDocument>({
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
+  },
+  passwordResetToken: {
+    type: String,
+    default: null
+  },
+  passwordResetExpires: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
