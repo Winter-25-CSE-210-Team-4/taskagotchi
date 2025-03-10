@@ -198,19 +198,20 @@ const HomePage = () => {
 
   // fetch the pet's experience when the component mounts
   const fetchUserPet = useCallback(async () => {
-    if (loggedIn) {
-      axiosPrivate
-        .get('/pets')
-        .then((res) => {
-          if (res.data.success && res.data.data.length > 0) {
-            const pet = res.data.data[0]; // Assuming one pet per user
-            set_xp(pet.exp); // Set experience
-            updatePetImage(pet.exp); // Update pet image
-          }
-        })
-        .catch((err) => console.error(err));
+    if (loggedIn && user?.id) {
+      try {
+        const res = await axiosPrivate.get(`/pets/${user.id}`);
+        if (res.data.success && res.data.data) {
+          const pet = res.data.data;
+          set_xp(pet.exp); // Set XP from backend
+          updatePetImage(pet.exp); // Update pet image
+        }
+      } catch (error) {
+        console.error('Error fetching pet:', error);
+      }
     }
-  }, [loggedIn, axiosPrivate]);
+  }, [loggedIn, user, axiosPrivate]);
+  
   
   const updatePetImage = (xp) => {
     if (xp >= 66) {
@@ -348,10 +349,10 @@ const HomePage = () => {
   // };
 
   const handle_task_completion = async (index) => {
-    if (!loggedIn) return;
+    if (!loggedIn || !user?.id) return;
   
     const curr_task = tasks[index];
-    if (curr_task.completed) return; // Prevent XP gain if already completed
+    if (curr_task.completed) return; // Prevent duplicate XP gains
   
     const xp_gain = 5;
     const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
