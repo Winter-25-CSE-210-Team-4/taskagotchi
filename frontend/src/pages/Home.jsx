@@ -196,6 +196,33 @@ const HomePage = () => {
     [loggedIn, tasks, axiosPrivate]
   );
 
+  // fetch the pet's experience when the component mounts
+  const fetchUserPet = useCallback(async () => {
+    if (loggedIn) {
+      axiosPrivate
+        .get('/pets')
+        .then((res) => {
+          if (res.data.success && res.data.data.length > 0) {
+            const pet = res.data.data[0]; // Assuming one pet per user
+            set_xp(pet.exp); // Set experience
+            updatePetImage(pet.exp); // Update pet image
+          }
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [loggedIn, axiosPrivate]);
+  
+  const updatePetImage = (xp) => {
+    if (xp >= 66) {
+      set_image('/images/pet-3.png');
+    } else if (xp >= 33) {
+      set_image('/images/pet-2.png');
+    } else {
+      set_image('/images/pet-1.png');
+    }
+  };
+  
+
   useEffect(() => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
@@ -203,6 +230,11 @@ const HomePage = () => {
   useEffect(() => {
     fetchUserTasks();
   }, [user, fetchUserTasks]);
+
+  useEffect(() => {
+    fetchUserPet();
+  }, [user, fetchUserPet]);
+  
 
   //Event handler for opening goal form
   const openGoalForm = (goal = null) => {
@@ -280,40 +312,62 @@ const HomePage = () => {
   };
 
   //Event handler for marking task as done
-  const handle_task_completion = (index) => {
-    set_tasks((prev_tasks) =>
-      prev_tasks.map((task, i) => {
-        if( i === index) {
-          const is_completed = !task.completed;
+  // const handle_task_completion = (index) => {
+  //   set_tasks((prev_tasks) =>
+  //     prev_tasks.map((task, i) => {
+  //       if( i === index) {
+  //         const is_completed = !task.completed;
 
-          if(is_completed) {
-            set_confetti(true);
-            setTimeout(() => set_confetti(false), 5000);
-          }
-          return { ...task, completed: is_completed };
-        }
-        return task;
-      })
-    );
+  //         if(is_completed) {
+  //           set_confetti(true);
+  //           setTimeout(() => set_confetti(false), 5000);
+  //         }
+  //         return { ...task, completed: is_completed };
+  //       }
+  //       return task;
+  //     })
+  //   );
 
-    set_xp((prev_xp) => {
-      const curr_task = tasks[index];
+  //   set_xp((prev_xp) => {
+  //     const curr_task = tasks[index];
 
-      if(!curr_task.completed) {
-        const updated_xp = Math.min(prev_xp + 5, 100);
+  //     if(!curr_task.completed) {
+  //       const updated_xp = Math.min(prev_xp + 5, 100);
 
-        if(updated_xp >= 66) {
-          set_image('/images/pet-2.png');
-        } else if (updated_xp >= 33) {
-          set_image('/images/pet-3.png');
-        }
+  //       if(updated_xp >= 66) {
+  //         set_image('/images/pet-3.png');
+  //       } else if (updated_xp >= 33) {
+  //         set_image('/images/pet-2.png');
+  //       }
 
-        return updated_xp;
+  //       return updated_xp;
 
-      }
-      return prev_xp;
-    })
+  //     }
+  //     return prev_xp;
+  //   })
+  // };
+
+  const handle_task_completion = async (index) => {
+    if (!loggedIn) return;
+  
+    const curr_task = tasks[index];
+    if (curr_task.completed) return; // Prevent XP gain if already completed
+  
+    const xp_gain = 5;
+    const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
+  
+    try {
+      await axiosPrivate.put(`/pets/${user.id}/gain-exp`, { exp: xp_gain });
+      set_xp(new_xp);
+      updatePetImage(new_xp); // Update pet image based on new XP
+  
+      set_confetti(true);
+      setTimeout(() => set_confetti(false), 5000);
+    } catch (error) {
+      console.error('Error updating XP:', error);
+    }
   };
+  
 
   return (
     <div className='flex flex-col h-screen w-full min-w-[1024px]'>
