@@ -1,6 +1,5 @@
 import Header from '../components/ui/Header';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import GoalForm from '../components/GoalForm/GoalForm';
 import TaskModal from '../components/ui/TaskModal';
 import { useState, useEffect } from 'react';
@@ -340,43 +339,7 @@ const HomePage = () => {
     setEditTask(false);
   };
 
-  //Event handler for marking task as done
-  // const handle_task_completion = (index) => {
-  //   set_tasks((prev_tasks) =>
-  //     prev_tasks.map((task, i) => {
-  //       if( i === index) {
-  //         const is_completed = !task.completed;
-
-  //         if(is_completed) {
-  //           set_confetti(true);
-  //           setTimeout(() => set_confetti(false), 5000);
-  //         }
-  //         return { ...task, completed: is_completed };
-  //       }
-  //       return task;
-  //     })
-  //   );
-
-  //   set_xp((prev_xp) => {
-  //     const curr_task = tasks[index];
-
-  //     if(!curr_task.completed) {
-  //       const updated_xp = Math.min(prev_xp + 5, 100);
-
-  //       if(updated_xp >= 66) {
-  //         set_image('/images/pet-3.png');
-  //       } else if (updated_xp >= 33) {
-  //         set_image('/images/pet-2.png');
-  //       }
-
-  //       return updated_xp;
-
-  //     }
-  //     return prev_xp;
-  //   })
-  // };
-
-  const handle_task_completion = async (index) => {
+  const handleCompleteTask = async (index) => {
     if (!loggedIn || !user?.id) return;
   
     const curr_task = tasks[index];
