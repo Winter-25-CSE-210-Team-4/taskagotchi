@@ -140,14 +140,14 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 // Mark task as complete
 export const completeTask = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params;
+        const { task_id } = req.params;
 
         // Validate MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(task_id)) {
             return res.status(400).json({ message: "Invalid task ID format" });
         }
 
-        const task = await Task.findById(id);
+        const task = await Task.findById(task_id);
 
         if (!task) {
             return res.status(404).json({ message: "Task not found" });

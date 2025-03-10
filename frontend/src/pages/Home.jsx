@@ -147,6 +147,25 @@ const HomePage = () => {
     [loggedIn, axiosPrivate, fetchUserTasks]
   );
 
+  const completeUserTask = useCallback(
+    async (taskId) => {
+      if (loggedIn) {
+        axiosPrivate
+          .patch(`/tasks/${taskId}/complete`)
+          .then((res) => {
+            const completedTask = res.data;
+            setCheckedTasks((prevState) => ({
+              ...prevState,
+              [completedTask._id]: false,
+            }));
+            fetchUserTasks();
+          })
+          .catch((err) => console.error(err));
+      }
+    },
+    [loggedIn, axiosPrivate, fetchUserTasks]
+  );
+
   const deleteUserTask = useCallback(
     async (taskId) => {
       if (loggedIn) {
@@ -201,7 +220,7 @@ const HomePage = () => {
   }, [user, fetchUserTasks]);
 
   const get_user = (loggedIn, user) => {
-    if(loggedIn) {
+    if (loggedIn) {
       return user.name.charAt(0).toUpperCase();
     } else {
       return '?';
@@ -285,8 +304,8 @@ const HomePage = () => {
   };
 
   //Event handler for marking task as done
-  const handleTaskCompletion = (taskId) => {
-    deleteUserTask(taskId);
+  const handleCompleteTask = (taskId) => {
+    completeUserTask(taskId);
   };
 
   return (
@@ -385,7 +404,7 @@ const HomePage = () => {
                             ...prevState,
                             [task._id]: true,
                           }));
-                          handleTaskCompletion(task.id);
+                          handleCompleteTask(task.id);
                         }}
                       />
                     </label>
@@ -398,6 +417,12 @@ const HomePage = () => {
                     </label>
                   </div>
                   <span>{taskDeadline}</span>
+                  <button
+                    className='text-red-500 text-sm'
+                    onClick={() => deleteUserTask(task.id)}
+                  >
+                    Delete
+                  </button>
 
                   <TaskModal
                     id={`task-modal-${index}`}
@@ -471,9 +496,9 @@ const HomePage = () => {
 
         {/* User icon */}
         <div className='absolute top-4 right-4'>
-          <div className="avatar avatar-placeholder">
-            <div className="bg-neutral text-neutral-content w-12 rounded-full text-center">
-              <div className="text-2xl font-bold py-2">
+          <div className='avatar avatar-placeholder'>
+            <div className='bg-neutral text-neutral-content w-12 rounded-full text-center'>
+              <div className='text-2xl font-bold py-2'>
                 {get_user(loggedIn, user)}
               </div>
             </div>
