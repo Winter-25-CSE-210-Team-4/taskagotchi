@@ -5,94 +5,104 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 
-const GoalForm = ({ onSubmit, edit, currentGoal }) => {
-  const emptyGoal = useMemo(
+const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
+  const emptyTask = useMemo(
     () => ({
       id: '',
       name: '',
       description: '',
+      goalId: '',
       completed: false,
       deadline: new Date(),
     }),
     []
   );
-  const initalGoal = currentGoal
+  const initalTask = currentTask
     ? {
-        id: currentGoal.id || '',
-        name: currentGoal.name || '',
-        description: currentGoal.description || '',
-        completed: currentGoal.completed || false,
-        deadline: currentGoal.deadline || null,
+        id: currentTask.id || '',
+        name: currentTask.name || '',
+        description: currentTask.description || '',
+        goalId: currentTask.goalId || '',
+        completed: currentTask.completed || false,
+        deadline: currentTask.deadline || null,
       }
-    : emptyGoal;
-  const initalDeadline = currentGoal ? currentGoal.deadline : Date.now();
+    : emptyTask;
+  const initalDeadline = currentTask ? currentTask.deadline : new Date();
   const incompleteState = useMemo(
     () => ({
       submitted: false,
       name: true,
       description: true,
+      goalId: true,
     }),
     []
   );
-  const [goal, setGoal] = useState(initalGoal);
+  const [task, setTask] = useState(initalTask);
   const [incomplete, setIncomplete] = useState(incompleteState);
   const [deadline, setDeadline] = useState(initalDeadline);
 
-  // TODO: fix edit and lint
-
   useEffect(() => {
-    if (currentGoal) {
-      setGoal({
-        id: currentGoal.id || '',
-        name: currentGoal.name || '',
-        description: currentGoal.description || '',
-        completed: currentGoal.completed || false,
-        deadline: currentGoal.deadline || null,
+    if (currentTask) {
+      setTask({
+        id: currentTask.id || '',
+        name: currentTask.name || '',
+        goalId: currentTask.goalId || '',
+        description: currentTask.description || '',
+        completed: currentTask.completed || false,
+        deadline: currentTask.deadline || null,
       });
-      setDeadline(currentGoal.deadline);
+      setDeadline(currentTask.deadline);
     } else {
-      setGoal(emptyGoal);
-      setDeadline(emptyGoal.deadline);
+      setTask(emptyTask);
+      setDeadline(emptyTask.deadline);
     }
 
     setIncomplete(incompleteState);
-  }, [currentGoal, emptyGoal, incompleteState]);
+  }, [currentTask, emptyTask, incompleteState]);
 
-  const setGoalName = (name) => {
-    setGoal((prevGoal) => ({ ...prevGoal, name }));
+  const setTaskName = (name) => {
+    setTask((prevTask) => ({ ...prevTask, name }));
     setIncomplete((prev) => ({ ...prev, name: false }));
   };
 
-  const setGoalDescription = (description) => {
-    setGoal((prevGoal) => ({ ...prevGoal, description }));
+  const setTaskDescription = (description) => {
+    setTask((prevTask) => ({ ...prevTask, description }));
     setIncomplete((prev) => ({ ...prev, description: false }));
+  };
+
+  const setTaskGoalId = (goalId) => {
+    console.log('setting goal id', goalId);
+    setTask((prevTask) => ({ ...prevTask, goalId }));
+    setIncomplete((prev) => ({ ...prev, goal: false }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('submitting form');
-    if (goal.name === '' || goal.description === '') {
+    if (task.name === '' || task.description === '' || task.goalId === '') {
       setIncomplete({
         submitted: true,
-        name: goal.name === '',
-        description: goal.description === '',
+        name: task.name === '',
+        description: task.description === '',
+        goalId: task.goalId === '',
       });
     } else {
-      const trimmedName = goal.name.trim();
-      const trimmedDescription = goal.description.trim();
+      const trimmedName = task.name.trim();
+      const trimmedDescription = task.description.trim();
       onSubmit({
-        ...goal,
+        ...task,
         name: trimmedName,
         description: trimmedDescription,
         deadline: deadline,
       });
-      setGoal(emptyGoal);
-      setDeadline(emptyGoal.deadline);
+      setTask(emptyTask);
+      setDeadline(emptyTask.deadline);
+      document.getElementById(`goal-selection-${task.id}`).selectedIndex = 0;
     }
   };
 
   return (
-    <dialog id='goal-form-modal' className='modal'>
+    <dialog id='task-form-modal' className='modal'>
       <div className='modal-box'>
         <form
           onSubmit={handleSubmit}
@@ -104,12 +114,8 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
               <button
                 type='button'
                 onClick={() => {
-                  document.getElementById('goal-form-modal').close();
-                  setIncomplete({
-                    submitted: false,
-                    name: false,
-                    description: false,
-                  });
+                  document.getElementById('task-form-modal').close();
+                  setIncomplete(incompleteState);
                 }}
                 className='btn btn-outline btn-xs'
               >
@@ -120,17 +126,17 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
                   height={16}
                 ></img>
               </button>
-              <label>{edit ? 'Edit Goal' : 'Create a Goal'}</label>
+              <label>{edit ? 'Edit Task' : 'Create a Task'}</label>
             </div>
             <div className='flex flex-col gap-2'>
               <p>Name</p>
               <input
                 type='text'
-                id='goal'
-                placeholder='Input name of goal'
+                id='task'
+                placeholder='Input name of task'
                 className='input input-bordered w-full'
-                value={goal.name ?? ''}
-                onChange={(e) => setGoalName(e.target.value)}
+                value={task.name ?? ''}
+                onChange={(e) => setTaskName(e.target.value)}
                 data-testid='form-input-name-element'
               />
               {incomplete.submitted && incomplete.name && (
@@ -138,13 +144,32 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
               )}
             </div>
             <div className='flex flex-col gap-2'>
+              <p>Select Goal</p>
+              <select
+                id={`goal-selection-${task.id}`}
+                defaultValue={task.goalId ? task.goalId : 'Select a goal'}
+                className='select'
+                onChange={(e) => setTaskGoalId(e.target.value)}
+              >
+                <option disabled={true}>Select a goal</option>
+                {goals.map((goal) => (
+                  <option key={goal.id} value={goal.id}>
+                    {goal.name}
+                  </option>
+                ))}
+              </select>
+              {incomplete.submitted && incomplete.goalId && (
+                <p className='text-red-600'>Missing Goal!</p>
+              )}
+            </div>
+            <div className='flex flex-col gap-2'>
               <p>Description</p>
               <textarea
-                id='goal'
-                placeholder='Input description of goal'
+                id='task'
+                placeholder='Input description of task'
                 className='textarea textarea-bordered w-full'
-                value={goal.description ?? ''}
-                onChange={(e) => setGoalDescription(e.target.value)}
+                value={task.description ?? ''}
+                onChange={(e) => setTaskDescription(e.target.value)}
                 data-testid='form-input-description-element'
               />
               {incomplete.submitted && incomplete.description && (
@@ -153,11 +178,13 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
             </div>
             <div>
               <div className='flex flex-col gap-2'>
-                <p>Select End Date</p>
+                <p>Select End Date and time</p>
                 <DatePicker
                   selected={deadline}
                   onChange={(date) => setDeadline(date)}
                   className='input input-bordered w-full'
+                  showTimeSelect
+                  dateFormat='MMMM d, yyyy h:mm aa'
                 />
               </div>
             </div>
@@ -169,12 +196,8 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
                 className='btn'
                 data-testid='form-cancel-button'
                 onClick={() => {
-                  document.getElementById('goal-form-modal').close();
-                  setIncomplete({
-                    submitted: false,
-                    name: false,
-                    description: false,
-                  });
+                  document.getElementById('task-form-modal').close();
+                  setIncomplete(incompleteState);
                 }}
               >
                 Close
@@ -185,7 +208,7 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
                 data-testid='form-submit-button'
               >
                 <img src={CheckIcon} alt='check-icon' width={16} height={16} />
-                {edit ? 'Update Goal' : 'Create Goal'}
+                {edit ? 'Update Task' : 'Create Task'}
               </button>
             </div>
           </div>
@@ -195,10 +218,11 @@ const GoalForm = ({ onSubmit, edit, currentGoal }) => {
   );
 };
 
-GoalForm.propTypes = {
+TaskForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   edit: PropTypes.bool,
-  currentGoal: PropTypes.object,
+  currentTask: PropTypes.object,
+  goals: PropTypes.array,
 };
 
-export default GoalForm;
+export default TaskForm;

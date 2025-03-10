@@ -6,12 +6,13 @@ import { beforeAll, beforeEach, afterAll, describe, it, expect } from '@jest/glo
 
 let mongoServer: MongoMemoryServer;
 let authToken: string;
+let goalId: string;
 
 beforeAll(async () => {
     if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect();
     }
-    
+
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
@@ -23,12 +24,12 @@ beforeAll(async () => {
             password: 'password123',
             name: 'Test User'
         });
-
-    authToken = registerResponse.body.token;
-});
-
-beforeEach(async () => {
-    await mongoose.connection.collection('goals').deleteMany({});
+        
+    console.log('Registration response:', registerResponse.body);
+    authToken = registerResponse.body.data.token;
+    if (!authToken) {
+        throw new Error('Failed to get auth token');
+    }
 });
 
 afterAll(async () => {
@@ -40,21 +41,26 @@ describe('Goal Endpoints', () => {
     let goalId: string;
 
     beforeEach(async () => {
+        await mongoose.connection.collection('goals').deleteMany({});
         try {
             const createRes = await request(app)
                 .post('/api/goals')
                 .set('Authorization', `Bearer ${authToken}`)
                 .send({
-                    title: 'Initial Test Goal',
+                    name: 'Initial Test Goal',
                     description: 'Initial Test Description',
                     deadline: '2024-03-01T00:00:00.000Z'
                 });
             
-            console.log('Create response:', createRes.body);
+            console.log('Goal creation response:', createRes.body);
+            if (!createRes.body.data?._id) {
+                throw new Error('No goal ID received from creation');
+            }
             goalId = createRes.body.data._id;
             console.log('Created goal ID:', goalId);
         } catch (error) {
-            console.error('Error in beforeEach:', error);
+            console.error('Goal creation error:', error);
+            throw error;
         }
     });
 
@@ -63,7 +69,7 @@ describe('Goal Endpoints', () => {
             .post('/api/goals')
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                title: 'Another Goal',
+                name: 'Another Goal',
                 description: 'Another Description',
                 deadline: '2024-03-01T00:00:00.000Z',
                 isCompleted: false
@@ -71,7 +77,7 @@ describe('Goal Endpoints', () => {
 
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
-        expect(res.body.data).toHaveProperty('title', 'Another Goal');
+        expect(res.body.data).toHaveProperty('name', 'Another Goal');
         expect(res.body.data).toHaveProperty('isCompleted', false);
     });
 
@@ -86,13 +92,12 @@ describe('Goal Endpoints', () => {
 
     it('should get a specific goal by id', async () => {
         console.log('Testing get goal with ID:', goalId);
-        
+
         const res = await request(app)
             .get(`/api/goals/${goalId}`)
             .set('Authorization', `Bearer ${authToken}`);
-        
         console.log('Get goal response:', res.body);
-        
+
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
         expect(res.body.data).toHaveProperty('_id', goalId);
@@ -103,13 +108,13 @@ describe('Goal Endpoints', () => {
             .put(`/api/goals/${goalId}`)
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                title: 'Updated Goal',
+                name: 'Updated Goal',
                 isCompleted: true
             });
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
-        expect(res.body.data).toHaveProperty('title', 'Updated Goal');
+        expect(res.body.data).toHaveProperty('name', 'Updated Goal');
         expect(res.body.data).toHaveProperty('isCompleted', true);
     });
 
@@ -118,7 +123,7 @@ describe('Goal Endpoints', () => {
             .delete(`/api/goals/${goalId}`)
             .set('Authorization', `Bearer ${authToken}`)
             .send();
-    
+
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
         expect(res.body.message).toBe('Goal successfully deleted');
@@ -138,7 +143,7 @@ describe('Goal Endpoints', () => {
             .post('/api/goals')
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                title: 'Test Goal'
+                name: 'Test Goal'
             });
 
         expect(res.status).toBe(400);
@@ -158,7 +163,7 @@ describe('Goal Endpoints', () => {
             .post('/api/goals')
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                title: 'Test Goal'
+                name: 'Test Goal'
             });
 
         expect(res.status).toBe(400);
@@ -170,7 +175,7 @@ describe('Goal Endpoints', () => {
             .put(`/api/goals/${new mongoose.Types.ObjectId()}`)
             .set('Authorization', `Bearer ${authToken}`)
             .send({
-                title: 'Updated Goal',
+                name: 'Updated Goal',
                 isCompleted: true
             });
 
@@ -199,7 +204,7 @@ describe('Goal Endpoints', () => {
         const res = await request(app)
             .post('/api/goals')
             .send({
-                title: 'Test Goal',
+                name: 'Test Goal',
                 description: 'Test Description',
                 deadline: '2024-03-01T00:00:00.000Z'
             });
@@ -207,4 +212,9 @@ describe('Goal Endpoints', () => {
         expect(res.status).toBe(401);
         expect(res.body).toHaveProperty('error', 'Please authenticate.');
     });
+});
+
+afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
 });

@@ -1,12 +1,22 @@
 import express from "express";
-import { completeTask, deleteCompletedTasks } from "../controllers/taskController";
+import {
+  createTask,
+  updateTask,
+  deleteTask,
+  completeTask,
+  deleteCompletedTasks,
+  getAllTasks
+} from "../controllers/taskController";
+import { auth } from '../middleware/auth';
 
 const router = express.Router();
 
-// mark task as complete
-// router.put("/:task_id/complete", completeTask);
+// Interactions
+router.get("/", auth, getAllTasks);
+router.post("/", auth, createTask);
+router.patch("/:task_id", auth, updateTask);
+router.patch("/:task_id/complete", auth, completeTask);
+router.delete("/:task_id", auth, deleteTask);
+router.delete("/completed", auth, deleteCompletedTasks);
 
-// delete completed tasks
-router.delete("/completed", deleteCompletedTasks);
-router.patch('/:task_id/complete', completeTask);
 export default router;

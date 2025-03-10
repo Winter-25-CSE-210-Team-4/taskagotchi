@@ -56,7 +56,7 @@ describe('GoalForm Component', () => {
           name: 'New Goal',
           description: 'Goal Description',
           completed: false,
-          endDate: expect.any(Number),
+          deadline: expect.any(Date),
         })
       );
     });
@@ -82,7 +82,7 @@ describe('GoalForm Component', () => {
           name: 'New Goal',
           description: 'Goal Description',
           completed: false,
-          endDate: expect.any(Number),
+          deadline: expect.any(Date),
         })
       );
     });

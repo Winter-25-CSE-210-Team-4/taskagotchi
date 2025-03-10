@@ -5,7 +5,8 @@ const MAX_HEALTH = 100;
 const PET_PFPS = [];    // TODO: Add pet profile pictures
 
 interface IPet {
-    pet_id: number;
+    userId: mongoose.Types.ObjectId;
+    pet_id: mongoose.Types.ObjectId;
     name: string;
     health: number;
     level: number;
@@ -26,8 +27,9 @@ interface IPetModel extends Model<IPetDocument> {
 }
 
 const petSchema = new mongoose.Schema<IPetDocument>({
-    pet_id: {
-        type: Number,
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
         unique: true
     },
