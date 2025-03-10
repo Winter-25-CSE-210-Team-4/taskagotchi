@@ -59,8 +59,6 @@ const HomePage = () => {
         .get('/tasks')
         .then((res) => {
           const responseData = res.data;
-          console.log("Fetched user tasks received:", responseData);
-          console.log("responseData.tasks is: ", responseData.tasks)
           const uncompletedTasks = responseData.tasks.filter(
             (task) => !task.isCompleted
           );
@@ -222,6 +220,7 @@ const HomePage = () => {
     fetchUserTasks();
   }, [user, fetchUserTasks]);
 
+  
   const get_user = (loggedIn, user) => {
 
     if (loggedIn) {
@@ -298,7 +297,7 @@ const HomePage = () => {
         deadline: newTask.deadline,
         goal_id: newTask.goalId,
       };
-      console.log("request body to add task", requestBody)
+
       createUserTask(requestBody);
     }
 
@@ -309,7 +308,7 @@ const HomePage = () => {
 
   //Event handler for marking task as done
   const handleCompleteTask = (taskId) => {
-    console.log("✅ handleCompleteTask called with:", taskId);
+
     completeUserTask(taskId);
   };
 
@@ -364,6 +363,7 @@ const HomePage = () => {
                       openGoalForm(goal);
                     }}
                     data-testid={`goal-modal-${index}`}
+
                   />
                 </li>
               );
@@ -405,7 +405,7 @@ const HomePage = () => {
                         className='checkbox-sm'
                         checked={checkedTasks[task.id]}
                         onChange={() => {
-                          console.log("🔥 Checkbox clicked for task:", task.id, "Checked:", event.target.checked);
+
                           setCheckedTasks((prevState) => ({
                             ...prevState,
                             [task._id]: true,
@@ -507,6 +507,7 @@ const HomePage = () => {
               <div 
               className='text-2xl font-bold py-2'
               data-testid='home-user-icon'>
+
                 {get_user(loggedIn, user)}
               </div>
             </div>
