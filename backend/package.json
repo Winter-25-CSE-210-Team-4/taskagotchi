@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.13.0",
     "mongoose": "^8.10.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "react-confetti": "^6.4.0"
   },
   "description": "",
   "devDependencies": {
