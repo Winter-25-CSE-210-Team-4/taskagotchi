@@ -1,5 +1,4 @@
 import Header from '../components/ui/Header';
-import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import TaskModal from '../components/ui/TaskModal';
 import { useState, useEffect } from 'react';
@@ -12,7 +11,6 @@ import GoalModal from '../components/ui/GoalModal';
 
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const { user, loggedIn, auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
 
@@ -461,7 +459,7 @@ const HomePage = () => {
                             ...prevState,
                             [task._id]: true,
                           }));
-                          handleTaskCompletion(task.id);
+                          handleCompleteTask(task.id);
                         }}
                       />
                     </label>
@@ -474,6 +472,12 @@ const HomePage = () => {
                     </label>
                   </div>
                   <span>{taskDeadline}</span>
+                  <button
+                    className='text-red-500 text-sm'
+                    onClick={() => deleteUserTask(task.id)}
+                  >
+                    Delete
+                  </button>
 
                   <TaskModal
                     id={`task-modal-${index}`}
@@ -545,12 +549,15 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Stats button */}
-        {/* TODO: route properly */}
+        {/* User icon */}
         <div className='absolute top-4 right-4'>
-          <button className='btn btn-accent ' onClick={() => navigate('/')}>
-            stats
-          </button>
+          <div className='avatar avatar-placeholder'>
+            <div className='bg-neutral text-neutral-content w-12 rounded-full text-center'>
+              <div className='text-2xl font-bold py-2'>
+                {get_user(loggedIn, user)}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
