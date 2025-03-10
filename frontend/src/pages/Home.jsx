@@ -1,5 +1,4 @@
 import Header from '../components/ui/Header';
-import { useNavigate } from 'react-router-dom';
 import GoalForm from '../components/GoalForm/GoalForm';
 import TaskModal from '../components/ui/TaskModal';
 import { useState, useEffect } from 'react';
@@ -11,7 +10,6 @@ import TaskForm from '../components/TaskForm/TaskForm';
 import GoalModal from '../components/ui/GoalModal';
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const { user, loggedIn, auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
 
@@ -196,9 +194,18 @@ const HomePage = () => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
 
+  const get_user = (loggedIn, user) => {
+    if(loggedIn) {
+      return user.name.charAt(0).toUpperCase();
+    } else {
+      return '?';
+    }
+  };
+
   useEffect(() => {
     fetchUserTasks();
   }, [user, fetchUserTasks]);
+
 
   //Event handler for opening goal form
   const openGoalForm = (goal = null) => {
@@ -459,12 +466,15 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Stats button */}
-        {/* TODO: route properly */}
+        {/* User icon */}
         <div className='absolute top-4 right-4'>
-          <button className='btn btn-accent ' onClick={() => navigate('/')}>
-            stats
-          </button>
+          <div className="avatar avatar-placeholder">
+            <div className="bg-neutral text-neutral-content w-12 rounded-full text-center">
+              <div className="text-2xl font-bold py-2">
+                {get_user(loggedIn, user)}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
