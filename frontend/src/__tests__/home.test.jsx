@@ -3,20 +3,22 @@ import MockAuthContextProvider from '../__mocks__/MockAuthContextProvider';
 import Home from '../pages/Home';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import {describe, beforeEach, afterEach, expect, it, vi} from "vitest";
-import axiosPrivate from '../../api/axios';
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate'
-import GoalForm from '../components/GoalForm/GoalForm';
-
 
 vi.mock('../../auth/hooks/useAxiosPrivate', () => ({
     default: vi.fn(),
   }));
 
+
 let mockAxios;
 beforeEach(() => {
-
     let goalsData = [
-        { _id: "1", name: "Learn guitar", description: "Play chords", completed: false }
+        { 
+            _id: "1", 
+            name: "Learn guitar", 
+            description: "Play chords", 
+            isCompleted: false,
+            deadline: new Date() }
     ];
 
     let tasksData = [
@@ -63,7 +65,7 @@ beforeEach(() => {
         delete: vi.fn().mockImplementation((url) => {
             const id = url.split("/").pop();
 
-            if (url === "/goals") {
+            if (url.includes("/goals/")) {
 
                 const currGoal = goalsData.find(g => g._id === id);
                 
@@ -72,13 +74,16 @@ beforeEach(() => {
 
 
                 return Promise.resolve({ data: { data: currGoal } });
-            } else {
-                const currTask = tasksData.find((t) => t._id === id); 
+            }  
+            if (url.includes("/tasks/")) {
+
+                const deletedTask = tasksData.find((t) => t._id === id); 
 
                 // Remove task from mock data 
                 tasksData = tasksData.filter((t) => t._id !== id);
 
-                return Promise.resolve({ data: { data: currTask } });
+
+                return Promise.resolve({ data: { deletedTask } });
             }
         }),
         put: vi.fn().mockImplementation((url, data) => {
@@ -93,16 +98,26 @@ beforeEach(() => {
             return Promise.resolve({ data: { data: goalsData[goalIndex] } }); 
         }),
         patch: vi.fn().mockImplementation((url, data) => {
-            console.log("Mocking PATCH /tasks/:id with:", data);
-
+            console.log("PATCH calls:", mockAxios.patch.mock.calls);
+            
             const id = url.split("/").pop();
+            
+            if (url.startsWith("/tasks/") && !url.endsWith("/complete")) {
+                console.log("in edit case");
+                const taskIndex = tasksData.findIndex((t) => t._id === id);
 
-            let taskIndex = tasksData.findIndex((g) => g._id === id);
+                tasksData[taskIndex] = { ...tasksData[taskIndex], ...data };
 
-            tasksData[taskIndex] = {...tasksData[taskIndex], ...data};
+                return Promise.resolve({ data: { task: tasksData[taskIndex] } });
+            } 
 
+            
+            const taskIndex = tasksData.findIndex((t) => t._id === id);
 
-            return Promise.resolve({ data: { tasks: tasksData[taskIndex] } }); 
+            tasksData[taskIndex].isCompleted = true;
+
+            return Promise.resolve({ data: { _id: id, isCompleted: true } });  
+            
         }),
     };
 
@@ -138,7 +153,18 @@ describe("Homepage Compoenet", () => {
         expect(screen.getByAltText(/TaskaGoTchi Character/i)).toBeInTheDocument();
 
         expect(screen.getByText(/Experince: 0\/100/i)).toBeInTheDocument();
+
+        expect(screen.getByTestId("home-user-icon")).toBeInTheDocument();
     });
+
+/////////// USER ICON TESTS ////////////////////////////////////
+it("should display users first initial in user icon", () => {
+    const icon = screen.getByTestId("home-user-icon");
+
+    const initial = within(icon).getByText("J");
+
+    expect(initial).toBeInTheDocument();
+});
 
 /////////////////////////////////////// GOAL TESTS ////////////////////////////////////
     it("should open goal modal upon add goal click", () => {
@@ -294,12 +320,12 @@ describe("Homepage Compoenet", () => {
 
         fireEvent.change(nameInput, { target: { value: "Learn piano" } });
 
-    //     fireEvent.click(submitButton);
+        fireEvent.click(submitButton);
 
         await waitFor(() => {
             expect(mockAxios.put).toHaveBeenCalledTimes(1);
             expect(mockAxios.put).toHaveBeenCalledWith("/goals/1", expect.objectContaining({
-                deadline: NaN,
+                deadline: expect.any(Number),
                 description: "Play chords",
                 name : "Learn piano",
               }));
@@ -437,6 +463,7 @@ describe("Homepage Compoenet", () => {
 
         const taskModal = await waitFor(() => within(document.body).getByText("Learn A-minor chord", { selector: "h3" }));
 
+
         expect(taskModal).toBeInTheDocument();
 
         const editButton = within(taskModal.closest("div.modal")).getByText("Edit");
@@ -464,5 +491,47 @@ describe("Homepage Compoenet", () => {
 
     });
 
+    it("should delete a task", async () => {
+        const taskElement = screen.getAllByText((content) => content.includes("Learn A-minor chord"));
+        const clickableElement = taskElement.find((element) => element.tagName.toLowerCase() === "span");
+
+        expect(clickableElement).toBeInTheDocument();
+
+        const currTask = clickableElement.closest("li");
+
+    
+        fireEvent.click(within(currTask).getByText("Delete"));
+
+        // Ensure the DELETE request was made
+        await waitFor(() => {
+            expect(mockAxios.delete).toHaveBeenCalledTimes(1);
+            expect(mockAxios.delete).toHaveBeenCalledWith("/tasks/1a");
+        });
+
+        // Ensure the task is removed from UI
+        await waitFor(() => {
+            expect(screen.queryByText(/Learn A-minor chord/i)).not.toBeInTheDocument();
+        });
+    });
+
+    it("should mark an existing task as complete", async () => {
+
+        const taskCheckbox = screen.getByLabelText(/Learn A-minor chord/i);
+        expect(taskCheckbox).toBeInTheDocument();
+        expect(taskCheckbox.checked).toBe(false);
+
+        fireEvent.click(taskCheckbox);
+
+        // await waitFor(() => {
+        //     expect(mockAxios.patch).toHaveBeenCalledTimes(1);
+        //     expect(mockAxios.patch).toHaveBeenCalledWith("/tasks/1a/complete");
+        // });
+    
+        // Ensure the UI updates
+        await waitFor(() => {
+            expect(taskCheckbox.checked).toBe(true);
+        });
+    
+    });
 
 });

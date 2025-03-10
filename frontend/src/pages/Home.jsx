@@ -116,10 +116,12 @@ const HomePage = () => {
   const updateUserGoal = useCallback(
     // router.put('/:id', auth, updateGoal);
     async (goal) => {
+      console.log("Calling axios.put with:", goal);
       if (loggedIn) {
         axiosPrivate
           .put(`/goals/${goal.id}`, goal)
           .then((res) => {
+            console.log("Update response:", res.data);
             const updatedGoal = res.data.data;
             const updatedGoals = goals.map((goal) =>
               goal.id === updatedGoal._id ? updatedGoal : goal
@@ -221,6 +223,7 @@ const HomePage = () => {
   }, [user, fetchUserTasks]);
 
   const get_user = (loggedIn, user) => {
+
     if (loggedIn) {
       return user.name.charAt(0).toUpperCase();
     } else {
@@ -306,6 +309,7 @@ const HomePage = () => {
 
   //Event handler for marking task as done
   const handleCompleteTask = (taskId) => {
+    console.log("✅ handleCompleteTask called with:", taskId);
     completeUserTask(taskId);
   };
 
@@ -401,6 +405,7 @@ const HomePage = () => {
                         className='checkbox-sm'
                         checked={checkedTasks[task.id]}
                         onChange={() => {
+                          console.log("🔥 Checkbox clicked for task:", task.id, "Checked:", event.target.checked);
                           setCheckedTasks((prevState) => ({
                             ...prevState,
                             [task._id]: true,
@@ -499,7 +504,9 @@ const HomePage = () => {
         <div className='absolute top-4 right-4'>
           <div className='avatar avatar-placeholder'>
             <div className='bg-neutral text-neutral-content w-12 rounded-full text-center'>
-              <div className='text-2xl font-bold py-2'>
+              <div 
+              className='text-2xl font-bold py-2'
+              data-testid='home-user-icon'>
                 {get_user(loggedIn, user)}
               </div>
             </div>
