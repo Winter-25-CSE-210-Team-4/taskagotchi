@@ -136,6 +136,7 @@ const HomePage = () => {
     [loggedIn, goals, axiosPrivate, fetchUserGoals]
   );
 
+
   const createUserTask = useCallback(
     async (responseBody) => {
       console.log('createUserTask', responseBody);
@@ -143,6 +144,25 @@ const HomePage = () => {
         axiosPrivate
           .post('/tasks', responseBody)
           .then(() => {
+            fetchUserTasks();
+          })
+          .catch((err) => console.error(err));
+      }
+    },
+    [loggedIn, axiosPrivate, fetchUserTasks]
+  );
+
+  const completeUserTask = useCallback(
+    async (taskId) => {
+      if (loggedIn) {
+        axiosPrivate
+          .patch(`/tasks/${taskId}/complete`)
+          .then((res) => {
+            const completedTask = res.data;
+            setCheckedTasks((prevState) => ({
+              ...prevState,
+              [completedTask._id]: false,
+            }));
             fetchUserTasks();
           })
           .catch((err) => console.error(err));
@@ -227,6 +247,14 @@ const HomePage = () => {
   useEffect(() => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
+
+  const get_user = (loggedIn, user) => {
+    if (loggedIn) {
+      return user.name.charAt(0).toUpperCase();
+    } else {
+      return '?';
+    }
+  };
 
   useEffect(() => {
     fetchUserTasks();
@@ -358,14 +386,19 @@ const HomePage = () => {
     const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
   
     try {
+      // Mark the task as completed in the backend
+      await completeUserTask(curr_task.id);
+  
+      // Update pet experience
       await axiosPrivate.put(`/pets/${user.id}/gain-exp`, { exp: xp_gain });
       set_xp(new_xp);
       updatePetImage(new_xp); // Update pet image based on new XP
   
+      // Show confetti animation
       set_confetti(true);
       setTimeout(() => set_confetti(false), 5000);
     } catch (error) {
-      console.error('Error updating XP:', error);
+      console.error('Error completing task or updating XP:', error);
     }
   };
   
