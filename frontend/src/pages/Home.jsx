@@ -39,7 +39,6 @@ const HomePage = () => {
       axiosPrivate
         .get('/goals')
         .then((res) => {
-          console.log("Fetched goals:", res.data.data);
           const responseData = res.data;
           const goals = responseData.data.map((goal) => ({
             id: goal._id,
@@ -61,6 +60,8 @@ const HomePage = () => {
         .get('/tasks')
         .then((res) => {
           const responseData = res.data;
+          console.log("Fetched user tasks received:", responseData);
+          console.log("responseData.tasks is: ", responseData.tasks)
           const uncompletedTasks = responseData.tasks.filter(
             (task) => !task.isCompleted
           );
@@ -332,6 +333,7 @@ const HomePage = () => {
                       setEditGoal(true);
                       openGoalForm(goal);
                     }}
+                    data-testid={`goal-modal-${index}`}
                   />
                 </li>
               );

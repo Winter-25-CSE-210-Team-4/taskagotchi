@@ -149,6 +149,7 @@ const TaskForm = ({ onSubmit, edit, currentTask, goals }) => {
                 id={`goal-selection-${task.id}`}
                 defaultValue={task.goalId ? task.goalId : 'Select a goal'}
                 className='select'
+                data-testid='form-input-select-element'
                 onChange={(e) => setTaskGoalId(e.target.value)}
               >
                 <option disabled={true}>Select a goal</option>
