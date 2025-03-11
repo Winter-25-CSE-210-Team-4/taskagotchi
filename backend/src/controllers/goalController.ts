@@ -21,13 +21,14 @@ export const createGoal = async (req: AuthRequest, res: Response) => {
             deadline,
             status: 'active',
             createdAt: new Date().toISOString(),
-            userId: req.user?.id
+            userId: req.user?.id 
         });
 
         console.log('Goal to be saved:', newGoal);
 
         const savedGoal = await newGoal.save();
         console.log('Saved goal:', savedGoal);
+
 
 
         res.status(201).json({

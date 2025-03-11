@@ -9,6 +9,7 @@ import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate';
 import TaskForm from '../components/TaskForm/TaskForm';
 import GoalModal from '../components/ui/GoalModal';
 
+
 const HomePage = () => {
   const { user, loggedIn, auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
@@ -27,8 +28,10 @@ const HomePage = () => {
   const [currTask, setCurrTask] = useState(null);
   const [editTask, setEditTask] = useState(false);
 
-  const [xp] = useState(0);
-  const [confetti] = useState(false);
+  const [xp, set_xp] = useState(0);
+  const [confetti, set_confetti] = useState(false);
+  const [image, set_image] = useState('/images/pet-1.png');
+
 
   // API-----
 
@@ -135,6 +138,7 @@ const HomePage = () => {
     [loggedIn, goals, axiosPrivate, fetchUserGoals]
   );
 
+
   const createUserTask = useCallback(
     async (responseBody) => {
       console.log('createUserTask', responseBody);
@@ -218,6 +222,34 @@ const HomePage = () => {
     [loggedIn, tasks, axiosPrivate]
   );
 
+  // fetch the pet's experience when the component mounts
+  const fetchUserPet = useCallback(async () => {
+    if (loggedIn) {
+      try {
+        const res = await axiosPrivate.get('/pets');
+        if (res.data.success && res.data.data) {
+          const pet = res.data.data[0];
+          set_xp(pet.exp); // Set XP from backend
+          updatePetImage(pet.exp); // Update pet image
+        }
+      } catch (error) {
+        console.error('Error fetching pet:', error);
+      }
+    }
+  }, [loggedIn, user, axiosPrivate]);
+  
+  
+  const updatePetImage = (xp) => {
+    if (xp >= 66) {
+      set_image('/images/pet-3.png');
+    } else if (xp >= 33) {
+      set_image('/images/pet-2.png');
+    } else {
+      set_image('/images/pet-1.png');
+    }
+  };
+  
+
   useEffect(() => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
@@ -233,6 +265,15 @@ const HomePage = () => {
       return '?';
     }
   };
+
+  useEffect(() => {
+    fetchUserPet();
+  }, [user, fetchUserPet]);
+
+  useEffect(() => {
+    console.log("xp changed", xp)
+  }, [xp]);
+  
 
   //Event handler for opening goal form
   const openGoalForm = (goal = null) => {
@@ -310,10 +351,32 @@ const HomePage = () => {
     setEditTask(false);
   };
 
-  //Event handler for marking task as done
-  const handleCompleteTask = (taskId) => {
-    completeUserTask(taskId);
+  const handleCompleteTask = async (taskId) => {  
+    const xp_gain = 5;
+
+    try {
+      // Mark the task as completed in the backend
+      completeUserTask(taskId).then(
+        // Update pet experience
+        axiosPrivate.put('/pets/gain-exp', { exp: xp_gain }).then(
+          (res) => {
+            const data = res.data.data;
+            set_xp(data.exp);
+            updatePetImage(data.exp);
+        }
+        ),
+    
+        // Show confetti animation
+        set_confetti(true),
+        setTimeout(() => set_confetti(false), 5000)
+      );
+  
+
+    } catch (error) {
+      console.error('Error completing task or updating XP:', error);
+    }
   };
+  
 
   return (
     <div className='flex flex-col h-screen w-full min-w-[1024px]'>
@@ -491,16 +554,16 @@ const HomePage = () => {
         </div>
 
         {/* Character*/}
-        <div className='flex flex-1 justify-center items-center flex-col pb-4'>
+        <div className='flex flex-1 justify-center items-center w-full h-full relative flex-col pb-4'>
           <img
-            src='/images/monster-transparentbg.png'
+            src={image}
             alt='TaskaGoTchi Character'
-            className='w-96 h-96 object-contain mt-8 mb-8'
+            className='w-96 h-96 object-contain mt-8 mb-8 mx-auto'
           />
 
-          <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
+          <div className='px-5 py-8 bg-zinc-50 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
             {/* Experience Bar*/}
-            <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
+            <span className='absolute top-0 left-6 pt-2 text-sm font-semibold text-accent'>
               Experience: {xp}/100
             </span>
             <progress

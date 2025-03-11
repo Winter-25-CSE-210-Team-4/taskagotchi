@@ -96,7 +96,6 @@ describe('Goal Endpoints', () => {
         const res = await request(app)
             .get(`/api/goals/${goalId}`)
             .set('Authorization', `Bearer ${authToken}`);
-
         console.log('Get goal response:', res.body);
 
         expect(res.status).toBe(200);
