@@ -564,7 +564,7 @@ const HomePage = () => {
           <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
             {/* Experince Bar*/}
             <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
-              Health: {xp}/100
+              Experience: {xp}/100
             </span>
             <progress
               className='progress progress-secondary border border-accent w-96 h-10'
