@@ -218,6 +218,34 @@ const HomePage = () => {
     [loggedIn, tasks, axiosPrivate]
   );
 
+  // fetch the pet's experience when the component mounts
+  const fetchUserPet = useCallback(async () => {
+    if (loggedIn && user?.id) {
+      try {
+        const res = await axiosPrivate.get('/pets');
+        if (res.data.success && res.data.data) {
+          const pet = res.data.data;
+          set_xp(pet.exp); // Set XP from backend
+          updatePetImage(pet.exp); // Update pet image
+        }
+      } catch (error) {
+        console.error('Error fetching pet:', error);
+      }
+    }
+  }, [loggedIn, user, axiosPrivate]);
+  
+  
+  const updatePetImage = (xp) => {
+    if (xp >= 66) {
+      set_image('/images/pet-3.png');
+    } else if (xp >= 33) {
+      set_image('/images/pet-2.png');
+    } else {
+      set_image('/images/pet-1.png');
+    }
+  };
+  
+
   useEffect(() => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
@@ -310,9 +338,30 @@ const HomePage = () => {
     setEditTask(false);
   };
 
-  //Event handler for marking task as done
-  const handleCompleteTask = (taskId) => {
-    completeUserTask(taskId);
+  const handleCompleteTask = async (index) => {
+    if (!loggedIn || !user?.id) return;
+  
+    const curr_task = tasks[index];
+    if (curr_task.completed) return; // Prevent duplicate XP gains
+  
+    const xp_gain = 5;
+    const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
+  
+    try {
+      // Mark the task as completed in the backend
+      await completeUserTask(curr_task.id);
+  
+      // Update pet experience
+      await axiosPrivate.put('/pets/gain-exp', { exp: xp_gain });
+      set_xp(new_xp);
+      updatePetImage(new_xp); // Update pet image based on new XP
+  
+      // Show confetti animation
+      set_confetti(true);
+      setTimeout(() => set_confetti(false), 5000);
+    } catch (error) {
+      console.error('Error completing task or updating XP:', error);
+    }
   };
 
   return (

@@ -6,7 +6,6 @@ const PET_PFPS = [];    // TODO: Add pet profile pictures
 
 interface IPet {
     userId: mongoose.Types.ObjectId;
-    pet_id: mongoose.Types.ObjectId;
     name: string;
     health: number;
     level: number;
@@ -69,9 +68,12 @@ petSchema.methods.getRequiredExp = function (level: number): number {
 
 // Levels up the pet to its appropriate level if it has enough experience
 petSchema.methods.levelUp = async function (this: IPetDocument): Promise<void> {
+    let didLevelUp = false;
     while (this.exp >= this.getRequiredExp(this.level)) {
         this.level += 1;
         this.health = MAX_HEALTH; // Reset health to max when leveling up
+        didLevelUp = true;
+        console.log(`Pet ${this._id} leveled up to ${this.level}`); // Debug
     }
     await this.save();
 };
@@ -87,8 +89,11 @@ petSchema.methods.gainExp = async function (this: IPetDocument, amount: number):
     if (amount < 0) return; // Prevent negative exp gains
 
     this.exp += amount;
-    await this.levelUp(); // Check if we can level up after gaining exp
+    console.log(`Pet ${this._id} gained ${amount} exp, new total: ${this.exp}`); // Debug
+    this.markModified('exp');
     await this.save();
+    await this.levelUp(); // Check if we can level up after gaining exp
+    
 };
 
 const Pet = mongoose.model<IPetDocument, IPetModel>('Pet', petSchema);
