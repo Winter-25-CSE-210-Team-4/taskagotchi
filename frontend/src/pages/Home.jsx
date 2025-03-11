@@ -37,6 +37,7 @@ const HomePage = () => {
       axiosPrivate
         .get('/goals')
         .then((res) => {
+          console.log("Fetched goals:", res.data.data);
           const responseData = res.data;
           const goals = responseData.data.map((goal) => ({
             id: goal._id,
@@ -113,10 +114,12 @@ const HomePage = () => {
   const updateUserGoal = useCallback(
     // router.put('/:id', auth, updateGoal);
     async (goal) => {
+      console.log("Calling axios.put with:", goal);
       if (loggedIn) {
         axiosPrivate
           .put(`/goals/${goal.id}`, goal)
           .then((res) => {
+            console.log("Update response:", res.data);
             const updatedGoal = res.data.data;
             const updatedGoals = goals.map((goal) =>
               goal.id === updatedGoal._id ? updatedGoal : goal
@@ -213,17 +216,19 @@ const HomePage = () => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
 
+  useEffect(() => {
+    fetchUserTasks();
+  }, [user, fetchUserTasks]);
+
+  
   const get_user = (loggedIn, user) => {
+
     if (loggedIn) {
       return user.name.charAt(0).toUpperCase();
     } else {
       return '?';
     }
   };
-
-  useEffect(() => {
-    fetchUserTasks();
-  }, [user, fetchUserTasks]);
 
   //Event handler for opening goal form
   const openGoalForm = (goal = null) => {
@@ -292,6 +297,7 @@ const HomePage = () => {
         deadline: newTask.deadline,
         goal_id: newTask.goalId,
       };
+
       createUserTask(requestBody);
     }
 
@@ -302,6 +308,7 @@ const HomePage = () => {
 
   //Event handler for marking task as done
   const handleCompleteTask = (taskId) => {
+
     completeUserTask(taskId);
   };
 
@@ -355,6 +362,8 @@ const HomePage = () => {
                       setEditGoal(true);
                       openGoalForm(goal);
                     }}
+                    data-testid={`goal-modal-${index}`}
+
                   />
                 </li>
               );
@@ -396,6 +405,7 @@ const HomePage = () => {
                         className='checkbox-sm'
                         checked={checkedTasks[task.id]}
                         onChange={() => {
+
                           setCheckedTasks((prevState) => ({
                             ...prevState,
                             [task._id]: true,
@@ -494,7 +504,10 @@ const HomePage = () => {
         <div className='absolute top-4 right-4'>
           <div className='avatar avatar-placeholder'>
             <div className='bg-neutral text-neutral-content w-12 rounded-full text-center'>
-              <div className='text-2xl font-bold py-2'>
+              <div 
+              className='text-2xl font-bold py-2'
+              data-testid='home-user-icon'>
+
                 {get_user(loggedIn, user)}
               </div>
             </div>
