@@ -562,7 +562,7 @@ const HomePage = () => {
           />
 
           <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
-            {/* Experince Bar*/}
+            {/* Experience Bar*/}
             <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
               Experience: {xp}/100
             </span>
