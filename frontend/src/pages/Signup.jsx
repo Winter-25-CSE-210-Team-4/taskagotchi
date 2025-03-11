@@ -79,7 +79,7 @@ const SignupPage = () => {
 
     // querying database to check if account with email already exists
     try {
-      const response = await axios.post('/auth/register', submission_data).then(axios.post()); //FIX 
+      const response = await axios.post('/auth/register', submission_data);
 
       if (response.status < 200 || response.status > 299) {
         throw new Error(response.data.message || 'Failed to register');

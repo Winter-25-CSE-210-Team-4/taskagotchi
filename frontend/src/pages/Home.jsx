@@ -224,11 +224,11 @@ const HomePage = () => {
 
   // fetch the pet's experience when the component mounts
   const fetchUserPet = useCallback(async () => {
-    if (loggedIn && user?.id) {
+    if (loggedIn) {
       try {
         const res = await axiosPrivate.get('/pets');
         if (res.data.success && res.data.data) {
-          const pet = res.data.data;
+          const pet = res.data.data[0];
           set_xp(pet.exp); // Set XP from backend
           updatePetImage(pet.exp); // Update pet image
         }
@@ -267,12 +267,12 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    fetchUserTasks();
-  }, [user, fetchUserTasks]);
-
-  useEffect(() => {
     fetchUserPet();
   }, [user, fetchUserPet]);
+
+  useEffect(() => {
+    console.log("xp changed", xp)
+  }, [xp]);
   
 
   //Event handler for opening goal form
@@ -358,16 +358,14 @@ const HomePage = () => {
     if (curr_task.completed) return; // Prevent duplicate XP gains
   
     const xp_gain = 5;
-    const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
+    // const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
   
     try {
       // Mark the task as completed in the backend
       await completeUserTask(curr_task.id);
   
       // Update pet experience
-      await axiosPrivate.put('/pets/gain-exp', { exp: xp_gain });
-      set_xp(new_xp);
-      updatePetImage(new_xp); // Update pet image based on new XP
+      axiosPrivate.put('/pets/gain-exp', { exp: xp_gain }).then(fetchUserPet());
   
       // Show confetti animation
       set_confetti(true);
