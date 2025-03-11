@@ -152,7 +152,7 @@ describe("Homepage Compoenet", () => {
 
         expect(screen.getByAltText(/TaskaGoTchi Character/i)).toBeInTheDocument();
 
-        expect(screen.getByText(/Experince: 0\/100/i)).toBeInTheDocument();
+        expect(screen.getByText(/Experience: 0\/100/i)).toBeInTheDocument();
 
         expect(screen.getByTestId("home-user-icon")).toBeInTheDocument();
     });
