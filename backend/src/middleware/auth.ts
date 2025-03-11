@@ -22,3 +22,5 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction) 
     res.status(401).json({ error: 'Please authenticate.' });
   }
 };
+
+export const protectRoute = auth;
