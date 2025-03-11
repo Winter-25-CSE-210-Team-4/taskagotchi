@@ -51,7 +51,7 @@ describe('Goal Endpoints', () => {
                     description: 'Initial Test Description',
                     deadline: '2024-03-01T00:00:00.000Z'
                 });
-            
+
             console.log('Goal creation response:', createRes.body);
             if (!createRes.body.data?._id) {
                 throw new Error('No goal ID received from creation');

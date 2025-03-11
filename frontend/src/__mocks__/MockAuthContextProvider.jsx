@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 const mockAuthContextValue = {
   auth: {},
   setAuth: vi.fn(),
-  user: 'John Doe',
+  user: {name: "John Doe", email:"johndoe@email.com"},
   setUser: vi.fn(),
   loggedIn: true,
   setLoggedIn: vi.fn(),

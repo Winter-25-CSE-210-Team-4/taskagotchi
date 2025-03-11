@@ -85,7 +85,7 @@ const SignupPage = () => {
         throw new Error(response.data.message || 'Failed to register');
       }
 
-      const { token, user } = response.data;
+      const { token, user } = response.data.data;
 
       setAuth({ accessToken: token });
       setLoggedIn(true);
@@ -102,9 +102,14 @@ const SignupPage = () => {
 
       navigate('/home');
     } catch (error) {
-        console.error('Registration error:', error.response?.data?.message || error.message); //fix here 
-        set_errs({ general: error.response.data.message || 'Registration failed' });
-        //set_errs({ general: error.message });
+      console.error(
+        'Registration error:',
+        error.response?.data?.message || error.message
+      ); //fix here
+      set_errs({
+        general: error.response?.data?.message || 'Registration failed',
+      });
+      //set_errs({ general: error.message });
     }
   };
 

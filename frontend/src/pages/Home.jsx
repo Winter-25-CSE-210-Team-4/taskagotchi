@@ -40,14 +40,17 @@ const HomePage = () => {
       axiosPrivate
         .get('/goals')
         .then((res) => {
+          console.log('Fetched goals:', res.data.data);
           const responseData = res.data;
-          const goals = responseData.data.map((goal) => ({
-            id: goal._id,
-            name: goal.name,
-            description: goal.description,
-            completed: goal.isCompleted,
-            deadline: Date.parse(goal.deadline),
-          }));
+          const goals = responseData.data
+            .map((goal) => ({
+              id: goal._id,
+              name: goal.name,
+              description: goal.description,
+              completed: goal.isCompleted,
+              deadline: Date.parse(goal.deadline),
+            }))
+            .sort((a, b) => a.completed - b.completed);
           console.log('Goals fetched:', goals);
           setGoals(goals);
         })
@@ -61,10 +64,10 @@ const HomePage = () => {
         .get('/tasks')
         .then((res) => {
           const responseData = res.data;
-          const uncompletedTasks = responseData.tasks.filter(
-            (task) => !task.isCompleted
-          );
-          const tasks = uncompletedTasks.map((task) => ({
+          // const uncompletedTasks = responseData.tasks.filter(
+          //   (task) => !task.isCompleted
+          // );
+          const tasks = responseData.tasks.map((task) => ({
             id: task._id,
             name: task.name,
             description: task.description,
@@ -116,10 +119,12 @@ const HomePage = () => {
   const updateUserGoal = useCallback(
     // router.put('/:id', auth, updateGoal);
     async (goal) => {
+      console.log('Calling axios.put with:', goal);
       if (loggedIn) {
         axiosPrivate
           .put(`/goals/${goal.id}`, goal)
           .then((res) => {
+            console.log('Update response:', res.data);
             const updatedGoal = res.data.data;
             const updatedGoals = goals.map((goal) =>
               goal.id === updatedGoal._id ? updatedGoal : goal
@@ -161,11 +166,15 @@ const HomePage = () => {
               [completedTask._id]: false,
             }));
             fetchUserTasks();
+            // call fetchUserGoals to update the goal completion status
+            // not response from backend to differentate when task completion
+            // leads to goal completetion
+            fetchUserGoals();
           })
           .catch((err) => console.error(err));
       }
     },
-    [loggedIn, axiosPrivate, fetchUserTasks]
+    [loggedIn, axiosPrivate, fetchUserTasks, fetchUserGoals]
   );
 
   const deleteUserTask = useCallback(
@@ -217,7 +226,7 @@ const HomePage = () => {
   const fetchUserPet = useCallback(async () => {
     if (loggedIn && user?.id) {
       try {
-        const res = await axiosPrivate.get(`/pets/${user.id}`);
+        const res = await axiosPrivate.get('/pets');
         if (res.data.success && res.data.data) {
           const pet = res.data.data;
           set_xp(pet.exp); // Set XP from backend
@@ -244,6 +253,10 @@ const HomePage = () => {
   useEffect(() => {
     fetchUserGoals();
   }, [user, fetchUserGoals]);
+
+  useEffect(() => {
+    fetchUserTasks();
+  }, [user, fetchUserTasks]);
 
   const get_user = (loggedIn, user) => {
     if (loggedIn) {
@@ -329,6 +342,7 @@ const HomePage = () => {
         deadline: newTask.deadline,
         goal_id: newTask.goalId,
       };
+
       createUserTask(requestBody);
     }
 
@@ -351,7 +365,7 @@ const HomePage = () => {
       await completeUserTask(curr_task.id);
   
       // Update pet experience
-      await axiosPrivate.put(`/pets/${user.id}/gain-exp`, { exp: xp_gain });
+      await axiosPrivate.put('/pets/gain-exp', { exp: xp_gain });
       set_xp(new_xp);
       updatePetImage(new_xp); // Update pet image based on new XP
   
@@ -395,7 +409,11 @@ const HomePage = () => {
                 >
                   <label
                     htmlFor={`goal-modal-${index}`}
-                    className='flex justify-between text-sm text-accent cursor-pointer underline'
+                    className={`flex justify-between text-sm cursor-pointer underline ${
+                      goal.completed
+                        ? 'text-gray-500 line-through'
+                        : 'text-accent'
+                    }`}
                   >
                     <span className='pr-1'> {goal.name}</span>
                   </label>
@@ -414,6 +432,7 @@ const HomePage = () => {
                       setEditGoal(true);
                       openGoalForm(goal);
                     }}
+                    data-testid={`goal-modal-${index}`}
                   />
                 </li>
               );
@@ -445,28 +464,34 @@ const HomePage = () => {
                   className='p-2 rounded-lg transition hover:bg-neutral cursor-pointer flex justify-between items-center'
                 >
                   <div className='flex justify-start gap-2'>
-                    <label
-                      htmlFor={`task-checkbox-${index}`}
-                      className='text-sm cursor-pointer items-center'
-                    >
-                      <input
-                        type='checkbox'
-                        id={`task-checkbox-${index}`}
-                        className='checkbox-sm'
-                        checked={checkedTasks[task.id]}
-                        onChange={() => {
-                          setCheckedTasks((prevState) => ({
-                            ...prevState,
-                            [task._id]: true,
-                          }));
-                          handleCompleteTask(task.id);
-                        }}
-                      />
-                    </label>
+                    {!task.completed && (
+                      <label
+                        htmlFor={`task-checkbox-${index}`}
+                        className='text-sm cursor-pointer items-center'
+                      >
+                        <input
+                          type='checkbox'
+                          id={`task-checkbox-${index}`}
+                          className='checkbox-sm'
+                          checked={checkedTasks[task.id]}
+                          onChange={() => {
+                            setCheckedTasks((prevState) => ({
+                              ...prevState,
+                              [task._id]: true,
+                            }));
+                            handleCompleteTask(task.id);
+                          }}
+                        />
+                      </label>
+                    )}
 
                     <label
                       htmlFor={`task-modal-${index}`}
-                      className='flex justify-between text-sm text-accent cursor-pointer underline'
+                      className={`flex justify-between text-sm text-accent cursor-pointer underline ${
+                        task.completed
+                          ? 'text-gray-500 line-through'
+                          : 'text-accent'
+                      }`}
                     >
                       <span className='pr-1'>{task.name}</span>
                     </label>
@@ -553,7 +578,10 @@ const HomePage = () => {
         <div className='absolute top-4 right-4'>
           <div className='avatar avatar-placeholder'>
             <div className='bg-neutral text-neutral-content w-12 rounded-full text-center'>
-              <div className='text-2xl font-bold py-2'>
+              <div
+                className='text-2xl font-bold py-2'
+                data-testid='home-user-icon'
+              >
                 {get_user(loggedIn, user)}
               </div>
             </div>
