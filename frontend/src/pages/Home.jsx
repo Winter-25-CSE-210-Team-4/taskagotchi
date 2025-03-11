@@ -351,25 +351,27 @@ const HomePage = () => {
     setEditTask(false);
   };
 
-  const handleCompleteTask = async (index) => {
-    if (!loggedIn || !user?.id) return;
-  
-    const curr_task = tasks[index];
-    if (curr_task.completed) return; // Prevent duplicate XP gains
-  
+  const handleCompleteTask = async (taskId) => {  
     const xp_gain = 5;
-    // const new_xp = Math.min(xp + xp_gain, 100); // Cap XP at 100
-  
+
     try {
       // Mark the task as completed in the backend
-      await completeUserTask(curr_task.id);
+      completeUserTask(taskId).then(
+        // Update pet experience
+        axiosPrivate.put('/pets/gain-exp', { exp: xp_gain }).then(
+          (res) => {
+            const data = res.data.data;
+            set_xp(data.exp);
+            updatePetImage(data.exp);
+        }
+        ),
+    
+        // Show confetti animation
+        set_confetti(true),
+        setTimeout(() => set_confetti(false), 5000)
+      );
   
-      // Update pet experience
-      axiosPrivate.put('/pets/gain-exp', { exp: xp_gain }).then(fetchUserPet());
-  
-      // Show confetti animation
-      set_confetti(true);
-      setTimeout(() => set_confetti(false), 5000);
+
     } catch (error) {
       console.error('Error completing task or updating XP:', error);
     }
