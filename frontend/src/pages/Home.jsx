@@ -561,9 +561,9 @@ const HomePage = () => {
             className='w-96 h-96 object-contain mt-8 mb-8 mx-auto'
           />
 
-          <div className='w-96 h-24 bg-zinc-100 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
+          <div className='px-5 py-8 bg-zinc-50 rounded-lg flex flex-col justify-center relative mt-8 shadow-xl'>
             {/* Experience Bar*/}
-            <span className='absolute top-0 left-2 text-sm font-semibold text-accent'>
+            <span className='absolute top-0 left-6 pt-2 text-sm font-semibold text-accent'>
               Experience: {xp}/100
             </span>
             <progress
