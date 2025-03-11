@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, CallbackError } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-// define the interface of Task
+// define Task interface
 export interface ITask extends Document {
     user_id: mongoose.Types.ObjectId; // The task belongs to which user;
     goal_id: mongoose.Types.ObjectId; // The task belongs to which goal
@@ -10,10 +10,9 @@ export interface ITask extends Document {
     deadline?: Date;
     recurrs?: boolean;
     recurringUnit?: string; // Daily, Weekly, Monthly
-
 }
 
-// Define schema of task
+// define Task Schema
 const TaskSchema: Schema = new Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     goal_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Goal', required: true },
@@ -28,7 +27,7 @@ const TaskSchema: Schema = new Schema({
     { timestamps: true }
 );
 
-// create Task Model
+// create task model
 const Task = mongoose.model<ITask>("Task", TaskSchema);
 
 export default Task;
