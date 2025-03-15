@@ -542,6 +542,7 @@ it("should display users first initial in user icon", () => {
         });
     });
 
+//////////////////// TASK COMPLETION & PET TESTS ///////////////////////////////////////////////////
     it("should mark an existing task as complete update xp and update pet picture", async () => {
 
         const taskElements = screen.getAllByText(/Learn A-minor chord/i);
@@ -580,6 +581,53 @@ it("should display users first initial in user icon", () => {
             expect(screen.getByText(/Experience: 35\/100/i)).toBeInTheDocument();
             const petImage = screen.getByRole("img", { name: "TaskaGoTchi Character" });
             expect(petImage).toHaveAttribute("src", "/images/pet-2.png");
+        });
+    
+    });
+
+    it("should update pet picture to image 3 when task completed", async () => {
+
+        petData[0].exp = 62;
+        console.log(petData[0].exp);
+
+        const taskElements = screen.getAllByText(/Learn A-minor chord/i);
+    
+        // Find the one inside the task list (should be inside a <span>)
+        const taskSpan = taskElements.find((el) => el.tagName.toLowerCase() === "span");
+        expect(taskSpan).toBeInTheDocument(); 
+
+        // Find the closest <li> that contains this task
+        const taskItem = taskSpan.closest("li");
+        expect(taskItem).toBeInTheDocument();
+
+        // Get the checkbox inside task <li>
+        const taskCheckboxes = within(taskItem).getAllByRole("checkbox");
+        const taskCheckbox = taskCheckboxes.find((checkbox) => checkbox.classList.contains("checkbox-sm"));
+
+        expect(taskCheckbox).toBeInTheDocument();
+        expect(taskCheckbox.checked).toBe(false);
+
+
+
+        fireEvent.click(taskCheckbox);
+
+        await waitFor(() => {
+            expect(mockAxios.patch).toHaveBeenCalledTimes(1);
+            expect(mockAxios.patch).toHaveBeenCalledWith("/tasks/1a/complete");
+        });
+    
+        // Ensure the UI updates
+        await waitFor(() => {
+            expect(mockAxios.put).toHaveBeenCalledWith("/pets/gain-exp", { exp: 5 });
+        });
+
+        console.log(petData[0].exp)
+    
+        // Verify XP update and pet update
+        await waitFor(() => {
+            expect(screen.getByText(/Experience: 67\/100/i)).toBeInTheDocument();
+            const petImage = screen.getByRole("img", { name: "TaskaGoTchi Character" });
+            expect(petImage).toHaveAttribute("src", "/images/pet-3.png");
         });
     
     });
