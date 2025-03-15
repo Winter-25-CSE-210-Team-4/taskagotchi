@@ -1,7 +1,7 @@
 import { MemoryRouter } from 'react-router-dom';
 import MockAuthContextProvider from '../__mocks__/MockAuthContextProvider';
 import Home from '../pages/Home';
-import { render, screen, fireEvent, waitFor, within, act} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within} from '@testing-library/react';
 import {describe, beforeEach, afterEach, expect, it, vi} from "vitest";
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate'
 
@@ -575,7 +575,7 @@ it("should display users first initial in user icon", () => {
             expect(mockAxios.put).toHaveBeenCalledWith("/pets/gain-exp", { exp: 5 });
         });
     
-        // Verify XP update in UI
+        // Verify XP update and pet update
         await waitFor(() => {
             expect(screen.getByText(/Experience: 35\/100/i)).toBeInTheDocument();
             const petImage = screen.getByRole("img", { name: "TaskaGoTchi Character" });
