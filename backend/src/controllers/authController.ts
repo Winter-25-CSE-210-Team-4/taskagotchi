@@ -39,7 +39,7 @@ export const register = async (req: Request, res: Response, next:NextFunction) =
 
     const pet = new Pet({
       userId: user._id,
-      pet_id: new mongoose.Types.ObjectId(),
+      // pet_id: new mongoose.Types.ObjectId(),
       name: `${name}'s Pet`,
       health: 100,
       level: 1,

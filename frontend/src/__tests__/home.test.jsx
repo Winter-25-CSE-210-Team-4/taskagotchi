@@ -1,7 +1,7 @@
 import { MemoryRouter } from 'react-router-dom';
 import MockAuthContextProvider from '../__mocks__/MockAuthContextProvider';
 import Home from '../pages/Home';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within} from '@testing-library/react';
 import {describe, beforeEach, afterEach, expect, it, vi} from "vitest";
 import useAxiosPrivate from '../../auth/hooks/useAxiosPrivate'
 
@@ -9,6 +9,14 @@ vi.mock('../../auth/hooks/useAxiosPrivate', () => ({
     default: vi.fn(),
   }));
 
+vi.mock('react-confetti', () => {
+    return {
+        __esModule: true,
+        default: () => null, 
+    };
+});
+
+let petData = [];
 
 let mockAxios;
 beforeEach(() => {
@@ -22,7 +30,8 @@ beforeEach(() => {
     ];
 
     let tasksData = [
-        {_id: '1a',
+        {   
+            _id: '1a',
             name: 'Learn A-minor chord',
             description: 'watch videos',
             isCompleted: false,
@@ -30,6 +39,15 @@ beforeEach(() => {
             goal_id: {_id:"1"},}
     ];
 
+    petData = [
+        {
+            _id: "pet1",
+            name: "TaskaPet",
+            health: 100,
+            level: 1,
+            exp: 30
+        }
+    ];
 
     HTMLDialogElement.prototype.show = vi.fn();
     HTMLDialogElement.prototype.showModal = vi.fn();
@@ -41,8 +59,10 @@ beforeEach(() => {
                 return Promise.resolve({ data: { data: goalsData } });
             }
             if(url === "/tasks") {
-                console.log("Returning tasksData:", tasksData); // 🔥 Debugging
                 return Promise.resolve({ data: { tasks: [...tasksData] } }); 
+            }
+            if (url === "/pets") {
+                return Promise.resolve({ data: { success: true, data: petData } });
             }
         }),
         post: vi.fn().mockImplementation((url, data) => {
@@ -87,6 +107,13 @@ beforeEach(() => {
             }
         }),
         put: vi.fn().mockImplementation((url, data) => {
+
+            if (url === "/pets/gain-exp") {
+                console.log("Mocking XP gain", data);
+                petData[0].exp += data.exp; // Update XP
+                return Promise.resolve({ data: { success: true, data: petData[0] } });
+            }
+
             const id = url.split("/").pop();
 
 
@@ -99,24 +126,25 @@ beforeEach(() => {
         }),
         patch: vi.fn().mockImplementation((url, data) => {
             console.log("PATCH calls:", mockAxios.patch.mock.calls);
+
             
-            const id = url.split("/").pop();
-            
-            if (url.startsWith("/tasks/") && !url.endsWith("/complete")) {
+            if (url === '/tasks/1a') {
+                const id = url.split("/").pop();
                 console.log("in edit case");
                 const taskIndex = tasksData.findIndex((t) => t._id === id);
 
                 tasksData[taskIndex] = { ...tasksData[taskIndex], ...data };
 
                 return Promise.resolve({ data: { task: tasksData[taskIndex] } });
-            } 
+            } else if (url === "/tasks/1a/complete") {
 
-            
-            const taskIndex = tasksData.findIndex((t) => t._id === id);
+                const taskIndex = tasksData.findIndex((t) => t._id === "1a");
+                
+                tasksData[taskIndex].isCompleted = true;
 
-            tasksData[taskIndex].isCompleted = true;
+                return Promise.resolve({ data: { _id: "1a", isCompleted: true } });  
 
-            return Promise.resolve({ data: { _id: id, isCompleted: true } });  
+            }
             
         }),
     };
@@ -514,24 +542,93 @@ it("should display users first initial in user icon", () => {
         });
     });
 
-    it("should mark an existing task as complete", async () => {
+//////////////////// TASK COMPLETION & PET TESTS ///////////////////////////////////////////////////
+    it("should mark an existing task as complete update xp and update pet picture", async () => {
 
-        const taskCheckbox = screen.getByLabelText(/Learn A-minor chord/i);
+        const taskElements = screen.getAllByText(/Learn A-minor chord/i);
+    
+        // Find the one inside the task list (should be inside a <span>)
+        const taskSpan = taskElements.find((el) => el.tagName.toLowerCase() === "span");
+        expect(taskSpan).toBeInTheDocument(); 
+
+        // Find the closest <li> that contains this task
+        const taskItem = taskSpan.closest("li");
+        expect(taskItem).toBeInTheDocument();
+
+        // Get the checkbox inside task <li>
+        const taskCheckboxes = within(taskItem).getAllByRole("checkbox");
+        const taskCheckbox = taskCheckboxes.find((checkbox) => checkbox.classList.contains("checkbox-sm"));
+
         expect(taskCheckbox).toBeInTheDocument();
         expect(taskCheckbox.checked).toBe(false);
 
+
+
         fireEvent.click(taskCheckbox);
 
-        // await waitFor(() => {
-        //     expect(mockAxios.patch).toHaveBeenCalledTimes(1);
-        //     expect(mockAxios.patch).toHaveBeenCalledWith("/tasks/1a/complete");
-        // });
+        await waitFor(() => {
+            expect(mockAxios.patch).toHaveBeenCalledTimes(1);
+            expect(mockAxios.patch).toHaveBeenCalledWith("/tasks/1a/complete");
+        });
     
         // Ensure the UI updates
         await waitFor(() => {
-            expect(taskCheckbox.checked).toBe(true);
+            expect(mockAxios.put).toHaveBeenCalledWith("/pets/gain-exp", { exp: 5 });
+        });
+    
+        // Verify XP update and pet update
+        await waitFor(() => {
+            expect(screen.getByText(/Experience: 35\/100/i)).toBeInTheDocument();
+            const petImage = screen.getByRole("img", { name: "TaskaGoTchi Character" });
+            expect(petImage).toHaveAttribute("src", "/images/pet-2.png");
         });
     
     });
 
+    it("should update pet picture to image 3 when task completed", async () => {
+
+        petData[0].exp = 62;
+        console.log(petData[0].exp);
+
+        const taskElements = screen.getAllByText(/Learn A-minor chord/i);
+    
+        // Find the one inside the task list (should be inside a <span>)
+        const taskSpan = taskElements.find((el) => el.tagName.toLowerCase() === "span");
+        expect(taskSpan).toBeInTheDocument(); 
+
+        // Find the closest <li> that contains this task
+        const taskItem = taskSpan.closest("li");
+        expect(taskItem).toBeInTheDocument();
+
+        // Get the checkbox inside task <li>
+        const taskCheckboxes = within(taskItem).getAllByRole("checkbox");
+        const taskCheckbox = taskCheckboxes.find((checkbox) => checkbox.classList.contains("checkbox-sm"));
+
+        expect(taskCheckbox).toBeInTheDocument();
+        expect(taskCheckbox.checked).toBe(false);
+
+
+
+        fireEvent.click(taskCheckbox);
+
+        await waitFor(() => {
+            expect(mockAxios.patch).toHaveBeenCalledTimes(1);
+            expect(mockAxios.patch).toHaveBeenCalledWith("/tasks/1a/complete");
+        });
+    
+        // Ensure the UI updates
+        await waitFor(() => {
+            expect(mockAxios.put).toHaveBeenCalledWith("/pets/gain-exp", { exp: 5 });
+        });
+
+        console.log(petData[0].exp)
+    
+        // Verify XP update and pet update
+        await waitFor(() => {
+            expect(screen.getByText(/Experience: 67\/100/i)).toBeInTheDocument();
+            const petImage = screen.getByRole("img", { name: "TaskaGoTchi Character" });
+            expect(petImage).toHaveAttribute("src", "/images/pet-3.png");
+        });
+    
+    });
 });
